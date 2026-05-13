@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Node (if ever needed)
+node_modules/
+npm-debug.log*
+
+# Netlify
+.netlify/

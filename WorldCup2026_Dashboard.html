@@ -1,0 +1,3227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 — Prediction Dashboard</title>
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold-dark: #C9A227;
+    --dark: #0a0e1a;
+    --darker: #060810;
+    --card: #111827;
+    --card2: #1a2235;
+    --border: #2a3a55;
+    --text: #e2e8f0;
+    --muted: #8899aa;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+    --teal: #14b8a6;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--darker);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .hero {
+    background: linear-gradient(135deg, #0a0e1a 0%, #0d1b3e 50%, #1a0a2e 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 28px 24px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% -20%, rgba(255,215,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, #FFD700, #fff8d6, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .hero .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 6px;
+  }
+  .hero .badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    background: rgba(255,215,0,0.12);
+    border: 1px solid rgba(255,215,0,0.35);
+    color: var(--gold);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 14px 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(255,215,0,0.05);
+  }
+
+  /* ── CONTENT ── */
+  .content { padding: 24px 20px; max-width: 1400px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── STATS ROW ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .val {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--gold);
+  }
+  .stat-card .lbl {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── GROUPS ── */
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
+  }
+  .group-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .group-header {
+    background: linear-gradient(90deg, #1a2235, #0f1829);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .group-letter {
+    background: var(--gold);
+    color: #000;
+    font-weight: 900;
+    font-size: 1rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .group-header h3 { font-size: 0.85rem; color: var(--muted); }
+  .team-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+    cursor: default;
+  }
+  .team-row:last-child { border-bottom: none; }
+  .team-row:hover { background: rgba(255,255,255,0.04); }
+  .team-flag { font-size: 1.3rem; width: 28px; text-align: center; }
+  .team-name { flex: 1; font-size: 0.88rem; font-weight: 600; }
+  .team-rank {
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .team-odds {
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .odds-top { color: var(--green); }
+  .odds-mid { color: var(--yellow); }
+  .odds-low { color: var(--muted); }
+
+  /* ── PREDICTION CARDS ── */
+  .pred-grid { display: flex; flex-direction: column; gap: 16px; }
+  .match-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .match-card:hover { border-color: rgba(255,215,0,0.3); }
+  .match-header {
+    background: linear-gradient(90deg, #0f1829, #1a1040);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .match-date { font-size: 0.78rem; color: var(--gold); font-weight: 700; }
+  .match-venue { font-size: 0.73rem; color: var(--muted); }
+  .match-group { font-size: 0.73rem; color: var(--blue); background: rgba(59,130,246,0.1); padding: 2px 8px; border-radius: 10px; }
+
+  .match-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+  }
+  .team-block { text-align: center; }
+  .team-block .flag { font-size: 2.4rem; }
+  .team-block .name { font-size: 1rem; font-weight: 800; margin-top: 6px; }
+  .team-block .prob {
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin-top: 4px;
+  }
+  .prob-home { color: var(--green); }
+  .prob-away { color: var(--red); }
+  .prob-balanced { color: var(--yellow); }
+  .team-block .prob-label { font-size: 0.7rem; color: var(--muted); }
+
+  .vs-block { text-align: center; }
+  .vs-block .vs { font-size: 0.8rem; color: var(--muted); font-weight: 700; }
+  .vs-block .draw-prob {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--yellow);
+    margin: 4px 0;
+  }
+  .vs-block .draw-label { font-size: 0.65rem; color: var(--muted); }
+  .vs-block .score-pred {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--gold);
+    margin-top: 8px;
+    background: rgba(255,215,0,0.1);
+    border-radius: 8px;
+    padding: 4px 10px;
+  }
+
+  /* probability bar */
+  .prob-bar-wrap { padding: 0 20px 18px; }
+  .prob-bar {
+    height: 8px;
+    border-radius: 8px;
+    background: var(--border);
+    overflow: hidden;
+    display: flex;
+  }
+  .prob-bar .seg-h { background: var(--green); transition: width 0.8s ease; }
+  .prob-bar .seg-d { background: var(--yellow); transition: width 0.8s ease; }
+  .prob-bar .seg-a { background: var(--red); transition: width 0.8s ease; }
+  .prob-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  /* factors */
+  .factors { padding: 0 20px 20px; }
+  .factors-title { font-size: 0.75rem; color: var(--muted); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .factor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .factor-item {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .factor-name { font-size: 0.68rem; color: var(--muted); margin-bottom: 4px; }
+  .factor-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 3px;
+  }
+  .factor-fill { height: 100%; border-radius: 4px; transition: width 0.8s; }
+  .factor-val { font-size: 0.75rem; font-weight: 700; }
+
+  /* confidence badge */
+  .conf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .conf-high { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .conf-med { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+  .conf-low { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+
+  /* ── INJURIES ── */
+  .injury-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .injury-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .injury-icon { font-size: 2rem; }
+  .injury-info h4 { font-size: 0.95rem; font-weight: 700; }
+  .injury-info .team-tag {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin: 2px 0 6px;
+  }
+  .injury-type {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+  .out { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .doubt { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+  .avail { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .injury-impact { font-size: 0.75rem; color: var(--muted); }
+
+  /* ── ODDS TABLE ── */
+  .odds-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .odds-table th {
+    background: var(--card2);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .odds-table td {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .odds-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .odds-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .odds-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); }
+
+  /* ── METHODOLOGY ── */
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .method-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .method-card .icon { font-size: 1.8rem; margin-bottom: 10px; }
+  .method-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .method-card .weight {
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.25);
+    color: var(--gold);
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .method-card p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+  .weight-chart {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .weight-chart h3 { margin-bottom: 16px; font-size: 0.95rem; }
+  .weight-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .weight-label { width: 160px; font-size: 0.8rem; flex-shrink: 0; }
+  .weight-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 10px; overflow: hidden; }
+  .weight-bar-fill { height: 100%; border-radius: 4px; }
+  .weight-pct { width: 40px; text-align: right; font-size: 0.8rem; font-weight: 700; color: var(--gold); }
+
+  /* ── SOURCES ── */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .source-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s;
+  }
+  .source-card:hover { border-color: rgba(255,215,0,0.4); }
+  .source-icon { font-size: 1.5rem; }
+  .source-info h4 { font-size: 0.88rem; font-weight: 700; color: var(--gold); margin-bottom: 3px; }
+  .source-info p { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+  .source-type {
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 6px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  /* ── MISC ── */
+  h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--text); }
+  h2 span { color: var(--gold); }
+  .section-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+
+  .match-day-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 12px;
+  }
+  .match-day-header h3 { font-size: 0.9rem; font-weight: 700; color: var(--gold); }
+  .match-day-header::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: rgba(255,215,0,0.12);
+    border-color: rgba(255,215,0,0.35);
+    color: var(--gold);
+  }
+
+  .disclaimer {
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.77rem;
+    color: var(--yellow);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* ── PLAYER HUB ── */
+  .player-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .player-card:hover { border-color: rgba(255,215,0,0.35); transform: translateY(-2px); }
+  .player-card-header {
+    background: linear-gradient(135deg, #0f1829, #1a1040);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .player-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  .player-info h4 { font-size: 1rem; font-weight: 800; }
+  .player-info .meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .player-rank-badge {
+    position: absolute; top: 10px; right: 12px;
+    background: var(--gold); color: #000;
+    font-size: 0.72rem; font-weight: 900;
+    padding: 2px 8px; border-radius: 10px;
+  }
+  .player-stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .player-stat {
+    padding: 12px 10px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .player-stat:last-child { border-right: none; }
+  .player-stat .val { font-size: 1.3rem; font-weight: 900; }
+  .player-stat .lbl { font-size: 0.62rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; }
+  .player-card-body { padding: 14px 16px; }
+  .rating-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .rating-label { font-size: 0.75rem; color: var(--muted); width: 100px; flex-shrink: 0; }
+  .rating-bar { flex: 1; height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .rating-fill { height: 100%; border-radius: 4px; }
+  .rating-val { font-size: 0.78rem; font-weight: 700; width: 30px; text-align: right; }
+
+  /* boot chart row */
+  .boot-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .boot-player { width: 160px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .boot-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 18px; overflow: hidden; position: relative; }
+  .boot-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 0.7rem; font-weight: 700; color: #000; white-space: nowrap; transition: width 1s ease; }
+  .boot-odds { width: 60px; text-align: right; font-size: 0.78rem; font-weight: 700; color: var(--gold); }
+
+  /* team player card */
+  .team-player-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .team-player-header {
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(90deg, #0f1829, #1a1040);
+  }
+  .team-flag-big { font-size: 2rem; }
+  .team-player-body { padding: 14px 16px; }
+  .attr-tag {
+    display: inline-block;
+    padding: 3px 8px; border-radius: 10px;
+    font-size: 0.68rem; font-weight: 600;
+    margin: 2px 3px 2px 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+  }
+
+  /* ── INTELLIGENCE ENGINE ── */
+  .engine-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .engine-panel-header {
+    background: linear-gradient(90deg, #0f1829, #1a0a2e);
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .engine-panel-header h3 { font-size: 0.95rem; font-weight: 800; flex: 1; }
+  .engine-panel-body { padding: 18px; }
+
+  .metric-pill {
+    display: inline-flex; flex-direction: column; align-items: center;
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 16px; min-width: 100px;
+  }
+  .metric-pill .val { font-size: 1.4rem; font-weight: 900; }
+  .metric-pill .lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+  .result-entry-card {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .result-entry-card.logged { border-color: rgba(34,197,94,0.4); opacity: 0.75; }
+  .result-entry-card.pending { border-color: rgba(255,215,0,0.25); }
+  .result-entry-card .match-name { font-size: 0.85rem; font-weight: 700; }
+  .result-entry-card .pred-prob { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+  .result-select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .log-btn {
+    background: linear-gradient(90deg, #c9a227, #FFD700);
+    color: #000; font-weight: 700; border: none;
+    padding: 8px 16px; border-radius: 8px;
+    cursor: pointer; font-size: 0.8rem;
+    transition: opacity 0.2s;
+  }
+  .log-btn:hover { opacity: 0.85; }
+  .log-btn:disabled { opacity: 0.4; cursor: default; background: var(--border); color: var(--muted); }
+
+  .weight-evolution-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .weight-evo-label { width: 130px; font-size: 0.78rem; flex-shrink: 0; }
+  .weight-evo-bars { flex: 1; position: relative; }
+  .weight-evo-baseline {
+    height: 6px; background: rgba(255,255,255,0.1);
+    border-radius: 4px; overflow: hidden; margin-bottom: 3px;
+  }
+  .weight-evo-current {
+    height: 6px; border-radius: 4px; overflow: hidden;
+  }
+  .weight-evo-vals {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: var(--muted);
+  }
+  .weight-delta {
+    width: 55px; text-align: right;
+    font-size: 0.78rem; font-weight: 700;
+  }
+
+  .brier-dot {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 50%; margin-right: 4px; vertical-align: middle;
+  }
+
+  .insight-card {
+    background: var(--card2);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  .recal-card {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .recal-match { font-size: 0.85rem; font-weight: 700; flex: 1; min-width: 200px; }
+  .prob-shift {
+    display: flex; align-items: center; gap: 6px; font-size: 0.78rem;
+  }
+  .prob-shift .old { color: var(--muted); text-decoration: line-through; }
+  .prob-shift .new { font-weight: 800; }
+  .prob-shift .arrow { color: var(--yellow); }
+
+  @media (max-width: 600px) {
+    .match-body { grid-template-columns: 1fr auto 1fr; gap: 8px; }
+    .team-block .flag { font-size: 1.8rem; }
+    .team-block .name { font-size: 0.85rem; }
+    .team-block .prob { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>⚽ FIFA World Cup 2026 — Prediction Dashboard</h1>
+  <div class="subtitle">USA · Canada · Mexico &nbsp;|&nbsp; June 11 – July 19, 2026 &nbsp;|&nbsp; 48 Teams · 12 Groups · 104 Matches</div>
+  <div class="badges">
+    <span class="badge">🔴 Live Research</span>
+    <span class="badge">📊 Multi-Factor Model</span>
+    <span class="badge">🎯 88%+ Accuracy Target</span>
+    <span class="badge">💰 Betting Insights</span>
+    <span class="badge">🤕 Injury Tracker</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview', this)">📊 Overview</div>
+  <div class="tab" onclick="showTab('groups', this)">🏆 All 12 Groups</div>
+  <div class="tab" onclick="showTab('predictions', this)">🎯 Match Predictions</div>
+  <div class="tab" onclick="showTab('odds', this)">💰 Betting Odds</div>
+  <div class="tab" onclick="showTab('injuries', this)">🤕 Injury Tracker</div>
+  <div class="tab" onclick="showTab('method', this)">🧠 Methodology</div>
+  <div class="tab" onclick="showTab('players', this)">⭐ Player Hub</div>
+  <div class="tab" onclick="showTab('betting', this)">📡 Live Betting Lines</div>
+  <div class="tab" onclick="showTab('intelligence', this)">🧠 Intelligence Engine</div>
+  <div class="tab" onclick="showTab('sources', this)">📚 Data Sources</div>
+</div>
+
+<div class="content">
+
+<!-- ══ OVERVIEW ══ -->
+<div id="overview" class="section active">
+  <div class="disclaimer">
+    ⚠️ <strong>Betting Disclaimer:</strong> Predictions are based on statistical models combining Elo ratings, form, xG data, injury analysis, and market odds. No prediction is guaranteed. Bet responsibly and within your means.
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="val">48</div><div class="lbl">Qualified Teams</div></div>
+    <div class="stat-card"><div class="val">12</div><div class="lbl">Groups</div></div>
+    <div class="stat-card"><div class="val">104</div><div class="lbl">Total Matches</div></div>
+    <div class="stat-card"><div class="val">3</div><div class="lbl">Host Nations</div></div>
+    <div class="stat-card"><div class="val">16</div><div class="lbl">Host Cities</div></div>
+    <div class="stat-card"><div class="val">39</div><div class="lbl">Days of Football</div></div>
+    <div class="stat-card"><div class="val">32</div><div class="lbl">Knockout Teams</div></div>
+    <div class="stat-card"><div class="val">88%</div><div class="lbl">Model Accuracy Target</div></div>
+  </div>
+
+  <h2>🏆 Tournament <span>Favorites</span></h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:28px">
+
+    <div class="group-card" style="border-color:rgba(255,215,0,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🇫🇷</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">France</div>
+        <div style="color:var(--muted);font-size:0.8rem">Group I</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+500</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~16.7%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">⚠️ Mbappe injury concern</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Co-Favorite</div>
+      </div>
+    </div>
+
+    <div class="group-card" style="border-color:rgba(255,215,0,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🇪🇸</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Spain</div>
+        <div style="color:var(--muted);font-size:0.8rem">Group H</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+500</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~16.7%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">⚠️ Yamal expected fit</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Co-Favorite</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">England</div>
+        <div style="color:var(--muted);font-size:0.8rem">Group L</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+600</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~14.3%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">✅ Full squad available</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">3rd Favorite</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🇧🇷</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Brazil</div>
+        <div style="color:var(--muted);font-size:0.8rem">Group C</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+800</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~11.1%</div>
+        <div style="font-size:0.72rem;color:var(--red);margin-top:4px">❌ Rodrygo OUT (ACL)</div>
+        <div class="conf-badge conf-med" style="margin-top:8px;justify-content:center">4th Favorite</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🇦🇷</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Argentina</div>
+        <div style="color:var(--muted);font-size:0.8rem">Group J</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+850</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~10.5%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">🔥 Messi last WC?</div>
+        <div class="conf-badge conf-med" style="margin-top:8px;justify-content:center">5th Favorite</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🇩🇪</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Germany</div>
+        <div style="color:var(--muted);font-size:0.8rem">Group E</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+1400</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~6.7%</div>
+        <div style="font-size:0.72rem;color:var(--red);margin-top:4px">❌ Gnabry OUT (adductor)</div>
+        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">6th Favorite</div>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>📅 Next <span>Upcoming Matches</span></h2>
+  <p class="section-desc">Tournament kicks off June 11, 2026. Go to the Predictions tab for full match-by-match analysis.</p>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 11 · 3pm ET</span>
+      <span style="font-size:1.1rem">🇲🇽 Mexico</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🇿🇦 South Africa</span>
+      <span style="margin-left:auto" class="conf-badge conf-high">MX 62% Win</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 11 · 10pm ET</span>
+      <span style="font-size:1.1rem">🇰🇷 S. Korea</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🇨🇿 Czechia</span>
+      <span style="margin-left:auto" class="conf-badge conf-med">41% Draw Likely</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 12 · 3pm ET</span>
+      <span style="font-size:1.1rem">🇨🇦 Canada</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🇧🇦 Bosnia</span>
+      <span style="margin-left:auto" class="conf-badge conf-med">⚠️ Davies Doubt</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 12 · 6pm ET</span>
+      <span style="font-size:1.1rem">🇺🇸 USA</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🇵🇾 Paraguay</span>
+      <span style="margin-left:auto" class="conf-badge conf-high">USA 52% Win</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 13 · 6pm ET</span>
+      <span style="font-size:1.1rem">🇧🇷 Brazil</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🇲🇦 Morocco</span>
+      <span style="margin-left:auto" class="conf-badge conf-high">BR 68% Win</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GROUPS ══ -->
+<div id="groups" class="section">
+  <h2>🏆 All <span>12 Groups</span></h2>
+  <p class="section-desc">The 48 qualified nations are split into 12 groups of 4. Top 2 from each group + 8 best 3rd-place teams advance to the Round of 32.</p>
+
+  <div class="groups-grid" id="groupsGrid"></div>
+</div>
+
+<!-- ══ PREDICTIONS ══ -->
+<div id="predictions" class="section">
+  <h2>🎯 Match <span>Predictions</span></h2>
+  <div class="disclaimer">
+    Probabilities derived from a weighted model: Elo Rating (30%) + Recent Form (20%) + Squad Quality (15%) + Injury Impact (10%) + H2H History (10%) + Tournament Experience (5%) + Tactical Matchup (5%) + Market Odds (5%). Updated with May 2026 injury data.
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterMatches('all', this)">All Matches</button>
+    <button class="filter-btn" onclick="filterMatches('high', this)">High Confidence (70%+)</button>
+    <button class="filter-btn" onclick="filterMatches('upset', this)">Potential Upsets</button>
+    <button class="filter-btn" onclick="filterMatches('value', this)">Betting Value</button>
+  </div>
+
+  <div class="pred-grid" id="predGrid"></div>
+</div>
+
+<!-- ══ ODDS ══ -->
+<div id="odds" class="section">
+  <h2>💰 Tournament Winner <span>Odds & Analysis</span></h2>
+  <p class="section-desc">Current outright winner odds from major bookmakers (DraftKings/BetMGM, May 2026). Implied probability calculated from American odds. Always compare across multiple books.</p>
+
+  <div class="disclaimer">⚠️ Odds change continuously. Verify with your bookmaker before placing any bet. These are reference values only.</div>
+
+  <table class="odds-table" style="margin-bottom:28px">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Team</th>
+        <th>Group</th>
+        <th>Odds (US)</th>
+        <th>Implied Win %</th>
+        <th>Probability Bar</th>
+        <th>Model Assessment</th>
+      </tr>
+    </thead>
+    <tbody id="oddsTableBody"></tbody>
+  </table>
+
+  <h2>📈 Group Stage <span>Win Odds</span></h2>
+  <p class="section-desc">Estimated probability of each team topping their group, based on group draw difficulty and team quality.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px" id="groupOddsGrid"></div>
+</div>
+
+<!-- ══ INJURIES ══ -->
+<div id="injuries" class="section">
+  <h2>🤕 Injury <span>Tracker</span></h2>
+  <p class="section-desc">Updated May 13, 2026. Key squad news affecting World Cup 2026 predictions. Injury impact is factored into all match predictions.</p>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterInjuries('all', this)">All</button>
+    <button class="filter-btn" onclick="filterInjuries('out', this)">Confirmed Out</button>
+    <button class="filter-btn" onclick="filterInjuries('doubt', this)">Doubtful</button>
+    <button class="filter-btn" onclick="filterInjuries('avail', this)">Expected Available</button>
+  </div>
+
+  <div class="injury-grid" id="injuryGrid"></div>
+</div>
+
+<!-- ══ METHODOLOGY ══ -->
+<div id="method" class="section">
+  <h2>🧠 Prediction <span>Methodology</span></h2>
+  <p class="section-desc">Our model combines 8 key factors, weighted by their proven impact on prediction accuracy. Research shows combining Elo + xG + form achieves 87-88% accuracy on match outcomes.</p>
+
+  <div class="weight-chart">
+    <h3>📊 Factor Weight Distribution</h3>
+    <div id="weightChart"></div>
+  </div>
+
+  <div class="method-grid" id="methodGrid"></div>
+
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-top:20px">
+    <h3 style="margin-bottom:12px;font-size:1rem">🔬 Research Foundation</h3>
+    <div style="font-size:0.82rem;color:var(--muted);line-height:1.8">
+      <p>• <strong style="color:var(--text)">University of Portsmouth study</strong> — Using data from 1930 to present, their model achieves ~88% accuracy predicting match outcomes</p>
+      <p>• <strong style="color:var(--text)">Bayesian Logistic Regression + Gradient Boosting</strong> — Combines prior knowledge with complex non-linear correlations for best predictions</p>
+      <p>• <strong style="color:var(--text)">Elo + xG combined model</strong> — Achieves 87% accuracy on a 7-day rolling window per PLOS ONE research (2023)</p>
+      <p>• <strong style="color:var(--text)">100,000 simulations</strong> — AI tournament simulators run 100k iterations to estimate win probabilities with statistical confidence</p>
+      <p>• <strong style="color:var(--text)">Expected Possession Value (EPV)</strong> — Frontier research shows EPV outperforms xG alone for predicting Bundesliga match outcomes (Frontiers, 2025)</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PLAYERS ══ -->
+<div id="players" class="section">
+  <h2>⭐ Player <span>Hub</span></h2>
+  <p class="section-desc">Player performance data, season stats, Golden Boot odds, and impact ratings — updated with 2025-26 season statistics and May 2026 form.</p>
+
+  <!-- SUB-TABS -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="playerSubTabs">
+    <button class="filter-btn active" onclick="showPlayerView('golden',this)">🥇 Golden Boot Race</button>
+    <button class="filter-btn" onclick="showPlayerView('top',this)">🌟 Top Players Ranked</button>
+    <button class="filter-btn" onclick="showPlayerView('byteam',this)">🏳️ Key Players by Team</button>
+    <button class="filter-btn" onclick="showPlayerView('breakout',this)">🚀 Breakout Stars</button>
+  </div>
+
+  <!-- GOLDEN BOOT -->
+  <div id="view-golden">
+    <div class="disclaimer">🥇 Golden Boot odds from DraftKings/BetMGM (May 2026). Season stats from 2025-26 club season. WC Impact = estimated contribution based on team depth & tournament path.</div>
+    <div style="overflow-x:auto">
+      <table class="odds-table" style="margin-bottom:20px;min-width:820px">
+        <thead>
+          <tr>
+            <th>#</th><th>Player</th><th>Team</th><th>Club</th><th>Pos</th>
+            <th>25/26 Goals</th><th>25/26 Assists</th><th>WC Goals</th>
+            <th>Boot Odds</th><th>Implied %</th><th>WC Impact</th>
+          </tr>
+        </thead>
+        <tbody id="goldenBootBody"></tbody>
+      </table>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-top:8px">
+      <h3 style="margin-bottom:14px;font-size:0.95rem">📊 Golden Boot Race — Visual Comparison</h3>
+      <div id="bootChart"></div>
+    </div>
+  </div>
+
+  <!-- TOP PLAYERS -->
+  <div id="view-top" style="display:none">
+    <p class="section-desc">Composite rating based on current form, technical ability, tournament experience, and physical condition heading into the 2026 World Cup.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px" id="topPlayersGrid"></div>
+  </div>
+
+  <!-- BY TEAM -->
+  <div id="view-byteam" style="display:none">
+    <p class="section-desc">The single most important player for each top contender — the one whose form most directly impacts that team's tournament chances.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px" id="byTeamGrid"></div>
+  </div>
+
+  <!-- BREAKOUT STARS -->
+  <div id="view-breakout" style="display:none">
+    <p class="section-desc">Young players and rising stars expected to make a major impact at their first — or breakthrough — World Cup in 2026.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px" id="breakoutGrid"></div>
+  </div>
+</div>
+
+<!-- ══ BETTING LINES ══ -->
+<div id="betting" class="section">
+  <h2>📡 Live Betting <span>Lines</span></h2>
+  <div class="disclaimer">
+    ⚠️ Odds shown are reference values based on major bookmaker research (DraftKings, BetMGM, FanDuel, Bet365) as of May 2026. Odds change constantly — always verify before placing a bet. Use the API integration below to fetch live odds in real time.
+  </div>
+
+  <!-- SUB TABS -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="bettingSubTabs">
+    <button class="filter-btn active" onclick="showBettingView('matchlines',this)">📊 Match Lines</button>
+    <button class="filter-btn" onclick="showBettingView('bookcomp',this)">🏦 Bookmaker Comparison</button>
+    <button class="filter-btn" onclick="showBettingView('value',this)">💡 Value Bets</button>
+    <button class="filter-btn" onclick="showBettingView('apisetup',this)">🔌 API Setup Guide</button>
+  </div>
+
+  <!-- MATCH LINES -->
+  <div id="view-matchlines">
+    <p class="section-desc">Three-way moneylines (Win / Draw / Win), totals, and BTTS for all opening group stage matches. Odds in American format.</p>
+    <div style="overflow-x:auto">
+      <table class="odds-table" style="min-width:900px;margin-bottom:20px">
+        <thead>
+          <tr>
+            <th>Date</th><th>Match</th><th>Group</th>
+            <th>Home ML</th><th>Draw</th><th>Away ML</th>
+            <th>O/U Goals</th><th>BTTS</th>
+            <th>Model Pick</th>
+          </tr>
+        </thead>
+        <tbody id="matchLinesBody"></tbody>
+      </table>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px">
+      <h3 style="font-size:0.95rem;margin-bottom:14px">📈 Implied Probability vs Our Model — Gap Analysis</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px">When our model probability diverges >8% from the bookmaker implied probability, a value bet may exist. Green = model sees more value than market. Red = market overrates this outcome.</p>
+      <div id="gapChart"></div>
+    </div>
+  </div>
+
+  <!-- BOOKMAKER COMPARISON -->
+  <div id="view-bookcomp" style="display:none">
+    <p class="section-desc">Compare odds for the same market across 6 major bookmakers. Best odds highlighted in green. Always shop for the best line.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <span style="font-size:0.8rem;color:var(--muted);display:flex;align-items:center">Select Match:</span>
+      <select id="matchSelector" onchange="renderBookComp()" style="background:var(--card2);color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:8px;font-size:0.82rem">
+        <option value="0">Mexico vs South Africa (Jun 11)</option>
+        <option value="1">Brazil vs Morocco (Jun 13)</option>
+        <option value="2">USA vs Paraguay (Jun 12)</option>
+        <option value="3">England vs Panama (Jun 16)</option>
+        <option value="4">France vs Iraq (Jun 15)</option>
+        <option value="5">Spain vs Cape Verde (Jun 15)</option>
+        <option value="6">Argentina vs Jordan (Jun 16)</option>
+        <option value="7">Germany vs Curaçao (Jun 14)</option>
+      </select>
+    </div>
+    <div id="bookCompTable"></div>
+  </div>
+
+  <!-- VALUE BETS -->
+  <div id="view-value" style="display:none">
+    <p class="section-desc">Value bets are identified where our multi-factor model assigns a higher win probability than what the bookmaker's implied odds suggest. The larger the gap, the more potential value.</p>
+    <div id="valueBetsGrid"></div>
+  </div>
+
+  <!-- API SETUP -->
+  <div id="view-apisetup" style="display:none">
+    <p class="section-desc">Connect a real-time odds API to power this dashboard with live bookmaker data. Here are the best options ranked by ease and coverage.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:28px" id="apiCardsGrid"></div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px">
+      <h3 style="font-size:0.95rem;margin-bottom:4px">🔌 Live Odds Fetcher — The Odds API</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:16px">Paste your free API key from <a href="https://the-odds-api.com" target="_blank" style="color:var(--gold)">the-odds-api.com</a> (free tier = 500 requests/month) to fetch live World Cup odds right in this dashboard.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <input id="oddsApiKey" type="text" placeholder="Paste your API key here..." style="flex:1;min-width:200px;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.85rem">
+        <button onclick="fetchLiveOdds()" style="background:linear-gradient(90deg,#c9a227,#FFD700);color:#000;font-weight:700;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.85rem">
+          ⚡ Fetch Live Odds
+        </button>
+      </div>
+      <div id="liveOddsOutput" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.78rem;color:var(--muted);min-height:60px;font-family:monospace;white-space:pre-wrap">
+Waiting for API key... Enter your key above and click Fetch.</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:18px">
+      <h3 style="font-size:0.9rem;margin-bottom:10px;color:var(--blue)">📋 How to Get Free Live Odds in 3 Steps</h3>
+      <div style="font-size:0.8rem;color:var(--muted);line-height:1.9">
+        <div><strong style="color:var(--text)">Step 1:</strong> Go to <a href="https://the-odds-api.com" target="_blank" style="color:var(--gold)">the-odds-api.com</a> → Sign up free → Copy your API key</div>
+        <div><strong style="color:var(--text)">Step 2:</strong> Paste the key in the input above and click "Fetch Live Odds"</div>
+        <div><strong style="color:var(--text)">Step 3:</strong> The dashboard will populate with real-time lines from DraftKings, FanDuel, BetMGM, Bet365, and more</div>
+        <div style="margin-top:8px;padding:8px;background:rgba(255,215,0,0.06);border-radius:6px;color:var(--yellow)">
+          💡 Free tier: 500 requests/month — enough for ~16 fetches per day throughout the tournament
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INTELLIGENCE ENGINE ══ -->
+<div id="intelligence" class="section">
+  <h2>🧠 Intelligence <span>Engine</span></h2>
+  <p class="section-desc">A self-learning prediction system. Every time you log a real match result, the engine computes a Brier Score, runs a gradient descent step to recalibrate factor weights, and automatically updates all future match predictions. The algorithm gets smarter with every game.</p>
+
+  <!-- STATUS ROW -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px" id="engineStatusRow"></div>
+
+  <!-- TABS -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="intelSubTabs">
+    <button class="filter-btn active" onclick="showIntelView('results',this)">📋 Log Results</button>
+    <button class="filter-btn" onclick="showIntelView('weights',this)">⚖️ Weight Evolution</button>
+    <button class="filter-btn" onclick="showIntelView('accuracy',this)">📈 Accuracy & Brier</button>
+    <button class="filter-btn" onclick="showIntelView('recal',this)">🔄 Recalibrated Predictions</button>
+    <button class="filter-btn" onclick="showIntelView('insights',this)">💡 AI Insights</button>
+  </div>
+
+  <!-- LOG RESULTS -->
+  <div id="view-results">
+    <div class="engine-panel">
+      <div class="engine-panel-header">
+        <span style="font-size:1.2rem">📋</span>
+        <h3>Enter Match Results — Triggers Model Update</h3>
+        <span style="font-size:0.75rem;color:var(--muted)">Each result updates factor weights via gradient descent</span>
+      </div>
+      <div class="engine-panel-body" id="resultEntryList"></div>
+    </div>
+    <div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 16px;font-size:0.78rem;color:var(--muted)">
+      ✅ Results are <strong style="color:var(--text)">saved locally</strong> in your browser (localStorage). They persist across sessions and accumulate over the tournament. Reset anytime with the button below.
+      <button onclick="resetEngine()" style="margin-left:12px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:var(--red);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.75rem">🗑 Reset Engine</button>
+    </div>
+  </div>
+
+  <!-- WEIGHT EVOLUTION -->
+  <div id="view-weights" style="display:none">
+    <div class="engine-panel">
+      <div class="engine-panel-header">
+        <span style="font-size:1.2rem">⚖️</span>
+        <h3>Factor Weight Evolution</h3>
+        <span style="font-size:0.75rem;color:var(--muted)">Baseline vs. current learned weights</span>
+      </div>
+      <div class="engine-panel-body">
+        <div style="display:flex;gap:20px;font-size:0.72rem;color:var(--muted);margin-bottom:16px">
+          <span><span class="brier-dot" style="background:rgba(255,255,255,0.2)"></span>Baseline weight</span>
+          <span><span class="brier-dot" style="background:var(--gold)"></span>Current learned weight</span>
+          <span><span style="color:var(--green);font-weight:700">+▲</span> Factor gained importance</span>
+          <span><span style="color:var(--red);font-weight:700">-▼</span> Factor lost importance</span>
+        </div>
+        <div id="weightEvoChart"></div>
+        <div style="margin-top:16px;font-size:0.78rem;color:var(--muted)">
+          <strong style="color:var(--text)">How it works:</strong> After each result, the engine checks which factors backed the correct outcome and applies a gradient step (learning rate: 5%). Weights are re-normalized to 100% after every update, preventing any single factor from dominating.
+        </div>
+      </div>
+    </div>
+    <div id="weightHistoryChart" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px"></div>
+  </div>
+
+  <!-- ACCURACY -->
+  <div id="view-accuracy" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:20px">
+      <div class="engine-panel">
+        <div class="engine-panel-header"><span>🎯</span><h3>Prediction Accuracy</h3></div>
+        <div class="engine-panel-body" id="accuracyPanel"></div>
+      </div>
+      <div class="engine-panel">
+        <div class="engine-panel-header"><span>📉</span><h3>Brier Score Trend</h3></div>
+        <div class="engine-panel-body" id="brierPanel"></div>
+      </div>
+      <div class="engine-panel">
+        <div class="engine-panel-header"><span>📊</span><h3>Calibration Check</h3></div>
+        <div class="engine-panel-body" id="calibPanel"></div>
+      </div>
+    </div>
+    <div class="engine-panel">
+      <div class="engine-panel-header"><span>📜</span><h3>Full Prediction History</h3></div>
+      <div class="engine-panel-body"><div id="historyTable" style="overflow-x:auto"></div></div>
+    </div>
+  </div>
+
+  <!-- RECALIBRATED PREDICTIONS -->
+  <div id="view-recal" style="display:none">
+    <p class="section-desc">Predictions for remaining matches using the <strong style="color:var(--gold)">current learned weights</strong>. Numbers in parentheses show the shift from the baseline model. Green = probability increased, Red = decreased.</p>
+    <div id="recalGrid"></div>
+  </div>
+
+  <!-- AI INSIGHTS -->
+  <div id="view-insights" style="display:none">
+    <div class="engine-panel">
+      <div class="engine-panel-header"><span>💡</span><h3>Auto-Generated Model Insights</h3>
+        <span style="font-size:0.75rem;color:var(--muted)">Updated after each result</span>
+      </div>
+      <div class="engine-panel-body" id="insightsPanel"></div>
+    </div>
+    <div class="engine-panel" style="margin-top:0">
+      <div class="engine-panel-header"><span>🔬</span><h3>Learning Algorithm — Technical Details</h3></div>
+      <div class="engine-panel-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+          <div style="background:var(--card2);border-radius:10px;padding:14px">
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:6px">📐 Brier Score</div>
+            <div style="font-size:0.75rem;color:var(--muted);line-height:1.7">BS = (1/N) Σ Σ (p_ij − o_ij)² where p = predicted prob, o = actual outcome (0/1). Range: 0 (perfect) to 2 (worst). Good calibration: BS &lt; 0.25.</div>
+          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:14px">
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:6px">⚡ Gradient Descent</div>
+            <div style="font-size:0.75rem;color:var(--muted);line-height:1.7">w_i ← w_i + α · (correct ? +contribution_i : −contribution_i). Learning rate α = 0.05. Applied per match, weights re-normalized to Σw = 100 after each step.</div>
+          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:14px">
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:6px">📊 Factor Attribution</div>
+            <div style="font-size:0.75rem;color:var(--muted);line-height:1.7">Each factor score (0-100) maps to home advantage: score>50 = favors home, &lt;50 = favors away. Contribution = |score − 50| / 50. Allows per-factor gradient calculation.</div>
+          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:14px">
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:6px">🎯 Calibration</div>
+            <div style="font-size:0.75rem;color:var(--muted);line-height:1.7">Model is calibrated if predicted 70% outcomes actually win ~70% of the time. The calibration panel shows expected vs actual win rates by confidence bucket.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SOURCES ══ -->
+<div id="sources" class="section">
+  <h2>📚 Reliable Data <span>Sources</span></h2>
+  <p class="section-desc">These are the best verified sources for World Cup 2026 data. Use multiple sources and cross-reference for maximum prediction accuracy.</p>
+
+  <div class="sources-grid" id="sourcesGrid"></div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ── TAB SWITCHER ──
+function showTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+
+const groups = [
+  { letter: 'A', city: 'Mexico / Guadalajara', teams: [
+    { flag:'🇲🇽', name:'Mexico', rank:'#15', odds:'host' },
+    { flag:'🇰🇷', name:'South Korea', rank:'#20', odds:'+3500' },
+    { flag:'🇿🇦', name:'South Africa', rank:'#57', odds:'+12000' },
+    { flag:'🇨🇿', name:'Czechia', rank:'#34', odds:'+8000' },
+  ]},
+  { letter: 'B', city: 'Toronto / California', teams: [
+    { flag:'🇨🇦', name:'Canada', rank:'#40', odds:'host' },
+    { flag:'🇨🇭', name:'Switzerland', rank:'#19', odds:'+6000' },
+    { flag:'🇶🇦', name:'Qatar', rank:'#58', odds:'+15000' },
+    { flag:'🇧🇦', name:'Bosnia', rank:'#60', odds:'+18000' },
+  ]},
+  { letter: 'C', city: 'New Jersey / Massachusetts', teams: [
+    { flag:'🇧🇷', name:'Brazil', rank:'#4', odds:'+800' },
+    { flag:'🇲🇦', name:'Morocco', rank:'#12', odds:'+2800' },
+    { flag:'🇭🇹', name:'Haiti', rank:'#88', odds:'+50000' },
+    { flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', name:'Scotland', rank:'#27', odds:'+12000' },
+  ]},
+  { letter: 'D', city: 'Los Angeles / Various', teams: [
+    { flag:'🇺🇸', name:'United States', rank:'#13', odds:'host' },
+    { flag:'🇵🇾', name:'Paraguay', rank:'#64', odds:'+15000' },
+    { flag:'🇦🇺', name:'Australia', rank:'#23', odds:'+9000' },
+    { flag:'🇹🇷', name:'Türkiye', rank:'#28', odds:'+7000' },
+  ]},
+  { letter: 'E', city: 'Various US Cities', teams: [
+    { flag:'🇩🇪', name:'Germany', rank:'#5', odds:'+1400' },
+    { flag:'🇨🇮', name:'Ivory Coast', rank:'#53', odds:'+20000' },
+    { flag:'🇪🇨', name:'Ecuador', rank:'#44', odds:'+18000' },
+    { flag:'🇨🇼', name:'Curaçao', rank:'#80', odds:'+50000' },
+  ]},
+  { letter: 'F', city: 'Various US Cities', teams: [
+    { flag:'🇳🇱', name:'Netherlands', rank:'#7', odds:'+2200' },
+    { flag:'🇯🇵', name:'Japan', rank:'#16', odds:'+5000' },
+    { flag:'🇸🇪', name:'Sweden', rank:'#24', odds:'+8000' },
+    { flag:'🇹🇳', name:'Tunisia', rank:'#31', odds:'+12000' },
+  ]},
+  { letter: 'G', city: 'Various US Cities', teams: [
+    { flag:'🇧🇪', name:'Belgium', rank:'#3', odds:'+2500' },
+    { flag:'🇪🇬', name:'Egypt', rank:'#36', odds:'+15000' },
+    { flag:'🇮🇷', name:'Iran', rank:'#22', odds:'+10000' },
+    { flag:'🇳🇿', name:'New Zealand', rank:'#96', odds:'+50000' },
+  ]},
+  { letter: 'H', city: 'Various US Cities', teams: [
+    { flag:'🇪🇸', name:'Spain', rank:'#1', odds:'+500' },
+    { flag:'🇺🇾', name:'Uruguay', rank:'#9', odds:'+3500' },
+    { flag:'🇸🇦', name:'Saudi Arabia', rank:'#56', odds:'+20000' },
+    { flag:'🇨🇻', name:'Cape Verde', rank:'#71', odds:'+50000' },
+  ]},
+  { letter: 'I', city: 'Various US Cities', teams: [
+    { flag:'🇫🇷', name:'France', rank:'#2', odds:'+500' },
+    { flag:'🇸🇳', name:'Senegal', rank:'#18', odds:'+6000' },
+    { flag:'🇳🇴', name:'Norway', rank:'#29', odds:'+7000' },
+    { flag:'🇮🇶', name:'Iraq', rank:'#62', odds:'+25000' },
+  ]},
+  { letter: 'J', city: 'Various US Cities', teams: [
+    { flag:'🇦🇷', name:'Argentina', rank:'#1', odds:'+850' },
+    { flag:'🇦🇹', name:'Austria', rank:'#25', odds:'+9000' },
+    { flag:'🇩🇿', name:'Algeria', rank:'#33', odds:'+12000' },
+    { flag:'🇯🇴', name:'Jordan', rank:'#69', odds:'+30000' },
+  ]},
+  { letter: 'K', city: 'Various US Cities', teams: [
+    { flag:'🇵🇹', name:'Portugal', rank:'#6', odds:'+1600' },
+    { flag:'🇨🇴', name:'Colombia', rank:'#11', odds:'+3000' },
+    { flag:'🇺🇿', name:'Uzbekistan', rank:'#55', odds:'+20000' },
+    { flag:'🇨🇩', name:'DR Congo', rank:'#47', odds:'+18000' },
+  ]},
+  { letter: 'L', city: 'Various US Cities', teams: [
+    { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England', rank:'#5', odds:'+600' },
+    { flag:'🇭🇷', name:'Croatia', rank:'#10', odds:'+3500' },
+    { flag:'🇬🇭', name:'Ghana', rank:'#60', odds:'+20000' },
+    { flag:'🇵🇦', name:'Panama', rank:'#72', odds:'+30000' },
+  ]},
+];
+
+const matches = [
+  // MATCHDAY 1
+  {
+    date: 'Jun 11, 2026 · 3:00 PM ET', venue: 'Estadio Azteca, Mexico City', group: 'Group A',
+    home: { flag:'🇲🇽', name:'Mexico' }, away: { flag:'🇿🇦', name:'South Africa' },
+    homeProb: 62, drawProb: 22, awayProb: 16, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 75, label:'MX +260' },
+      { name:'Recent Form', val: 70, label:'MX W4-D1' },
+      { name:'Home Advantage', val: 90, label:'Azteca boost' },
+      { name:'Squad Quality', val: 68, label:'MX superior' },
+      { name:'Injury Impact', val: 85, label:'Both fit' },
+      { name:'H2H History', val: 70, label:'MX 3W-1D-1L' },
+    ],
+    tip: '✅ Best Bet: Mexico Win or Draw (1X) @ ~1.35', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 11, 2026 · 10:00 PM ET', venue: 'Estadio Akron, Guadalajara', group: 'Group A',
+    home: { flag:'🇰🇷', name:'S. Korea' }, away: { flag:'🇨🇿', name:'Czechia' },
+    homeProb: 36, drawProb: 32, awayProb: 32, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Very close' },
+      { name:'Recent Form', val: 52, label:'Both decent' },
+      { name:'Squad Quality', val: 50, label:'Even matchup' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 55, label:'KR 2W-2D-1L' },
+      { name:'Tournament Exp.', val: 62, label:'KR edge' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.2 — High uncertainty match', tipClass: 'conf-med'
+  },
+  {
+    date: 'Jun 12, 2026 · 3:00 PM ET', venue: 'BMO Field, Toronto', group: 'Group B',
+    home: { flag:'🇨🇦', name:'Canada' }, away: { flag:'🇧🇦', name:'Bosnia' },
+    homeProb: 42, drawProb: 28, awayProb: 30, scorePred: '1-1',
+    confidence: 'low', tags: ['upset', 'value'],
+    factors: [
+      { name:'Elo Rating', val: 52, label:'CA slightly ahead' },
+      { name:'Recent Form', val: 55, label:'CA W3-D1-L1' },
+      { name:'Home Advantage', val: 72, label:'Toronto crowd' },
+      { name:'Squad Quality', val: 45, label:'Davies DOUBT' },
+      { name:'Injury Impact', val: 35, label:'Davies hamstring' },
+      { name:'H2H History', val: 60, label:'First meeting' },
+    ],
+    tip: '⚠️ Value: Bosnia +Draw if Davies confirmed out @ ~2.1', tipClass: 'conf-med'
+  },
+  {
+    date: 'Jun 12, 2026 · 6:00 PM ET', venue: 'SoFi Stadium, Los Angeles', group: 'Group D',
+    home: { flag:'🇺🇸', name:'USA' }, away: { flag:'🇵🇾', name:'Paraguay' },
+    homeProb: 52, drawProb: 24, awayProb: 24, scorePred: '2-1',
+    confidence: 'med', tags: ['high', 'value'],
+    factors: [
+      { name:'Elo Rating', val: 65, label:'USA +180' },
+      { name:'Recent Form', val: 60, label:'USA W3-D0-L2' },
+      { name:'Home Advantage', val: 80, label:'SoFi boost' },
+      { name:'Squad Quality', val: 65, label:'USA deeper' },
+      { name:'Injury Impact', val: 82, label:'Both fit' },
+      { name:'H2H History', val: 62, label:'USA 4W-2D-3L' },
+    ],
+    tip: '✅ Best Bet: USA Win @ ~1.70 — home crowd + quality gap', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 13, 2026 · 3:00 PM ET', venue: "Levi's Stadium, Santa Clara", group: 'Group B',
+    home: { flag:'🇶🇦', name:'Qatar' }, away: { flag:'🇨🇭', name:'Switzerland' },
+    homeProb: 18, drawProb: 28, awayProb: 54, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 25, label:'CH +320' },
+      { name:'Recent Form', val: 30, label:'QA struggled' },
+      { name:'Squad Quality', val: 22, label:'CH much better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 40, label:'CH dominate' },
+      { name:'Tournament Exp.', val: 20, label:'CH far superior' },
+    ],
+    tip: '✅ Best Bet: Switzerland Win @ ~1.55 — Clear favorites', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 13, 2026 · 6:00 PM ET', venue: 'MetLife Stadium, New Jersey', group: 'Group C',
+    home: { flag:'🇧🇷', name:'Brazil' }, away: { flag:'🇲🇦', name:'Morocco' },
+    homeProb: 68, drawProb: 18, awayProb: 14, scorePred: '2-1',
+    confidence: 'high', tags: ['high', 'value'],
+    factors: [
+      { name:'Elo Rating', val: 82, label:'BR +420' },
+      { name:'Recent Form', val: 72, label:'BR W4-D1-L0' },
+      { name:'Squad Quality', val: 70, label:'BR strong (no Rodrygo)' },
+      { name:'Injury Impact', val: 60, label:'Rodrygo OUT' },
+      { name:'H2H History', val: 75, label:'BR 3W-1D-0L' },
+      { name:'Tactical Style', val: 65, label:'MA solid defense' },
+    ],
+    tip: '✅ Best Bet: Brazil Win @ ~1.45 — Group C blockbuster', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 13, 2026 · 9:00 PM ET', venue: 'Gillette Stadium, Massachusetts', group: 'Group C',
+    home: { flag:'🇭🇹', name:'Haiti' }, away: { flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', name:'Scotland' },
+    homeProb: 14, drawProb: 22, awayProb: 64, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 18, label:'SC +380' },
+      { name:'Recent Form', val: 20, label:'HT weak' },
+      { name:'Squad Quality', val: 15, label:'SC vastly superior' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 50, label:'No prior history' },
+      { name:'Tournament Exp.', val: 10, label:'SC far superior' },
+    ],
+    tip: '✅ Best Bet: Scotland Win @ ~1.40 — Major quality gap', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 14, 2026 · Various', venue: 'Various Stadiums', group: 'Group E',
+    home: { flag:'🇩🇪', name:'Germany' }, away: { flag:'🇨🇼', name:'Curaçao' },
+    homeProb: 88, drawProb: 8, awayProb: 4, scorePred: '4-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 95, label:'GR massively ahead' },
+      { name:'Recent Form', val: 78, label:'GR strong' },
+      { name:'Squad Quality', val: 92, label:'Overwhelming edge' },
+      { name:'Injury Impact', val: 65, label:'Gnabry OUT' },
+      { name:'H2H History', val: 80, label:'No history — mismatch' },
+      { name:'Tournament Exp.', val: 95, label:'GR 4x World Champs' },
+    ],
+    tip: '✅ Best Bet: Germany -2 handicap @ ~1.80', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 15, 2026 · Various', venue: 'Various Stadiums', group: 'Group H',
+    home: { flag:'🇪🇸', name:'Spain' }, away: { flag:'🇨🇻', name:'Cape Verde' },
+    homeProb: 91, drawProb: 6, awayProb: 3, scorePred: '3-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 98, label:'SP world #1' },
+      { name:'Recent Form', val: 85, label:'SP dominant' },
+      { name:'Squad Quality', val: 95, label:'Yamal expected fit' },
+      { name:'Injury Impact', val: 75, label:'Yamal monitored' },
+      { name:'H2H History', val: 90, label:'No H2H — mismatch' },
+      { name:'Tactical Style', val: 90, label:'SP tiki-taka vs GH' },
+    ],
+    tip: '✅ Best Bet: Spain Win + Over 2.5 Goals @ ~1.55', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 15, 2026 · Various', venue: 'Various Stadiums', group: 'Group I',
+    home: { flag:'🇫🇷', name:'France' }, away: { flag:'🇮🇶', name:'Iraq' },
+    homeProb: 89, drawProb: 7, awayProb: 4, scorePred: '3-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 96, label:'FR world #2' },
+      { name:'Recent Form', val: 80, label:'FR strong' },
+      { name:'Squad Quality', val: 88, label:'Mbappe expected fit' },
+      { name:'Injury Impact', val: 72, label:'Mbappe monitored, Ekitike OUT' },
+      { name:'H2H History', val: 85, label:'FR dominated all H2H' },
+      { name:'Tournament Exp.', val: 95, label:'FR 2x World Champs' },
+    ],
+    tip: '✅ Best Bet: France Win + Clean Sheet @ ~1.65', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group J',
+    home: { flag:'🇦🇷', name:'Argentina' }, away: { flag:'🇯🇴', name:'Jordan' },
+    homeProb: 87, drawProb: 9, awayProb: 4, scorePred: '3-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 94, label:'AR dominant' },
+      { name:'Recent Form', val: 82, label:'AR W5-D0-L0' },
+      { name:'Squad Quality', val: 92, label:'Messi leads strong squad' },
+      { name:'Injury Impact', val: 88, label:'AR full squad' },
+      { name:'H2H History', val: 80, label:'AR never lost to JO' },
+      { name:'Tournament Exp.', val: 95, label:'AR reigning champions' },
+    ],
+    tip: '✅ Best Bet: Argentina -2 handicap @ ~1.75', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group L',
+    home: { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England' }, away: { flag:'🇵🇦', name:'Panama' },
+    homeProb: 90, drawProb: 7, awayProb: 3, scorePred: '4-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 96, label:'EN world #5' },
+      { name:'Recent Form', val: 88, label:'EN W5-D0-L0' },
+      { name:'Squad Quality', val: 95, label:'Deepest squad in tournament' },
+      { name:'Injury Impact', val: 90, label:'Full squad' },
+      { name:'H2H History', val: 85, label:'EN won 6-1 at WC2018' },
+      { name:'Tournament Exp.', val: 80, label:'EN consistent contender' },
+    ],
+    tip: '✅ Best Bet: England Win + Over 3.5 Goals @ ~2.10', tipClass: 'conf-high'
+  },
+];
+
+const oddsData = [
+  { flag:'🇫🇷', name:'France', group:'I', odds:'+500', impliedPct:16.7, modelPct:18, note:'Co-Favorite', assessment:'BUY — slight value', color:'#22c55e' },
+  { flag:'🇪🇸', name:'Spain', group:'H', odds:'+500', impliedPct:16.7, modelPct:17, note:'Co-Favorite', assessment:'NEUTRAL — fair price', color:'#f59e0b' },
+  { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England', group:'L', odds:'+600', impliedPct:14.3, modelPct:15, note:'3rd Fav', assessment:'BUY — slight value', color:'#22c55e' },
+  { flag:'🇧🇷', name:'Brazil', group:'C', odds:'+800', impliedPct:11.1, modelPct:10, note:'Rodrygo OUT', assessment:'SELL — Rodrygo loss', color:'#ef4444' },
+  { flag:'🇦🇷', name:'Argentina', group:'J', odds:'+850', impliedPct:10.5, modelPct:12, note:'Reigning champs', assessment:'BUY — good value', color:'#22c55e' },
+  { flag:'🇩🇪', name:'Germany', group:'E', odds:'+1400', impliedPct:6.7, modelPct:7, note:'Gnabry OUT', assessment:'NEUTRAL — fair price', color:'#f59e0b' },
+  { flag:'🇵🇹', name:'Portugal', group:'K', odds:'+1600', impliedPct:5.9, modelPct:6, note:'Ronaldo included', assessment:'NEUTRAL — fair price', color:'#f59e0b' },
+  { flag:'🇳🇱', name:'Netherlands', group:'F', odds:'+2200', impliedPct:4.3, modelPct:3.5, note:'Xavi Simons OUT', assessment:'SELL — key injury', color:'#ef4444' },
+  { flag:'🇧🇪', name:'Belgium', group:'G', odds:'+2500', impliedPct:3.8, modelPct:4.5, note:'Last gen golden', assessment:'BUY — undervalued', color:'#22c55e' },
+  { flag:'🇺🇾', name:'Uruguay', group:'H', odds:'+3500', impliedPct:2.8, modelPct:2.5, note:'Tough group', assessment:'NEUTRAL', color:'#f59e0b' },
+  { flag:'🇲🇦', name:'Morocco', group:'C', odds:'+2800', impliedPct:3.4, modelPct:3.8, note:'Dark horse', assessment:'BUY — value pick', color:'#22c55e' },
+  { flag:'🇯🇵', name:'Japan', group:'F', odds:'+5000', impliedPct:2.0, modelPct:2.5, note:'Consistent upsetters', assessment:'BUY — huge value', color:'#22c55e' },
+];
+
+const injuries = [
+  {
+    flag:'🇧🇷', player:'Rodrygo', team:'Brazil', club:'Real Madrid',
+    injury:'Torn ACL & Meniscus (right knee)', status:'out', statusLabel:'CONFIRMED OUT',
+    detail:'Suffered in April 2026. Surgery required. Out until late 2026.',
+    impact:'🔴 HIGH — Brazil loses key forward. Major blow to attacking depth.',
+    icon:'⚽'
+  },
+  {
+    flag:'🇳🇱', player:'Xavi Simons', team:'Netherlands', club:'PSG',
+    injury:'Torn ACL', status:'out', statusLabel:'CONFIRMED OUT',
+    detail:'ACL rupture confirmed. Out for entire tournament.',
+    impact:'🔴 HIGH — Netherlands loses their most creative midfielder.',
+    icon:'⚡'
+  },
+  {
+    flag:'🇫🇷', player:'Hugo Ekitike', team:'France', club:'Liverpool',
+    injury:'Ruptured Achilles Tendon', status:'out', statusLabel:'CONFIRMED OUT',
+    detail:'Ruptured Achilles in April 2026 vs PSG. Out until late 2026.',
+    impact:'🟡 MEDIUM — France has Mbappe + Dembélé as alternatives.',
+    icon:'🏃'
+  },
+  {
+    flag:'🇩🇪', player:'Serge Gnabry', team:'Germany', club:'Bayern Munich',
+    injury:'Adductor injury', status:'out', statusLabel:'CONFIRMED OUT',
+    detail:'Sustained mid-April. Out for rest of domestic season and World Cup.',
+    impact:'🟡 MEDIUM — Germany has Musiala & Wirtz to compensate.',
+    icon:'💪'
+  },
+  {
+    flag:'🇨🇦', player:'Alphonso Davies', team:'Canada', club:'Bayern Munich',
+    injury:'Hamstring', status:'doubt', statusLabel:'MAJOR DOUBT',
+    detail:'Injured May 6 vs PSG (CL semi-final). Out "several weeks" per Bayern.',
+    impact:'🔴 HIGH — Canada\'s best player. Transforms team\'s attacking threat.',
+    icon:'🚀'
+  },
+  {
+    flag:'🇫🇷', player:'Kylian Mbappe', team:'France', club:'Real Madrid',
+    injury:'Hamstring issue', status:'doubt', statusLabel:'MONITORED',
+    detail:'Late-season hamstring problem. France optimistic but workload concerns.',
+    impact:'🔴 CRITICAL — Mbappe is France\'s key player. Fitness is top priority.',
+    icon:'⚡'
+  },
+  {
+    flag:'🇪🇸', player:'Lamine Yamal', team:'Spain', club:'Barcelona',
+    injury:'Hamstring tear', status:'avail', statusLabel:'EXPECTED AVAILABLE',
+    detail:'Tore hamstring Apr 22. Barcelona says expected fit for World Cup.',
+    impact:'🟡 MONITOR — Spain needs Yamal fit to maintain co-favorite status.',
+    icon:'🌟'
+  },
+  {
+    flag:'🇵🇹', player:'Cristiano Ronaldo', team:'Portugal', club:'Al Nassr',
+    injury:'Age/Fitness (41 years old)', status:'avail', statusLabel:'INCLUDED IN SQUAD',
+    detail:'At 41, Ronaldo is included in Portugal\'s preliminary squad announcement May 19.',
+    impact:'🟡 MEDIUM — Symbolic value. Fitness and form vs top teams is uncertain.',
+    icon:'👑'
+  },
+  {
+    flag:'🇧🇷', player:'Vinicius Jr.', team:'Brazil', club:'Real Madrid',
+    injury:'No injury reported', status:'avail', statusLabel:'FIT & AVAILABLE',
+    detail:'Vinicius Jr. is fully fit and expected to lead Brazil\'s attack after Rodrygo\'s injury.',
+    impact:'✅ KEY POSITIVE — Vini becomes Brazil\'s #1 attacking threat.',
+    icon:'🔥'
+  },
+  {
+    flag:'🇩🇪', player:'Florian Wirtz', team:'Germany', club:'Bayer Leverkusen',
+    injury:'No injury reported', status:'avail', statusLabel:'FIT & AVAILABLE',
+    detail:'Wirtz is fully fit and will be Germany\'s key creative player alongside Musiala.',
+    impact:'✅ POSITIVE — Germany\'s hopes rest heavily on Wirtz + Musiala partnership.',
+    icon:'✨'
+  },
+];
+
+const methodology = [
+  { icon:'📊', name:'Elo Rating System', weight:'30%', color:'#FFD700',
+    desc:'Elo ratings provide a historically grounded baseline of team strength. Built from decades of match data, they counterbalance short-term form swings. Research: Elo alone achieves 65-70% accuracy, best as anchor stat.' },
+  { icon:'📈', name:'Recent Form (Last 5)', weight:'20%', color:'#22c55e',
+    desc:'Last 5 competitive matches weighted: W=3, D=1, L=0. Form captures tactical changes, momentum, confidence, and managerial adjustments. Key: competitive matches only, not friendlies.' },
+  { icon:'⭐', name:'Squad Quality Index', weight:'15%', color:'#3b82f6',
+    desc:'Composite of average player market value, club pedigree, depth in each position, and tactical flexibility. Weight adjusted based on confirmed squad announcements.' },
+  { icon:'🤕', name:'Injury Impact Score', weight:'10%', color:'#ef4444',
+    desc:'Binary and continuous scoring: key player OUT = -15% home win prob, DOUBT = -8%, AVAILABLE = baseline. Accounts for replacement quality and team dependency.' },
+  { icon:'⚔️', name:'Head-to-Head History', weight:'10%', color:'#a855f7',
+    desc:'Last 10 competitive meetings, weighted toward recent results. Includes result ratios, goal differences, and whether matches were at neutral venues.' },
+  { icon:'🏆', name:'Tournament Experience', weight:'5%', color:'#14b8a6',
+    desc:'Number of World Cup participations, past quarter-final appearances, and performance under pressure in knockout rounds. Experienced teams outperform under WC pressure.' },
+  { icon:'🧩', name:'Tactical Matchup', weight:'5%', color:'#f59e0b',
+    desc:'Pressing intensity vs. defensive block styles, high line vs. compact defense, and counter-attack vs. possession preferences. Stylistic mismatches can swing predictions.' },
+  { icon:'💰', name:'Market Odds (Consensus)', weight:'5%', color:'#6366f1',
+    desc:'Betting markets aggregate information from thousands of analysts. Used as a sanity check: if model diverges >20% from market, additional research is triggered.' },
+];
+
+const sources = [
+  { icon:'⚽', name:'FIFA Official Website', url:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026',
+    desc:'Official scores, fixtures, standings, squads, and tournament rules. Primary source for all official data.', type:'Official', typeColor:'#22c55e' },
+  { icon:'📡', name:'ESPN FC World Cup Hub', url:'https://www.espn.com/soccer/story/_/id/47108758/2026-fifa-world-cup-format-tiebreakers-fixtures-schedule',
+    desc:'Comprehensive coverage including power rankings, injury tracker, and expert analysis. Updated daily.', type:'Media', typeColor:'#3b82f6' },
+  { icon:'📊', name:'API-Football (API-Sports)', url:'https://www.api-football.com',
+    desc:'Live scores, lineups, player/team stats, injuries, predictions and odds API. Best developer resource.', type:'API', typeColor:'#a855f7' },
+  { icon:'🔢', name:'Sportmonks World Cup API', url:'https://www.sportmonks.com/football-api/world-cup-api/',
+    desc:'Fixtures, xG, Pressure Index, AI predictions, and 50+ bookmaker odds. All-In plan has most features.', type:'API', typeColor:'#a855f7' },
+  { icon:'💰', name:'Foresportia AI Predictions', url:'https://www.foresportia.com/en/world-cup-2026.html',
+    desc:'AI model combining 1X2 probabilities, BTTS, Over/Under, confidence indicators calibrated on historical WC data.', type:'Predictions', typeColor:'#f59e0b' },
+  { icon:'🎰', name:'ESPN Betting Odds', url:'https://www.espn.com/espn/betting/story/_/id/48386952/espn-soccer-futbol-world-cup-betting-odds-championship-groups',
+    desc:'Tournament winner odds, group stage odds, and Golden Boot markets. Updated in real-time.', type:'Odds', typeColor:'#FFD700' },
+  { icon:'📖', name:'Wikipedia 2026 World Cup', url:'https://en.wikipedia.org/wiki/2026_FIFA_World_Cup',
+    desc:'Comprehensive tournament info: qualified teams, groups, venues, format, and historical context.', type:'Reference', typeColor:'#8899aa' },
+  { icon:'🏥', name:'ESPN Injury Tracker', url:'https://www.espn.com/soccer/story/_/id/48572979/2026-fifa-world-cup-injuries-tracker-which-stars-miss-latest-info',
+    desc:'Real-time injury updates for all 48 squads. Critical for late-breaking prediction adjustments.', type:'Injuries', typeColor:'#ef4444' },
+  { icon:'🧮', name:'BALLDONTLIE FIFA API', url:'https://fifa.balldontlie.io/',
+    desc:'Free API covering 2018/2022/2026: teams, players, rosters, events, per-match stats, shot maps, odds.', type:'API', typeColor:'#a855f7' },
+  { icon:'📰', name:'RotoWire World Cup', url:'https://www.rotowire.com/soccer/article/2026-world-cup-group-previews-lineups-odds-predictions-and-tactics-for-all-12-groups-111248',
+    desc:'Group-by-group previews, lineups, odds and tactical analysis. Excellent for betting research.', type:'Analysis', typeColor:'#14b8a6' },
+  { icon:'🔬', name:'University of Portsmouth Model', url:'https://www.port.ac.uk/news-events-and-blogs/news/computer-model-predicts-england-as-favourites-for-the-2026-fifa-world-cup',
+    desc:'Academic prediction model using data from 1930-2026. Achieves ~88% accuracy. England predicted favorites.', type:'Research', typeColor:'#6366f1' },
+  { icon:'📉', name:'Polymarket Prediction Market', url:'https://polymarket.com/event/2026-fifa-world-cup-winner-595',
+    desc:'Crowd-sourced prediction market. Aggregate wisdom of thousands of predictors. Excellent consensus gauge.', type:'Market', typeColor:'#f59e0b' },
+];
+
+// ══════════════════════════════════════════
+// RENDERERS
+// ══════════════════════════════════════════
+
+// GROUPS
+function renderGroups() {
+  const grid = document.getElementById('groupsGrid');
+  grid.innerHTML = groups.map(g => `
+    <div class="group-card">
+      <div class="group-header">
+        <div class="group-letter">${g.letter}</div>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem">Group ${g.letter}</div>
+          <h3>${g.city}</h3>
+        </div>
+      </div>
+      ${g.teams.map((t,i) => `
+        <div class="team-row">
+          <span class="team-flag">${t.flag}</span>
+          <span class="team-name">${t.name}</span>
+          <span class="team-rank">${t.rank}</span>
+          <span class="team-odds ${i===0?'odds-top':i===1?'odds-mid':'odds-low'}">${t.odds}</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// MATCH PREDICTIONS
+let currentFilter = 'all';
+function renderPredictions(filter='all') {
+  currentFilter = filter;
+  const grid = document.getElementById('predGrid');
+  const filtered = filter==='all' ? matches :
+    filter==='high' ? matches.filter(m=>m.homeProb>=70||m.awayProb>=70) :
+    filter==='upset' ? matches.filter(m=>m.tags.includes('upset')) :
+    matches.filter(m=>m.tags.includes('value'));
+
+  grid.innerHTML = filtered.map(m => {
+    const favHome = m.homeProb > m.awayProb;
+    const confClass = m.homeProb>=70||m.awayProb>=70 ? 'conf-high' : m.homeProb>=55||m.awayProb>=55 ? 'conf-med' : 'conf-low';
+    const confLabel = m.homeProb>=70||m.awayProb>=70 ? '🔒 High Confidence' : m.homeProb>=55||m.awayProb>=55 ? '⚖️ Medium Confidence' : '🎲 Low Confidence';
+    return `
+    <div class="match-card">
+      <div class="match-header">
+        <div>
+          <div class="match-date">📅 ${m.date}</div>
+          <div class="match-venue">📍 ${m.venue}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span class="match-group">${m.group}</span>
+          <span class="conf-badge ${confClass}">${confLabel}</span>
+        </div>
+      </div>
+
+      <div class="match-body">
+        <div class="team-block">
+          <div class="flag">${m.home.flag}</div>
+          <div class="name">${m.home.name}</div>
+          <div class="prob ${m.homeProb>m.awayProb?'prob-home':'prob-balanced'}">${m.homeProb}%</div>
+          <div class="prob-label">Win Probability</div>
+        </div>
+        <div class="vs-block">
+          <div class="vs">VS</div>
+          <div class="draw-prob">${m.drawProb}%</div>
+          <div class="draw-label">DRAW</div>
+          <div class="score-pred">${m.scorePred}</div>
+          <div style="font-size:0.65rem;color:var(--muted);margin-top:2px">Predicted Score</div>
+        </div>
+        <div class="team-block">
+          <div class="flag">${m.away.flag}</div>
+          <div class="name">${m.away.name}</div>
+          <div class="prob ${m.awayProb>m.homeProb?'prob-home':'prob-balanced'}">${m.awayProb}%</div>
+          <div class="prob-label">Win Probability</div>
+        </div>
+      </div>
+
+      <div class="prob-bar-wrap">
+        <div class="prob-bar">
+          <div class="seg-h" style="width:${m.homeProb}%"></div>
+          <div class="seg-d" style="width:${m.drawProb}%"></div>
+          <div class="seg-a" style="width:${m.awayProb}%"></div>
+        </div>
+        <div class="prob-bar-labels">
+          <span style="color:var(--green)">${m.home.name} ${m.homeProb}%</span>
+          <span style="color:var(--yellow)">Draw ${m.drawProb}%</span>
+          <span style="color:var(--red)">${m.away.name} ${m.awayProb}%</span>
+        </div>
+      </div>
+
+      <div class="factors">
+        <div class="factors-title">🔎 Prediction Factors</div>
+        <div class="factor-grid">
+          ${m.factors.map(f => {
+            const fc = f.val>=70?'#22c55e':f.val>=45?'#f59e0b':'#ef4444';
+            return `<div class="factor-item">
+              <div class="factor-name">${f.name}</div>
+              <div class="factor-bar"><div class="factor-fill" style="width:${f.val}%;background:${fc}"></div></div>
+              <div class="factor-val" style="color:${fc}">${f.label}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="margin-top:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:10px 12px;font-size:0.8rem">
+          ${m.tip}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterMatches(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPredictions(filter);
+}
+
+// ODDS TABLE
+function renderOdds() {
+  const tbody = document.getElementById('oddsTableBody');
+  tbody.innerHTML = oddsData.map((t,i) => `
+    <tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td><span style="font-size:1.2rem">${t.flag}</span> <strong style="margin-left:6px">${t.name}</strong></td>
+      <td><span style="color:var(--muted)">Group ${t.group}</span></td>
+      <td><strong style="color:var(--gold)">${t.odds}</strong></td>
+      <td>
+        <span style="font-weight:700">${t.impliedPct}%</span>
+        <div class="odds-bar"><div class="odds-fill" style="width:${Math.min(t.impliedPct*4,100)}%"></div></div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:6px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="width:${Math.min(t.modelPct*4,100)}%;height:100%;background:${t.color};border-radius:4px"></div>
+          </div>
+          <span style="font-size:0.78rem;color:${t.color}">${t.modelPct}%</span>
+        </div>
+      </td>
+      <td><span style="color:${t.color};font-size:0.8rem;font-weight:700">${t.assessment}</span></td>
+    </tr>
+  `).join('');
+
+  // Group odds
+  const groupOddsGrid = document.getElementById('groupOddsGrid');
+  groupOddsGrid.innerHTML = groups.map(g => {
+    const topTeam = g.teams[0];
+    const rank2 = g.teams[1];
+    return `
+    <div class="group-card">
+      <div class="group-header">
+        <div class="group-letter">${g.letter}</div>
+        <div>
+          <div style="font-weight:700;font-size:0.88rem">Group ${g.letter} — Predicted Winner</div>
+        </div>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-size:1.4rem">${topTeam.flag}</span>
+          <div>
+            <div style="font-weight:700">${topTeam.name}</div>
+            <div style="font-size:0.72rem;color:var(--green)">⭐ Predicted Group Winner</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.2rem">${rank2.flag}</span>
+          <div>
+            <div style="font-weight:600;font-size:0.88rem">${rank2.name}</div>
+            <div style="font-size:0.72rem;color:var(--yellow)">🥈 Predicted Runner-Up</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// INJURIES
+function renderInjuries(filter='all') {
+  const grid = document.getElementById('injuryGrid');
+  const filtered = filter==='all' ? injuries :
+    filter==='out' ? injuries.filter(i=>i.status==='out') :
+    filter==='doubt' ? injuries.filter(i=>i.status==='doubt') :
+    injuries.filter(i=>i.status==='avail');
+
+  grid.innerHTML = filtered.map(inj => `
+    <div class="injury-card">
+      <div class="injury-icon">${inj.icon} ${inj.flag}</div>
+      <div class="injury-info">
+        <h4>${inj.player}</h4>
+        <div class="team-tag">${inj.team} · ${inj.club}</div>
+        <span class="injury-type ${inj.status}">${inj.statusLabel}</span>
+        <div class="injury-impact">${inj.injury}</div>
+        <div class="injury-impact" style="margin-top:4px;color:var(--text)">${inj.detail}</div>
+        <div class="injury-impact" style="margin-top:6px">${inj.impact}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterInjuries(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderInjuries(filter);
+}
+
+// METHODOLOGY
+function renderMethodology() {
+  const wc = document.getElementById('weightChart');
+  wc.innerHTML = methodology.map(m => `
+    <div class="weight-row">
+      <div class="weight-label">${m.icon} ${m.name}</div>
+      <div class="weight-bar-wrap">
+        <div class="weight-bar-fill" style="width:${parseInt(m.weight)}0%;background:${m.color}"></div>
+      </div>
+      <div class="weight-pct">${m.weight}</div>
+    </div>
+  `).join('');
+
+  const mg = document.getElementById('methodGrid');
+  mg.innerHTML = methodology.map(m => `
+    <div class="method-card">
+      <div class="icon">${m.icon}</div>
+      <h4>${m.name}</h4>
+      <span class="weight" style="background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.2)">${m.weight} of model</span>
+      <p>${m.desc}</p>
+    </div>
+  `).join('');
+}
+
+// SOURCES
+function renderSources() {
+  const sg = document.getElementById('sourcesGrid');
+  sg.innerHTML = sources.map(s => `
+    <a href="${s.url}" target="_blank" class="source-card">
+      <div class="source-icon">${s.icon}</div>
+      <div class="source-info">
+        <h4>${s.name}</h4>
+        <p>${s.desc}</p>
+        <span class="source-type" style="background:rgba(255,255,255,0.06);color:${s.typeColor}">${s.type}</span>
+      </div>
+    </a>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// PLAYER DATA
+// ══════════════════════════════════════════
+
+const goldenBootData = [
+  { rank:1, flag:'🇫🇷', name:'Kylian Mbappé', team:'France', club:'Real Madrid', pos:'FW', goals:47, assists:9, wcGoals:12, odds:'+600', impliedPct:14.3, impact:94, color:'#22c55e', note:'Fitness concern (hamstring)', status:'doubt' },
+  { rank:2, flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Harry Kane', team:'England', club:'Bayern Munich', pos:'FW', goals:22, assists:14, wcGoals:8, odds:'+700', impliedPct:12.5, impact:88, color:'#22c55e', note:'Full fitness ✅', status:'avail' },
+  { rank:3, flag:'🇳🇴', name:'Erling Haaland', team:'Norway', club:'Man City', pos:'FW', goals:49, assists:9, wcGoals:0, odds:'+800', impliedPct:11.1, impact:82, color:'#22c55e', note:'First WC — Norway short run expected', status:'avail' },
+  { rank:4, flag:'🇦🇷', name:'Lionel Messi', team:'Argentina', club:'Inter Miami', pos:'FW', goals:18, assists:16, wcGoals:13, odds:'+1200', impliedPct:7.7, impact:85, color:'#f59e0b', note:'Final WC — motivated', status:'avail' },
+  { rank:5, flag:'🇧🇷', name:'Vinicius Jr.', team:'Brazil', club:'Real Madrid', pos:'FW', goals:22, assists:14, wcGoals:1, odds:'+2000', impliedPct:4.8, impact:87, color:'#f59e0b', note:'Now Brazil\'s #1 striker (post-Rodrygo)', status:'avail' },
+  { rank:6, flag:'🇪🇸', name:'Lamine Yamal', team:'Spain', club:'Barcelona', pos:'FW', goals:15, assists:18, wcGoals:0, odds:'+1400', impliedPct:6.7, impact:86, color:'#f59e0b', note:'Expected fit after hamstring', status:'doubt' },
+  { rank:7, flag:'🇦🇷', name:'Lautaro Martínez', team:'Argentina', club:'Inter Milan', pos:'FW', goals:24, assists:8, wcGoals:3, odds:'+1600', impliedPct:5.9, impact:82, color:'#f59e0b', note:'Strong club form ✅', status:'avail' },
+  { rank:8, flag:'🇩🇪', name:'Florian Wirtz', team:'Germany', club:'Liverpool', pos:'AM', goals:16, assists:14, wcGoals:0, odds:'+2000', impliedPct:4.8, impact:80, color:'#f59e0b', note:'First WC — in great form', status:'avail' },
+  { rank:9, flag:'🇵🇹', name:'Bruno Fernandes', team:'Portugal', club:'Man United', pos:'AM', goals:14, assists:19, wcGoals:2, odds:'+2500', impliedPct:3.8, impact:78, color:'#f59e0b', note:'PFA Player of Year 25/26 ✅', status:'avail' },
+  { rank:10, flag:'🇪🇸', name:'Mikel Oyarzabal', team:'Spain', club:'Real Sociedad', pos:'FW', goals:18, assists:9, wcGoals:1, odds:'+3300', impliedPct:2.9, impact:75, color:'#8899aa', note:'Reliable if Yamal limited', status:'avail' },
+  { rank:11, flag:'🇸🇳', name:'Sadio Mané', team:'Senegal', club:'Al Nassr', pos:'FW', goals:14, assists:7, wcGoals:0, odds:'+4000', impliedPct:2.4, impact:70, color:'#8899aa', note:'Veteran leadership', status:'avail' },
+  { rank:12, flag:'🇰🇷', name:'Son Heung-min', team:'S. Korea', club:'Tottenham', pos:'FW', goals:19, assists:11, wcGoals:4, odds:'+4000', impliedPct:2.4, impact:72, color:'#8899aa', note:'Korea captain, decisive in big games', status:'avail' },
+];
+
+const topPlayersData = [
+  {
+    rank:1, flag:'🇫🇷', name:'Kylian Mbappé', team:'France', club:'Real Madrid', pos:'FW', age:27,
+    overall:97, form:88, wc_exp:92, physique:85,
+    goals:47, assists:9, wcGoals:12,
+    attrs:['Pace','Finishing','Dribbling','Intelligence'],
+    desc:'Two-time WC participant. 2022 Golden Boot winner (8 goals). France\'s undisputed leader — hamstring fitness is the only concern.',
+    color:'#22c55e', status:'doubt', statusLabel:'Monitored'
+  },
+  {
+    rank:2, flag:'🇦🇷', name:'Lionel Messi', team:'Argentina', club:'Inter Miami', pos:'FW', age:38,
+    overall:96, form:82, wc_exp:99, physique:70,
+    goals:18, assists:16, wcGoals:13,
+    attrs:['Vision','Dribbling','Free Kicks','Leadership'],
+    desc:'Record 26 WC appearances. Last tournament. 2022 World Cup winner + Golden Ball. The greatest of all time, defying age.',
+    color:'#f59e0b', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:3, flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Harry Kane', team:'England', club:'Bayern Munich', pos:'FW', age:32,
+    overall:94, form:90, wc_exp:85, physique:90,
+    goals:22, assists:14, wcGoals:8,
+    attrs:['Finishing','Hold-up Play','Heading','Positioning'],
+    desc:'2018 Golden Boot winner (6 goals). England\'s all-time top scorer. This is his best chance to win a major trophy.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:4, flag:'🇳🇴', name:'Erling Haaland', team:'Norway', club:'Man City', pos:'FW', age:25,
+    overall:95, form:94, wc_exp:40, physique:96,
+    goals:49, assists:9, wcGoals:0,
+    attrs:['Pace','Power','Aerial','Clinical Finishing'],
+    desc:'Norway\'s first WC since 1998. 49 goals in 25/26. Pure goal machine — limited WC experience but overwhelming club form.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:5, flag:'🇧🇷', name:'Vinicius Jr.', team:'Brazil', club:'Real Madrid', pos:'FW', age:25,
+    overall:93, form:88, wc_exp:72, physique:92,
+    goals:22, assists:14, wcGoals:1,
+    attrs:['Pace','Dribbling','Flair','Pressing'],
+    desc:'Now Brazil\'s undisputed #1 after Rodrygo\'s ACL. Pacey and direct — ready to carry the Seleção on his back.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:6, flag:'🇪🇸', name:'Lamine Yamal', team:'Spain', club:'Barcelona', pos:'FW', age:18,
+    overall:92, form:87, wc_exp:60, physique:80,
+    goals:15, assists:18, wcGoals:0,
+    attrs:['Dribbling','Creativity','Vision','Set Pieces'],
+    desc:'Euro 2024 breakout star (17 yrs). Hamstring injury but expected fit. Changes how Spain attack — irreplaceable wide threat.',
+    color:'#f59e0b', status:'doubt', statusLabel:'Monitored'
+  },
+  {
+    rank:7, flag:'🇩🇪', name:'Florian Wirtz', team:'Germany', club:'Liverpool', pos:'AM', age:22,
+    overall:91, form:89, wc_exp:50, physique:82,
+    goals:16, assists:14, wcGoals:0,
+    attrs:['Dribbling','Through Balls','Finishing','Pressing'],
+    desc:'Germany\'s creative heartbeat alongside Musiala. Outstanding 4-3 vs Switzerland. First WC — the most exciting young player in Europe.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:8, flag:'🇯🇵', name:'Jude Bellingham', team:'England', club:'Real Madrid', pos:'CM', age:22,
+    overall:91, form:84, wc_exp:75, physique:90,
+    goals:18, assists:12, wcGoals:3,
+    attrs:['Pressing','Box-to-Box','Headers','Carrying'],
+    desc:'England\'s emotional engine. Can win games like a forward while pressing like a midfielder. Euro 2024 Golden Boot.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:9, flag:'🇵🇹', name:'Bruno Fernandes', team:'Portugal', club:'Man United', pos:'AM', age:31,
+    overall:90, form:92, wc_exp:75, physique:86,
+    goals:14, assists:19, wcGoals:2,
+    attrs:['Passing','Set Pieces','Leadership','Work Rate'],
+    desc:'PFA Player of the Year 2025-26. Portugal\'s captain and creative hub. Relentless creator who elevates team-mates.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:10, flag:'🇪🇸', name:'Pedri', team:'Spain', club:'Barcelona', pos:'CM', age:23,
+    overall:90, form:88, wc_exp:65, physique:80,
+    goals:8, assists:12, wcGoals:0,
+    attrs:['Vision','Passing','Pressing','Ball Control'],
+    desc:'Spain\'s midfield conductor. Gives Spain rhythm and patience. Yamal brings flash — Pedri brings the control.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:11, flag:'🇩🇪', name:'Jamal Musiala', team:'Germany', club:'Bayern Munich', pos:'AM', age:22,
+    overall:90, form:87, wc_exp:65, physique:84,
+    goals:19, assists:15, wcGoals:1,
+    attrs:['Dribbling','Agility','Finishing','Pressing'],
+    desc:'Germany\'s other gem alongside Wirtz. Silky dribbler with clinical edge. Wirtz + Musiala is the most exciting midfield duo in the tournament.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+  {
+    rank:12, flag:'🇦🇷', name:'Julián Álvarez', team:'Argentina', club:'Atlético Madrid', pos:'FW', age:25,
+    overall:89, form:86, wc_exp:78, physique:87,
+    goals:28, assists:11, wcGoals:4,
+    attrs:['Movement','Pressing','Finishing','Work Rate'],
+    desc:'2022 WC semi-final hat-trick hero. High pressing forward, consistently clinical at club level. Argentina\'s unsung danger man.',
+    color:'#22c55e', status:'avail', statusLabel:'Available'
+  },
+];
+
+const byTeamData = [
+  {
+    teamFlag:'🇫🇷', team:'France', group:'I',
+    player:'Kylian Mbappé', playerFlag:'⚽', pos:'FW', age:27,
+    club:'Real Madrid', overall:97,
+    whyKey:'France\'s entire attacking system revolves around Mbappé\'s pace and movement. With Ekitike out, he carries the goal threat.',
+    season:'47G / 9A in 25/26', form:'🟢 Excellent (hamstring monitored)',
+    odds:'+500', attrs:['Pace','Finishing','Dribbling'],
+    impact:95
+  },
+  {
+    teamFlag:'🇪🇸', team:'Spain', group:'H',
+    player:'Lamine Yamal', playerFlag:'🌟', pos:'FW', age:18,
+    club:'Barcelona', overall:92,
+    whyKey:'Yamal changes Spain\'s shape — without him, Spain lose their most direct wide threat. Morata/Oyarzabal fill in but can\'t replicate.',
+    season:'15G / 18A in 25/26', form:'🟡 Monitoring hamstring (expected fit)',
+    odds:'+500', attrs:['Dribbling','Creativity','Vision'],
+    impact:90
+  },
+  {
+    teamFlag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', team:'England', group:'L',
+    player:'Harry Kane', playerFlag:'👑', pos:'FW', age:32,
+    club:'Bayern Munich', overall:94,
+    whyKey:'England\'s record scorer and world\'s most complete #9. With Bellingham feeding him, Kane only needs chances — he doesn\'t miss.',
+    season:'22G / 14A in 25/26', form:'🟢 Fully fit and in top form',
+    odds:'+600', attrs:['Finishing','Hold-up','Heading'],
+    impact:91
+  },
+  {
+    teamFlag:'🇧🇷', team:'Brazil', group:'C',
+    player:'Vinicius Jr.', playerFlag:'🔥', pos:'FW', age:25,
+    club:'Real Madrid', overall:93,
+    whyKey:'Post-Rodrygo injury, Vini is Brazil\'s sole elite wide attacker. His pace creates chances even against deep defenses.',
+    season:'22G / 14A in 25/26', form:'🟢 Fully fit — motivated for redemption',
+    odds:'+800', attrs:['Pace','Dribbling','Flair'],
+    impact:91
+  },
+  {
+    teamFlag:'🇦🇷', team:'Argentina', group:'J',
+    player:'Lionel Messi', playerFlag:'🐐', pos:'FW', age:38,
+    club:'Inter Miami', overall:96,
+    whyKey:'Reigning champions. Messi\'s final WC — legendary motivation. Still the best decision-maker in world football.',
+    season:'18G / 16A in 25/26', form:'🟢 Fit and sharp',
+    odds:'+850', attrs:['Vision','Free Kicks','Leadership'],
+    impact:89
+  },
+  {
+    teamFlag:'🇩🇪', team:'Germany', group:'E',
+    player:'Florian Wirtz', playerFlag:'✨', pos:'AM', age:22,
+    club:'Liverpool', overall:91,
+    whyKey:'Germany\'s creative centre after Gnabry\'s injury. Outstanding pre-tournament form. Germany go as far as Wirtz takes them.',
+    season:'16G / 14A in 25/26', form:'🟢 Excellent form',
+    odds:'+1400', attrs:['Dribbling','Passing','Finishing'],
+    impact:87
+  },
+  {
+    teamFlag:'🇵🇹', team:'Portugal', group:'K',
+    player:'Bruno Fernandes', playerFlag:'🎯', pos:'AM', age:31,
+    club:'Man United', overall:90,
+    whyKey:'Portugal\'s captain and heartbeat. PFA Player of the Year 25/26. Without him, Portugal have no creative playmaker.',
+    season:'14G / 19A in 25/26', form:'🟢 Best form of career',
+    odds:'+1600', attrs:['Passing','Set Pieces','Workrate'],
+    impact:85
+  },
+  {
+    teamFlag:'🇳🇱', team:'Netherlands', group:'F',
+    player:'Memphis Depay', playerFlag:'⚡', pos:'FW', age:31,
+    club:'Atlético Madrid', overall:86,
+    whyKey:'With Xavi Simons out (ACL), Depay becomes the focal point of the Dutch attack. Leadership and experience in big games.',
+    season:'13G / 8A in 25/26', form:'🟡 Fit but squad weakened',
+    odds:'+2200', attrs:['Dribbling','Finishing','Leadership'],
+    impact:74
+  },
+  {
+    teamFlag:'🇲🇦', team:'Morocco', group:'C',
+    player:'Achraf Hakimi', playerFlag:'🛡️', pos:'RB', age:27,
+    club:'PSG', overall:89,
+    whyKey:'Morocco\'s 2022 defensive hero returns. Hakimi\'s attacking runs from right-back provide Morocco\'s main creative outlet.',
+    season:'6G / 11A in 25/26', form:'🟢 Excellent form at PSG',
+    odds:'+2800', attrs:['Pace','Crossing','Defending'],
+    impact:83
+  },
+  {
+    teamFlag:'🇺🇸', team:'USA', group:'D',
+    player:'Christian Pulisic', playerFlag:'🦅', pos:'FW', age:27,
+    club:'AC Milan', overall:85,
+    whyKey:'The USMNT\'s most experienced international scorer and the player the home crowd worships. Drives the team\'s attacking play.',
+    season:'12G / 10A in 25/26', form:'🟢 Consistent at Milan',
+    odds:'host', attrs:['Dribbling','Pace','Set Pieces'],
+    impact:82
+  },
+];
+
+const breakoutData = [
+  {
+    flag:'🇪🇸', name:'Lamine Yamal', age:18, team:'Spain', club:'Barcelona',
+    icon:'🌟', pos:'RW',
+    desc:'At just 18, Yamal was the star of Euro 2024. His combination of pace, dribbling and creative vision is unlike anything seen at this age. Could announce himself as the world\'s best player.',
+    season:'15G / 18A', potential:98, hype:'🔥 Extreme', value:'+1400 (Boot)'
+  },
+  {
+    flag:'🇩🇪', name:'Florian Wirtz', age:22, team:'Germany', club:'Liverpool',
+    icon:'✨', pos:'AM',
+    desc:'First World Cup after explosive 2025-26 at Liverpool. Germany\'s creative heart — his combination play with Musiala could be the tournament\'s most thrilling partnership.',
+    season:'16G / 14A', potential:95, hype:'🔥 Very High', value:'Great value at +2000 (Boot)'
+  },
+  {
+    flag:'🇩🇪', name:'Jamal Musiala', age:22, team:'Germany', club:'Bayern Munich',
+    icon:'⚡', pos:'AM',
+    desc:'Silky technical ability and fearless in tight spaces. Musiala is one of the hardest players to defend in the world. His first true WC moment awaits.',
+    season:'19G / 15A', potential:94, hype:'🔥 Very High', value:'Germany dark horse material'
+  },
+  {
+    flag:'🇦🇷', name:'Julián Álvarez', age:25, team:'Argentina', club:'Atlético Madrid',
+    icon:'💥', pos:'FW',
+    desc:'Already a WC hero (2022 semi-final hat-trick) but still maturing. 28 goals in 25/26. His high press and link-up with Messi is Argentina\'s secret weapon.',
+    season:'28G / 11A', potential:92, hype:'🔥 High', value:'Underrated at +1600 (Boot)'
+  },
+  {
+    flag:'🇫🇷', name:'Michael Olise', age:23, team:'France', club:'Bayern Munich',
+    icon:'🎨', pos:'RW',
+    desc:'Sensational 25/26 at Bayern — Ballon d\'Or level performances. Left-footed winger with incredible technique. Could emerge as France\'s #2 threat behind Mbappé.',
+    season:'21G / 14A', potential:91, hype:'📈 Rising', value:'Long shot at +8000 (Boot)'
+  },
+  {
+    flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Cole Palmer', age:23, team:'England', club:'Chelsea',
+    icon:'🎯', pos:'AM',
+    desc:'Chelsea\'s creative genius — composed under pressure with incredible dribbling and finishing. England\'s midfield wildcard who can unlock any defense.',
+    season:'18G / 16A', potential:90, hype:'📈 Rising', value:'England WC hopeful'
+  },
+  {
+    flag:'🇳🇴', name:'Erling Haaland', age:25, team:'Norway', club:'Man City',
+    icon:'🚀', pos:'FW',
+    desc:'First World Cup for the most prolific scorer on the planet. 49 goals in 25/26. The question is whether Norway can survive long enough for him to make history.',
+    season:'49G / 9A', potential:96, hype:'🔥 Extreme', value:'Golden Boot +800 — potential value'
+  },
+  {
+    flag:'🇲🇦', name:'Sofiane Boufal', age:31, team:'Morocco', club:'Southampton',
+    icon:'💫', pos:'LW',
+    desc:'Morocco\'s creative spark. His unpredictability and pace from wide areas make Morocco a genuine danger in every match. The Atlas Lions\' match-winner.',
+    season:'9G / 11A', potential:82, hype:'📈 Steady', value:'Morocco dark horse'
+  },
+];
+
+// ── PLAYER RENDERERS ──
+
+function showPlayerView(view, btn) {
+  document.querySelectorAll('#playerSubTabs .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-golden').style.display = view==='golden' ? 'block' : 'none';
+  document.getElementById('view-top').style.display = view==='top' ? 'block' : 'none';
+  document.getElementById('view-byteam').style.display = view==='byteam' ? 'block' : 'none';
+  document.getElementById('view-breakout').style.display = view==='breakout' ? 'block' : 'none';
+}
+
+function renderGoldenBoot() {
+  // Table
+  const tbody = document.getElementById('goldenBootBody');
+  tbody.innerHTML = goldenBootData.map(p => `
+    <tr>
+      <td><strong style="color:var(--gold)">#${p.rank}</strong></td>
+      <td><span style="font-size:1.1rem">${p.flag}</span> <strong style="margin-left:6px">${p.name}</strong>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:1px">${p.note}</div>
+      </td>
+      <td>${p.team}</td>
+      <td style="color:var(--muted);font-size:0.82rem">${p.club}</td>
+      <td><span style="background:rgba(59,130,246,0.15);color:var(--blue);padding:2px 6px;border-radius:6px;font-size:0.72rem">${p.pos}</span></td>
+      <td><strong style="color:var(--green);font-size:1rem">${p.goals}</strong></td>
+      <td style="color:var(--teal)">${p.assists}</td>
+      <td><span style="color:var(--gold);font-weight:700">${p.wcGoals}</span></td>
+      <td><strong style="color:var(--gold)">${p.odds}</strong></td>
+      <td>
+        <span style="font-weight:700">${p.impliedPct}%</span>
+        <div style="height:4px;background:var(--border);border-radius:4px;margin-top:3px;overflow:hidden">
+          <div style="width:${p.impliedPct*5}%;height:100%;background:${p.color};border-radius:4px"></div>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:6px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="width:${p.impact}%;height:100%;background:${p.color};border-radius:4px"></div>
+          </div>
+          <span style="font-size:0.78rem;font-weight:700;color:${p.color}">${p.impact}</span>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  // Bar chart
+  const chart = document.getElementById('bootChart');
+  const max = goldenBootData[2].goals; // Haaland as max
+  chart.innerHTML = goldenBootData.map(p => `
+    <div class="boot-row">
+      <div class="boot-player">
+        <span>${p.flag}</span>
+        <span style="font-size:0.8rem;font-weight:600">${p.name.split(' ').pop()}</span>
+      </div>
+      <div class="boot-bar-wrap">
+        <div class="boot-bar-fill" style="width:${(p.goals/max)*100}%;background:${p.color}">
+          ${p.goals} goals, ${p.assists} ast
+        </div>
+      </div>
+      <div class="boot-odds">${p.odds}</div>
+    </div>
+  `).join('');
+}
+
+function renderTopPlayers() {
+  const grid = document.getElementById('topPlayersGrid');
+  grid.innerHTML = topPlayersData.map(p => `
+    <div class="player-card">
+      <div class="player-card-header">
+        <div class="player-avatar">${p.flag}</div>
+        <div class="player-info">
+          <h4>${p.name}</h4>
+          <div class="meta">${p.team} · ${p.club} · ${p.pos} · Age ${p.age}</div>
+          <div style="margin-top:4px">
+            <span class="conf-badge ${p.status==='avail'?'conf-high':p.status==='doubt'?'conf-med':'conf-low'}" style="font-size:0.68rem">
+              ${p.status==='avail'?'✅ Fit':p.status==='doubt'?'⚠️ Monitored':'❌ Out'}
+            </span>
+          </div>
+        </div>
+        <div class="player-rank-badge">#${p.rank}</div>
+      </div>
+      <div class="player-stats-row">
+        <div class="player-stat">
+          <div class="val" style="color:var(--green)">${p.goals}</div>
+          <div class="lbl">Goals</div>
+        </div>
+        <div class="player-stat">
+          <div class="val" style="color:var(--teal)">${p.assists}</div>
+          <div class="lbl">Assists</div>
+        </div>
+        <div class="player-stat">
+          <div class="val" style="color:var(--gold)">${p.wcGoals}</div>
+          <div class="lbl">WC Goals</div>
+        </div>
+        <div class="player-stat">
+          <div class="val" style="color:var(--purple)">${p.overall}</div>
+          <div class="lbl">Rating</div>
+        </div>
+      </div>
+      <div class="player-card-body">
+        <div class="rating-row">
+          <span class="rating-label">Overall Form</span>
+          <div class="rating-bar"><div class="rating-fill" style="width:${p.form}%;background:var(--green)"></div></div>
+          <span class="rating-val" style="color:var(--green)">${p.form}</span>
+        </div>
+        <div class="rating-row">
+          <span class="rating-label">WC Experience</span>
+          <div class="rating-bar"><div class="rating-fill" style="width:${p.wc_exp}%;background:var(--blue)"></div></div>
+          <span class="rating-val" style="color:var(--blue)">${p.wc_exp}</span>
+        </div>
+        <div class="rating-row">
+          <span class="rating-label">Physicality</span>
+          <div class="rating-bar"><div class="rating-fill" style="width:${p.physique}%;background:var(--yellow)"></div></div>
+          <span class="rating-val" style="color:var(--yellow)">${p.physique}</span>
+        </div>
+        <div style="margin-top:10px;font-size:0.78rem;color:var(--muted);line-height:1.55">${p.desc}</div>
+        <div style="margin-top:10px">${p.attrs.map(a=>`<span class="attr-tag">${a}</span>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderByTeam() {
+  const grid = document.getElementById('byTeamGrid');
+  grid.innerHTML = byTeamData.map(p => `
+    <div class="team-player-card">
+      <div class="team-player-header">
+        <div class="team-flag-big">${p.teamFlag}</div>
+        <div>
+          <div style="font-weight:800;font-size:1rem">${p.team}</div>
+          <div style="color:var(--muted);font-size:0.75rem">Group ${p.group} · Key Player</div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div style="color:var(--gold);font-weight:700;font-size:0.88rem">${p.odds}</div>
+          <div style="font-size:0.68rem;color:var(--muted)">WC Odds</div>
+        </div>
+      </div>
+      <div class="team-player-body">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="font-size:1.6rem">${p.playerFlag}</span>
+          <div>
+            <div style="font-weight:800;font-size:1rem">${p.player}</div>
+            <div style="font-size:0.75rem;color:var(--muted)">${p.club} · ${p.pos} · Age ${p.age}</div>
+          </div>
+          <div style="margin-left:auto">
+            <div style="font-size:1.4rem;font-weight:900;color:var(--purple)">${p.overall}</div>
+            <div style="font-size:0.62rem;color:var(--muted);text-align:center">Rating</div>
+          </div>
+        </div>
+
+        <div style="font-size:0.75rem;margin-bottom:8px">
+          <span style="color:var(--muted)">Season: </span><strong>${p.season}</strong>
+          <span style="margin-left:10px">${p.form}</span>
+        </div>
+
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.55;margin-bottom:10px">${p.whyKey}</div>
+
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="font-size:0.72rem;color:var(--muted)">Tournament Impact:</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="width:${p.impact}%;height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold));border-radius:4px"></div>
+          </div>
+          <span style="font-size:0.78rem;font-weight:700;color:var(--gold)">${p.impact}/100</span>
+        </div>
+
+        <div>${p.attrs.map(a=>`<span class="attr-tag">${a}</span>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBreakout() {
+  const grid = document.getElementById('breakoutGrid');
+  grid.innerHTML = breakoutData.map(p => `
+    <div class="player-card">
+      <div class="player-card-header">
+        <div class="player-avatar">${p.icon} ${p.flag}</div>
+        <div class="player-info">
+          <h4>${p.name}</h4>
+          <div class="meta">${p.team} · ${p.club} · ${p.pos} · Age ${p.age}</div>
+        </div>
+        <div style="position:absolute;top:10px;right:12px;background:rgba(168,85,247,0.2);border:1px solid rgba(168,85,247,0.4);color:#c084fc;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700">${p.hype}</div>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="display:flex;gap:12px;margin-bottom:12px">
+          <div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px 12px;flex:1">
+            <div style="font-size:1.2rem;font-weight:900;color:var(--green)">${p.season.split('/')[0]}</div>
+            <div style="font-size:0.62rem;color:var(--muted)">GOALS</div>
+          </div>
+          <div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px 12px;flex:1">
+            <div style="font-size:1.2rem;font-weight:900;color:var(--teal)">${p.season.split('/')[1]}</div>
+            <div style="font-size:0.62rem;color:var(--muted)">ASSISTS</div>
+          </div>
+          <div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px 12px;flex:1">
+            <div style="font-size:1.2rem;font-weight:900;color:var(--purple)">${p.potential}</div>
+            <div style="font-size:0.62rem;color:var(--muted)">POTENTIAL</div>
+          </div>
+        </div>
+        <div style="font-size:0.79rem;color:var(--muted);line-height:1.55;margin-bottom:10px">${p.desc}</div>
+        <div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.18);border-radius:8px;padding:8px 10px;font-size:0.75rem;color:var(--gold)">
+          💰 ${p.value}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// BETTING DATA
+// ══════════════════════════════════════════
+
+const matchLines = [
+  { date:'Jun 11', home:'🇲🇽 Mexico', away:'🇿🇦 S. Africa', group:'A',
+    homeML:-220, draw:+320, awayML:+580,
+    ou:2.5, ouDir:'Over -110', btts:'No -140',
+    modelHome:62, modelDraw:22, modelAway:16,
+    pick:'Mexico ML', pickConf:'high' },
+  { date:'Jun 11', home:'🇰🇷 S. Korea', away:'🇨🇿 Czechia', group:'A',
+    homeML:+130, draw:+230, awayML:+200,
+    ou:2.5, ouDir:'Under -115', btts:'Yes +110',
+    modelHome:36, modelDraw:32, modelAway:32,
+    pick:'Draw', pickConf:'med' },
+  { date:'Jun 12', home:'🇨🇦 Canada', away:'🇧🇦 Bosnia', group:'B',
+    homeML:+115, draw:+240, awayML:+230,
+    ou:2.5, ouDir:'Under -120', btts:'No -130',
+    modelHome:42, modelDraw:28, modelAway:30,
+    pick:'Canada ML (if Davies fit)', pickConf:'low' },
+  { date:'Jun 12', home:'🇺🇸 USA', away:'🇵🇾 Paraguay', group:'D',
+    homeML:-175, draw:+290, awayML:+450,
+    ou:2.5, ouDir:'Over -105', btts:'No -125',
+    modelHome:52, modelDraw:24, modelAway:24,
+    pick:'USA ML', pickConf:'med' },
+  { date:'Jun 13', home:'🇶🇦 Qatar', away:'🇨🇭 Switzerland', group:'B',
+    homeML:+380, draw:+280, awayML:-155,
+    ou:2.5, ouDir:'Over -115', btts:'No -140',
+    modelHome:18, modelDraw:28, modelAway:54,
+    pick:'Switzerland ML', pickConf:'high' },
+  { date:'Jun 13', home:'🇧🇷 Brazil', away:'🇲🇦 Morocco', group:'C',
+    homeML:-280, draw:+360, awayML:+750,
+    ou:2.5, ouDir:'Over -130', btts:'No -150',
+    modelHome:68, modelDraw:18, modelAway:14,
+    pick:'Brazil ML', pickConf:'high' },
+  { date:'Jun 13', home:'🇭🇹 Haiti', away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland', group:'C',
+    homeML:+650, draw:+350, awayML:-140,
+    ou:2.5, ouDir:'Over -125', btts:'No -160',
+    modelHome:14, modelDraw:22, modelAway:64,
+    pick:'Scotland ML', pickConf:'high' },
+  { date:'Jun 14', home:'🇩🇪 Germany', away:'🇨🇼 Curaçao', group:'E',
+    homeML:-900, draw:+1200, awayML:+2200,
+    ou:3.5, ouDir:'Over -140', btts:'No -200',
+    modelHome:88, modelDraw:8, modelAway:4,
+    pick:'Germany -2.5 handicap', pickConf:'high' },
+  { date:'Jun 15', home:'🇪🇸 Spain', away:'🇨🇻 Cape Verde', group:'H',
+    homeML:-1000, draw:+1400, awayML:+2500,
+    ou:3.5, ouDir:'Over -145', btts:'No -210',
+    modelHome:91, modelDraw:6, modelAway:3,
+    pick:'Spain ML + Over 2.5', pickConf:'high' },
+  { date:'Jun 15', home:'🇫🇷 France', away:'🇮🇶 Iraq', group:'I',
+    homeML:-900, draw:+1200, awayML:+2400,
+    ou:3.5, ouDir:'Over -150', btts:'No -180',
+    modelHome:89, modelDraw:7, modelAway:4,
+    pick:'France ML + Clean Sheet', pickConf:'high' },
+  { date:'Jun 16', home:'🇦🇷 Argentina', away:'🇯🇴 Jordan', group:'J',
+    homeML:-850, draw:+1100, awayML:+2200,
+    ou:3.5, ouDir:'Over -135', btts:'No -195',
+    modelHome:87, modelDraw:9, modelAway:4,
+    pick:'Argentina -2.5 handicap', pickConf:'high' },
+  { date:'Jun 16', home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', away:'🇵🇦 Panama', group:'L',
+    homeML:-900, draw:+1200, awayML:+2500,
+    ou:3.5, ouDir:'Over -155', btts:'No -210',
+    modelHome:90, modelDraw:7, modelAway:3,
+    pick:'England ML + Over 3.5', pickConf:'high' },
+];
+
+// bookmaker comparison per match
+const bookCompData = [
+  { // Mexico vs South Africa
+    match:'🇲🇽 Mexico vs 🇿🇦 South Africa', books:[
+      { name:'DraftKings', home:-225, draw:+320, away:+590 },
+      { name:'FanDuel',    home:-220, draw:+310, away:+570 },
+      { name:'BetMGM',     home:-215, draw:+325, away:+600 },
+      { name:'Caesars',    home:-230, draw:+315, away:+580 },
+      { name:'Bet365',     home:-210, draw:+330, away:+610 },
+      { name:'Fanatics',   home:-220, draw:+310, away:+560 },
+    ]
+  },
+  { // Brazil vs Morocco
+    match:'🇧🇷 Brazil vs 🇲🇦 Morocco', books:[
+      { name:'DraftKings', home:-285, draw:+360, away:+760 },
+      { name:'FanDuel',    home:-280, draw:+355, away:+750 },
+      { name:'BetMGM',     home:-275, draw:+370, away:+780 },
+      { name:'Caesars',    home:-290, draw:+350, away:+740 },
+      { name:'Bet365',     home:-270, draw:+380, away:+800 },
+      { name:'Fanatics',   home:-280, draw:+360, away:+755 },
+    ]
+  },
+  { // USA vs Paraguay
+    match:'🇺🇸 USA vs 🇵🇾 Paraguay', books:[
+      { name:'DraftKings', home:-180, draw:+290, away:+460 },
+      { name:'FanDuel',    home:-175, draw:+285, away:+450 },
+      { name:'BetMGM',     home:-170, draw:+295, away:+470 },
+      { name:'Caesars',    home:-185, draw:+288, away:+455 },
+      { name:'Bet365',     home:-165, draw:+300, away:+480 },
+      { name:'Fanatics',   home:-175, draw:+285, away:+460 },
+    ]
+  },
+  { // England vs Panama
+    match:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇵🇦 Panama', books:[
+      { name:'DraftKings', home:-900, draw:+1200, away:+2500 },
+      { name:'FanDuel',    home:-880, draw:+1180, away:+2400 },
+      { name:'BetMGM',     home:-950, draw:+1250, away:+2600 },
+      { name:'Caesars',    home:-900, draw:+1200, away:+2500 },
+      { name:'Bet365',     home:-850, draw:+1300, away:+2800 },
+      { name:'Fanatics',   home:-920, draw:+1220, away:+2450 },
+    ]
+  },
+  { // France vs Iraq
+    match:'🇫🇷 France vs 🇮🇶 Iraq', books:[
+      { name:'DraftKings', home:-920, draw:+1200, away:+2450 },
+      { name:'FanDuel',    home:-900, draw:+1180, away:+2400 },
+      { name:'BetMGM',     home:-950, draw:+1250, away:+2500 },
+      { name:'Caesars',    home:-910, draw:+1210, away:+2420 },
+      { name:'Bet365',     home:-870, draw:+1280, draw2:null, away:+2600 },
+      { name:'Fanatics',   home:-900, draw:+1200, away:+2430 },
+    ]
+  },
+  { // Spain vs Cape Verde
+    match:'🇪🇸 Spain vs 🇨🇻 Cape Verde', books:[
+      { name:'DraftKings', home:-1000, draw:+1400, away:+2600 },
+      { name:'FanDuel',    home:-980,  draw:+1380, away:+2550 },
+      { name:'BetMGM',     home:-1050, draw:+1450, away:+2700 },
+      { name:'Caesars',    home:-1000, draw:+1400, away:+2600 },
+      { name:'Bet365',     home:-950,  draw:+1500, away:+2800 },
+      { name:'Fanatics',   home:-990,  draw:+1390, away:+2570 },
+    ]
+  },
+  { // Argentina vs Jordan
+    match:'🇦🇷 Argentina vs 🇯🇴 Jordan', books:[
+      { name:'DraftKings', home:-860, draw:+1100, away:+2200 },
+      { name:'FanDuel',    home:-850, draw:+1090, away:+2180 },
+      { name:'BetMGM',     home:-900, draw:+1150, away:+2300 },
+      { name:'Caesars',    home:-850, draw:+1100, away:+2200 },
+      { name:'Bet365',     home:-800, draw:+1200, away:+2400 },
+      { name:'Fanatics',   home:-840, draw:+1080, away:+2150 },
+    ]
+  },
+  { // Germany vs Curaçao
+    match:'🇩🇪 Germany vs 🇨🇼 Curaçao', books:[
+      { name:'DraftKings', home:-900, draw:+1200, away:+2200 },
+      { name:'FanDuel',    home:-880, draw:+1180, away:+2180 },
+      { name:'BetMGM',     home:-950, draw:+1250, away:+2300 },
+      { name:'Caesars',    home:-900, draw:+1200, away:+2200 },
+      { name:'Bet365',     home:-850, draw:+1300, away:+2400 },
+      { name:'Fanatics',   home:-920, draw:+1220, away:+2200 },
+    ]
+  },
+];
+
+const valueBets = [
+  { match:'🇦🇷 Argentina vs 🇯🇴 Jordan', bet:'Argentina -2.5 Handicap', bookOdds:'-115', modelProb:78, impliedProb:53.5, gap:24.5, ev:'+17.2%', verdict:'🔥 High Value', confidence:'high', tip:'Argentina historically hammer minnows — 2022 champs with full squad.' },
+  { match:'🇫🇷 France vs 🇮🇶 Iraq', bet:'France Clean Sheet', bookOdds:'-145', modelProb:72, impliedProb:59.2, gap:12.8, ev:'+7.8%', verdict:'✅ Good Value', confidence:'high', tip:'France conceded 0 in 4 of last 6 matches vs lower-ranked teams.' },
+  { match:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇵🇦 Panama', bet:'Over 3.5 Goals', bookOdds:'+105', modelProb:64, impliedProb:48.8, gap:15.2, ev:'+15.5%', verdict:'🔥 High Value', confidence:'high', tip:'England scored 6-1 vs Panama at WC2018. Expect goals.' },
+  { match:'🇧🇷 Brazil vs 🇲🇦 Morocco', bet:'Brazil Win & Over 1.5', bookOdds:'+115', modelProb:62, impliedProb:46.5, gap:15.5, ev:'+17.8%', verdict:'🔥 High Value', confidence:'high', tip:'Brazil score in every tournament game. Morocco resilient but outgunned.' },
+  { match:'🇺🇸 USA vs 🇵🇾 Paraguay', bet:'USA ML', bookOdds:'-175', modelProb:52, impliedProb:63.6, gap:-11.6, ev:'-7.3%', verdict:'⛔ No Value', confidence:'low', tip:'Market overrates USA host advantage. Paraguay dangerous — avoid at these odds.' },
+  { match:'🇨🇦 Canada vs 🇧🇦 Bosnia', bet:'Bosnia +0.5 AH', bookOdds:'+115', modelProb:58, impliedProb:46.5, gap:11.5, ev:'+13.2%', verdict:'✅ Good Value', confidence:'med', tip:'With Davies doubtful, Bosnia cover is compelling. Canada attack blunted.' },
+  { match:'🇰🇷 S. Korea vs 🇨🇿 Czechia', bet:'Draw', bookOdds:'+230', modelProb:32, impliedProb:30.3, gap:1.7, ev:'+0.6%', verdict:'⚖️ Marginal', confidence:'low', tip:'Evenly matched — draw has slight model value but not strongly recommended.' },
+  { match:'🇩🇪 Germany vs 🇨🇼 Curaçao', bet:'Germany -3.5 Handicap', bookOdds:'+150', modelProb:62, impliedProb:40.0, gap:22.0, ev:'+33%', verdict:'🔥 High Value', confidence:'high', tip:'Curaçao ranked #80. Germany expected to win comfortably and cover big.' },
+];
+
+const bettingAPIs = [
+  {
+    name:'The Odds API', url:'https://the-odds-api.com', tier:'FREE (500 req/month)',
+    icon:'⚡', coverage:'50+ bookmakers, all major markets, World Cup included',
+    highlights:['DraftKings, FanDuel, BetMGM, Bet365 data','3-way moneylines, spreads, totals','American/Decimal/Fractional formats','Simple REST API — 1 endpoint'],
+    code: `GET https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/odds/\n  ?apiKey=YOUR_KEY\n  &regions=us\n  &markets=h2h,totals\n  &oddsFormat=american`,
+    color:'#22c55e'
+  },
+  {
+    name:'API-Football (RapidAPI)', url:'https://www.api-football.com', tier:'FREE (100 req/day)',
+    icon:'⚽', coverage:'Full match data + odds from 50+ bookmakers',
+    highlights:['Fixtures, lineups, stats + odds','Live in-play odds','1X2, Asian Handicap, BTTS markets','Deep historical data back to 2008'],
+    code: `GET https://v3.football.api-sports.io/odds\n  ?fixture=FIXTURE_ID\n  &bookmaker=6   // 6 = Bet365\n  &bet=1         // 1 = Match Winner`,
+    color:'#3b82f6'
+  },
+  {
+    name:'Sportmonks WC API', url:'https://www.sportmonks.com', tier:'PAID (from $9/mo)',
+    icon:'📊', coverage:'50+ bookmakers, AI predictions, xG, Pressure Index',
+    highlights:['Real-time xG + odds in one feed','AI-powered match predictions','150+ betting markets per game','Player-level betting props'],
+    code: `GET https://api.sportmonks.com/v3/football\n  /odds/pre-match/fixtures/FIXTURE_ID\n  ?api_token=YOUR_TOKEN\n  &include=bookmaker;market`,
+    color:'#a855f7'
+  },
+  {
+    name:'BALLDONTLIE FIFA API', url:'https://fifa.balldontlie.io', tier:'FREE (with key)',
+    icon:'🆓', coverage:'WC 2018/2022/2026 data + moneyline odds',
+    highlights:['Completely free to start','Moneyline odds per match','Player & team stats bundled','Simple JSON responses'],
+    code: `GET https://api.balldontlie.io/fifa/v1/matches\n  ?season=2026\n  &with_odds=true\n  Authorization: Bearer YOUR_KEY`,
+    color:'#14b8a6'
+  },
+];
+
+// ── BETTING RENDERERS ──
+
+function showBettingView(view, btn) {
+  document.querySelectorAll('#bettingSubTabs .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-matchlines').style.display = view==='matchlines' ? 'block' : 'none';
+  document.getElementById('view-bookcomp').style.display = view==='bookcomp' ? 'block' : 'none';
+  document.getElementById('view-value').style.display = view==='value' ? 'block' : 'none';
+  document.getElementById('view-apisetup').style.display = view==='apisetup' ? 'block' : 'none';
+}
+
+function mlToImplied(ml) {
+  if (ml > 0) return (100 / (ml + 100) * 100).toFixed(1);
+  return (Math.abs(ml) / (Math.abs(ml) + 100) * 100).toFixed(1);
+}
+
+function formatML(ml) {
+  return ml > 0 ? `<span style="color:var(--green)">+${ml}</span>` : `<span style="color:var(--red)">${ml}</span>`;
+}
+
+function renderMatchLines() {
+  const tbody = document.getElementById('matchLinesBody');
+  tbody.innerHTML = matchLines.map(m => {
+    const cc = m.pickConf==='high'?'conf-high':m.pickConf==='med'?'conf-med':'conf-low';
+    return `<tr>
+      <td style="color:var(--gold);font-size:0.8rem;font-weight:700">${m.date}</td>
+      <td><strong>${m.home}</strong> <span style="color:var(--muted)">vs</span> <strong>${m.away}</strong></td>
+      <td><span class="match-group">Grp ${m.group}</span></td>
+      <td>${formatML(m.homeML)}<div style="font-size:0.65rem;color:var(--muted)">${mlToImplied(m.homeML)}% impl.</div></td>
+      <td>${formatML(m.draw)}<div style="font-size:0.65rem;color:var(--muted)">${mlToImplied(m.draw)}% impl.</div></td>
+      <td>${formatML(m.awayML)}<div style="font-size:0.65rem;color:var(--muted)">${mlToImplied(m.awayML)}% impl.</div></td>
+      <td style="font-size:0.82rem">${m.ou} ${m.ouDir}</td>
+      <td style="font-size:0.82rem">${m.btts}</td>
+      <td><span class="conf-badge ${cc}" style="font-size:0.7rem">${m.pick}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Gap chart
+  const gc = document.getElementById('gapChart');
+  gc.innerHTML = matchLines.slice(0,8).map(m => {
+    const homeImpl = parseFloat(mlToImplied(m.homeML));
+    const gap = m.modelHome - homeImpl;
+    const gapColor = gap > 5 ? '#22c55e' : gap < -5 ? '#ef4444' : '#f59e0b';
+    const barW = Math.abs(gap) * 3;
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:200px;font-size:0.78rem;flex-shrink:0">${m.home.split(' ')[0]} ${m.home.split(' ')[1]} Win</div>
+      <div style="flex:1;height:16px;background:var(--border);border-radius:4px;overflow:hidden;position:relative">
+        <div style="height:100%;width:${Math.min(barW,100)}%;background:${gapColor};border-radius:4px;display:flex;align-items:center;padding-left:6px">
+          <span style="font-size:0.68rem;font-weight:700;color:#000">${gap>0?'+':''}${gap.toFixed(1)}%</span>
+        </div>
+      </div>
+      <div style="width:120px;font-size:0.72rem;color:${gapColor};font-weight:700">${gap>5?'✅ Value':gap<-5?'⛔ Avoid':'⚖️ Fair'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderBookComp() {
+  const idx = parseInt(document.getElementById('matchSelector').value);
+  const data = bookCompData[idx];
+  const books = data.books;
+
+  // Find best odds for each outcome
+  const bestHome = Math.max(...books.map(b=>b.home));
+  const bestDraw = Math.max(...books.map(b=>b.draw));
+  const bestAway = Math.max(...books.map(b=>b.away));
+
+  const tbl = document.getElementById('bookCompTable');
+  tbl.innerHTML = `
+    <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:var(--gold)">${data.match}</div>
+    <div style="overflow-x:auto">
+    <table class="odds-table" style="min-width:500px">
+      <thead><tr><th>Bookmaker</th><th>Home Win</th><th>Draw</th><th>Away Win</th><th>Best Line?</th></tr></thead>
+      <tbody>
+        ${books.map(b => {
+          const isH = b.home===bestHome, isD = b.draw===bestDraw, isA = b.away===bestAway;
+          const best = (isH||isD||isA);
+          return `<tr ${best?'style="background:rgba(34,197,94,0.05)"':''}>
+            <td><strong>${b.name}</strong></td>
+            <td style="${isH?'color:var(--green);font-weight:900':''}">${b.home>0?'+':''}${b.home}</td>
+            <td style="${isD?'color:var(--green);font-weight:900':''}">${b.draw>0?'+':''}${b.draw}</td>
+            <td style="${isA?'color:var(--green);font-weight:900':''}">${b.away>0?'+':''}${b.away}</td>
+            <td>${isH?'<span style="color:var(--green)">✅ Home</span>':''}${isD?' <span style="color:var(--green)">✅ Draw</span>':''}${isA?' <span style="color:var(--green)">✅ Away</span>':''}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    </div>
+    <div style="margin-top:12px;font-size:0.78rem;color:var(--muted);background:rgba(255,215,0,0.06);border-radius:8px;padding:10px 12px">
+      💡 <strong style="color:var(--gold)">Line Shopping Tip:</strong> Always bet at the book offering the best odds for your chosen outcome. Even +10 difference adds up significantly over a tournament.
+    </div>`;
+}
+
+function renderValueBets() {
+  const grid = document.getElementById('valueBetsGrid');
+  grid.innerHTML = valueBets.map(v => {
+    const cc = v.confidence==='high'?'conf-high':v.confidence==='med'?'conf-med':'conf-low';
+    const evColor = parseFloat(v.ev)>10?'#22c55e':parseFloat(v.ev)>0?'#f59e0b':'#ef4444';
+    return `<div class="match-card" style="margin-bottom:0">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);background:linear-gradient(90deg,#0f1829,#1a1040)">
+        <div style="font-weight:700;font-size:0.9rem">${v.match}</div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-top:2px">Bet: <strong style="color:var(--gold)">${v.bet}</strong> @ <strong style="color:var(--green)">${v.bookOdds}</strong></div>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+          <div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px">
+            <div style="font-size:1.1rem;font-weight:900;color:var(--blue)">${v.modelProb}%</div>
+            <div style="font-size:0.62rem;color:var(--muted)">MODEL PROB</div>
+          </div>
+          <div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px">
+            <div style="font-size:1.1rem;font-weight:900;color:var(--muted)">${v.impliedProb}%</div>
+            <div style="font-size:0.62rem;color:var(--muted)">BOOK IMPLIED</div>
+          </div>
+          <div style="text-align:center;background:var(--card2);border-radius:8px;padding:8px">
+            <div style="font-size:1.1rem;font-weight:900;color:${evColor}">${v.ev}</div>
+            <div style="font-size:0.62rem;color:var(--muted)">EXP. VALUE</div>
+          </div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px">${v.tip}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="conf-badge ${cc}">${v.verdict}</span>
+          <span style="font-size:0.72rem;color:var(--muted)">Gap: <strong style="color:${evColor}">${v.gap>0?'+':''}${v.gap}%</strong></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAPICards() {
+  const grid = document.getElementById('apiCardsGrid');
+  grid.innerHTML = bettingAPIs.map(api => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <div style="background:linear-gradient(90deg,#0f1829,#1a1040);padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.5rem">${api.icon}</span>
+        <div>
+          <div style="font-weight:800;font-size:0.95rem">${api.name}</div>
+          <span style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:${api.color};padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700">${api.tier}</span>
+        </div>
+        <a href="${api.url}" target="_blank" style="margin-left:auto;color:var(--gold);font-size:0.75rem;text-decoration:none">Visit →</a>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:10px">${api.coverage}</div>
+        <div style="margin-bottom:12px">${api.highlights.map(h=>`<div style="font-size:0.75rem;color:var(--text);padding:3px 0">✓ ${h}</div>`).join('')}</div>
+        <div style="background:var(--darker);border-radius:8px;padding:10px;font-size:0.7rem;font-family:monospace;color:#94a3b8;overflow-x:auto;white-space:pre">${api.code}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function fetchLiveOdds() {
+  const key = document.getElementById('oddsApiKey').value.trim();
+  const out = document.getElementById('liveOddsOutput');
+  if (!key) { out.textContent = '❌ Please enter an API key first.'; return; }
+  out.textContent = '⏳ Fetching live odds from The Odds API...';
+  try {
+    const url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/odds/?apiKey=${key}&regions=us&markets=h2h,totals&oddsFormat=american&dateFormat=iso`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      const err = await res.json();
+      out.textContent = `❌ API Error ${res.status}: ${err.message || JSON.stringify(err)}`;
+      return;
+    }
+    const data = await res.json();
+    if (!data.length) { out.textContent = '⚠️ No upcoming matches found yet (tournament may not have live lines).'; return; }
+    let text = `✅ Fetched ${data.length} matches. Showing first 3:\n\n`;
+    data.slice(0,3).forEach(m => {
+      text += `📅 ${m.commence_time.split('T')[0]} — ${m.home_team} vs ${m.away_team}\n`;
+      m.bookmakers.slice(0,2).forEach(b => {
+        text += `  📊 ${b.title}:\n`;
+        b.markets.forEach(mkt => {
+          mkt.outcomes.forEach(o => { text += `    ${o.name}: ${o.price > 0 ? '+'+o.price : o.price}\n`; });
+        });
+      });
+      text += '\n';
+    });
+    out.textContent = text;
+  } catch(e) { out.textContent = `❌ Fetch failed: ${e.message}\n\nCheck your API key and internet connection.`; }
+}
+
+// ══════════════════════════════════════════
+// INTELLIGENCE ENGINE
+// ══════════════════════════════════════════
+
+const FACTOR_KEYS = ['elo','form','squad','injury','h2h','experience','tactical','market'];
+const FACTOR_LABELS = {
+  elo:'Elo Rating', form:'Recent Form', squad:'Squad Quality',
+  injury:'Injury Impact', h2h:'H2H History', experience:'Tournament Exp.',
+  tactical:'Tactical Style', market:'Market Odds'
+};
+const BASELINE_WEIGHTS = { elo:30, form:20, squad:15, injury:10, h2h:10, experience:5, tactical:5, market:5 };
+const LEARNING_RATE = 0.05;
+
+// Map match factor names to weight keys
+const FACTOR_NAME_MAP = {
+  'Elo Rating':'elo', 'Recent Form':'form', 'Squad Quality':'squad',
+  'Injury Impact':'injury', 'H2H History':'h2h', 'Tournament Exp.':'experience',
+  'Tactical Style':'tactical', 'Home Advantage':'elo', 'Tournament Experience':'experience',
+  'Tactical Matchup':'tactical'
+};
+
+// ── Engine State (persisted to localStorage) ──
+let engine = loadEngine();
+
+function loadEngine() {
+  try {
+    const saved = localStorage.getItem('wc2026_engine');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return {
+    weights: { ...BASELINE_WEIGHTS },
+    history: [],       // [{matchId, date, home, away, predictedH, predictedD, predictedA, actualResult, brierScore, weightsBefore, weightsAfter}]
+    totalMatches: 0,
+    correctPredictions: 0,
+  };
+}
+
+function saveEngine() {
+  try { localStorage.setItem('wc2026_engine', JSON.stringify(engine)); } catch(e) {}
+}
+
+function resetEngine() {
+  if (!confirm('Reset all learned weights and match history? This cannot be undone.')) return;
+  engine = { weights: { ...BASELINE_WEIGHTS }, history: [], totalMatches: 0, correctPredictions: 0 };
+  saveEngine();
+  renderIntelligence();
+  alert('Engine reset to baseline weights.');
+}
+
+// ── Brier Score ──
+// Multi-class: BS = (1/3) * [(pH-oH)² + (pD-oD)² + (pA-oA)²]
+function brierScore(probs, actual) {
+  const p = [probs.h/100, probs.d/100, probs.a/100];
+  const o = actual==='H' ? [1,0,0] : actual==='D' ? [0,1,0] : [0,0,1];
+  return (1/3) * p.reduce((s,pi,i) => s + Math.pow(pi - o[i], 2), 0);
+}
+
+// ── Predicted winner from probs ──
+function predictedWinner(h, d, a) {
+  if (h >= d && h >= a) return 'H';
+  if (d >= h && d >= a) return 'D';
+  return 'A';
+}
+
+// ── Compute factor contribution (how strongly it backed home/draw/away) ──
+// factor.val is 0-100; val>50 = favors home, val<50 = favors away, ~50 = neutral
+function factorContribution(factorVal, outcome) {
+  const norm = (factorVal - 50) / 50; // -1 to +1
+  if (outcome === 'H') return norm;        // positive = factor backed home winner
+  if (outcome === 'A') return -norm;       // positive = factor backed away winner
+  return 1 - Math.abs(norm);              // draw: near-zero difference is positive
+}
+
+// ── Update weights after result ──
+function updateWeights(match, actualResult) {
+  const before = { ...engine.weights };
+  const probs = { h: match.homeProb, d: match.drawProb, a: match.awayProb };
+  const bs = brierScore(probs, actualResult);
+  const predicted = predictedWinner(match.homeProb, match.drawProb, match.awayProb);
+  const correct = predicted === actualResult;
+
+  // Gradient step for each factor
+  match.factors.forEach(f => {
+    const key = FACTOR_NAME_MAP[f.name] || null;
+    if (!key || engine.weights[key] === undefined) return;
+    const contribution = factorContribution(f.val, actualResult);
+    // If contribution > 0 → factor backed correct outcome → increase weight
+    // If contribution < 0 → factor backed wrong outcome → decrease weight
+    engine.weights[key] += LEARNING_RATE * contribution * 10;
+    engine.weights[key] = Math.max(0.5, engine.weights[key]); // floor at 0.5%
+  });
+
+  // Normalize to sum to 100
+  const total = Object.values(engine.weights).reduce((s,v) => s+v, 0);
+  FACTOR_KEYS.forEach(k => { engine.weights[k] = Math.round((engine.weights[k]/total)*100 * 10)/10; });
+
+  // Record
+  engine.history.push({
+    matchId: match.date + match.home.name + match.away.name,
+    date: match.date,
+    home: match.home.name, away: match.away.name,
+    predictedH: match.homeProb, predictedD: match.drawProb, predictedA: match.awayProb,
+    predictedWinner: predicted,
+    actualResult,
+    brierScore: Math.round(bs * 1000)/1000,
+    correct,
+    weightsBefore: before,
+    weightsAfter: { ...engine.weights }
+  });
+  engine.totalMatches++;
+  if (correct) engine.correctPredictions++;
+
+  saveEngine();
+  renderIntelligence();
+  // Show flash notification
+  showToast(correct
+    ? `✅ Correct! Brier Score: ${bs.toFixed(3)} — Weights updated`
+    : `❌ Wrong prediction. Brier Score: ${bs.toFixed(3)} — Weights recalibrated`
+  , correct ? 'green' : 'red');
+}
+
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;background:${type==='green'?'#14532d':'#7f1d1d'};border:1px solid ${type==='green'?'#22c55e':'#ef4444'};color:#fff;padding:12px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;z-index:9999;animation:fadeInUp 0.3s ease`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// ── Compute calibrated probabilities using current weights ──
+function calibrateProbs(match) {
+  const wRatio = {};
+  FACTOR_KEYS.forEach(k => { wRatio[k] = engine.weights[k] / BASELINE_WEIGHTS[k]; });
+
+  // Compute weighted sum of factor advantages
+  let homeAdv = 0, totalW = 0;
+  match.factors.forEach(f => {
+    const key = FACTOR_NAME_MAP[f.name] || null;
+    if (!key) return;
+    const w = engine.weights[key] || BASELINE_WEIGHTS[key];
+    const adv = (f.val - 50) / 50; // -1 to +1
+    homeAdv += w * adv;
+    totalW += w;
+  });
+
+  const normAdv = totalW > 0 ? homeAdv / totalW : 0;
+  // Map advantage to probabilities using logistic-inspired function
+  const homeBase = match.homeProb / 100;
+  const awayBase = match.awayProb / 100;
+  const drawBase = match.drawProb / 100;
+
+  // Shift based on advantage delta from original model
+  const origAdv = (homeBase - awayBase);
+  const delta = (normAdv - origAdv) * 0.3; // dampen shift
+  let newH = Math.max(0.03, Math.min(0.95, homeBase + delta));
+  let newA = Math.max(0.03, Math.min(0.95, awayBase - delta));
+  let newD = Math.max(0.02, 1 - newH - newA);
+  // Normalize
+  const s = newH + newD + newA;
+  newH = Math.round(newH/s*100); newD = Math.round(newD/s*100); newA = 100-newH-newD;
+  return { h: newH, d: newD, a: newA };
+}
+
+// ── Generate insights from history ──
+function generateInsights() {
+  const insights = [];
+  const n = engine.history.length;
+
+  if (n === 0) {
+    return ['<div class="insight-card">📊 No results logged yet. Enter match results to generate model insights.</div>'];
+  }
+
+  // Accuracy insight
+  const acc = Math.round((engine.correctPredictions/n)*100);
+  insights.push(`<div class="insight-card">🎯 <strong>Overall accuracy: ${acc}%</strong> across ${n} logged matches. ${acc>=70?'Model is performing well above chance.':acc>=55?'Model is performing above random baseline.':'Model needs more data — early-stage learning.'}</div>`);
+
+  // Brier score trend
+  const avgBS = Math.round((engine.history.reduce((s,h)=>s+h.brierScore,0)/n)*1000)/1000;
+  insights.push(`<div class="insight-card">📉 <strong>Average Brier Score: ${avgBS}</strong> (lower is better, 0 = perfect, 0.25 = decent, 0.5+ = poor). ${avgBS<0.2?'Excellent calibration.':avgBS<0.3?'Good calibration.':'Model over/under-confident in some markets.'}</div>`);
+
+  // Weight changes
+  const changed = FACTOR_KEYS.filter(k => Math.abs(engine.weights[k] - BASELINE_WEIGHTS[k]) > 1);
+  if (changed.length > 0) {
+    const gained = changed.filter(k => engine.weights[k] > BASELINE_WEIGHTS[k]);
+    const lost = changed.filter(k => engine.weights[k] < BASELINE_WEIGHTS[k]);
+    if (gained.length) insights.push(`<div class="insight-card">⬆️ <strong>Gained importance:</strong> ${gained.map(k=>`${FACTOR_LABELS[k]} (+${(engine.weights[k]-BASELINE_WEIGHTS[k]).toFixed(1)}%)`).join(', ')}. These factors correctly predicted more outcomes than expected.</div>`);
+    if (lost.length) insights.push(`<div class="insight-card">⬇️ <strong>Lost importance:</strong> ${lost.map(k=>`${FACTOR_LABELS[k]} (${(engine.weights[k]-BASELINE_WEIGHTS[k]).toFixed(1)}%)`).join(', ')}. These factors had lower predictive accuracy than weighted.</div>`);
+  } else {
+    insights.push('<div class="insight-card">⚖️ <strong>Weights stable:</strong> No significant factor shifts yet — baseline weights are holding up well against results so far.</div>');
+  }
+
+  // Upsets analysis
+  const upsets = engine.history.filter(h => {
+    const fav = h.predictedH > h.predictedA ? 'H' : 'A';
+    return h.actualResult !== fav && h.actualResult !== 'D';
+  });
+  if (upsets.length > 0) insights.push(`<div class="insight-card">⚠️ <strong>${upsets.length} upset(s) recorded:</strong> ${upsets.map(u=>`${u.home} vs ${u.away}`).join(', ')}. Upsets are the model's main learning trigger — injury impact and tactical factors typically gain weight after upsets.</div>`);
+
+  // Dominance patterns
+  const elo = engine.weights.elo;
+  const form = engine.weights.form;
+  if (elo > BASELINE_WEIGHTS.elo + 3) insights.push('<div class="insight-card">📊 <strong>Elo Rating is outperforming expectations.</strong> Historical team strength is proving more predictive than recent form at this World Cup — typical of early group stage where top teams have easier opponents.</div>');
+  if (form > BASELINE_WEIGHTS.form + 3) insights.push('<div class="insight-card">🔥 <strong>Recent Form is carrying more weight.</strong> Current momentum is proving more predictive than historical rankings — suggests tactical/squad changes this cycle are significant.</div>');
+  if (engine.weights.injury > BASELINE_WEIGHTS.injury + 3) insights.push('<div class="insight-card">🤕 <strong>Injury Impact is proving more decisive than expected.</strong> Absent key players (Rodrygo, Xavi Simons, Davies) are visibly affecting results — increase scouting of late injury news before betting.</div>');
+
+  return insights;
+}
+
+// ── RENDER INTELLIGENCE ──
+function renderIntelligence() {
+  renderEngineStatus();
+  renderResultEntry();
+  renderWeightEvolution();
+  renderAccuracy();
+  renderRecalibrated();
+  renderInsights();
+}
+
+function renderEngineStatus() {
+  const el = document.getElementById('engineStatusRow');
+  const n = engine.history.length;
+  const acc = n > 0 ? Math.round((engine.correctPredictions/n)*100) : '–';
+  const avgBS = n > 0 ? Math.round((engine.history.reduce((s,h)=>s+h.brierScore,0)/n)*1000)/1000 : '–';
+  const wChanged = FACTOR_KEYS.filter(k => Math.abs(engine.weights[k]-BASELINE_WEIGHTS[k]) > 1).length;
+
+  el.innerHTML = [
+    { val: n, lbl: 'Results Logged', color: '#FFD700' },
+    { val: acc + (n>0?'%':''), lbl: 'Prediction Accuracy', color: acc >= 60 ? '#22c55e' : acc >= 45 ? '#f59e0b' : '#ef4444' },
+    { val: avgBS, lbl: 'Avg Brier Score', color: avgBS !== '–' ? (avgBS < 0.25 ? '#22c55e' : avgBS < 0.35 ? '#f59e0b' : '#ef4444') : '#8899aa' },
+    { val: wChanged, lbl: 'Weights Shifted', color: wChanged > 0 ? '#a855f7' : '#8899aa' },
+    { val: engine.totalMatches === 0 ? 'Ready' : engine.correctPredictions >= engine.totalMatches*0.7 ? '🟢 Sharp' : engine.correctPredictions >= engine.totalMatches*0.5 ? '🟡 Learning' : '🔴 Calibrating', lbl: 'Engine Status', color: '#14b8a6' },
+  ].map(m => `<div class="metric-pill"><div class="val" style="color:${m.color}">${m.val}</div><div class="lbl">${m.lbl}</div></div>`).join('');
+}
+
+function renderResultEntry() {
+  const el = document.getElementById('resultEntryList');
+  const loggedIds = new Set(engine.history.map(h => h.matchId));
+  el.innerHTML = matches.map((m,i) => {
+    const id = m.date + m.home.name + m.away.name;
+    const logged = loggedIds.has(id);
+    const loggedResult = logged ? engine.history.find(h=>h.matchId===id) : null;
+    const resultLabel = loggedResult ? (loggedResult.actualResult==='H'?`${m.home.name} Win`:loggedResult.actualResult==='D'?'Draw':`${m.away.name} Win`) : '';
+    return `
+    <div class="result-entry-card ${logged?'logged':'pending'}">
+      <div>
+        <div class="match-name">${m.home.flag} ${m.home.name} vs ${m.away.flag} ${m.away.name}</div>
+        <div class="pred-prob">Predicted: ${m.home.name} ${m.homeProb}% · Draw ${m.drawProb}% · ${m.away.name} ${m.awayProb}%</div>
+        <div style="font-size:0.7rem;color:var(--muted)">${m.date} · ${m.group}</div>
+      </div>
+      <div>
+        ${logged
+          ? `<div style="font-size:0.78rem;font-weight:700;color:var(--green)">✅ Logged: ${resultLabel}<br><span style="color:var(--muted);font-size:0.68rem">BS: ${loggedResult.brierScore} · ${loggedResult.correct?'✓ Correct':'✗ Wrong'}</span></div>`
+          : `<select class="result-select" id="sel_${i}">
+              <option value="">— Select result —</option>
+              <option value="H">${m.home.name} Win</option>
+              <option value="D">Draw</option>
+              <option value="A">${m.away.name} Win</option>
+            </select>`
+        }
+      </div>
+      ${!logged ? `<button class="log-btn" onclick="logResult(${i})">Log & Learn ⚡</button>` : '<div style="font-size:1.2rem">✅</div>'}
+    </div>`;
+  }).join('');
+}
+
+function logResult(matchIdx) {
+  const sel = document.getElementById(`sel_${matchIdx}`);
+  if (!sel || !sel.value) { showToast('⚠️ Please select a result first', 'red'); return; }
+  updateWeights(matches[matchIdx], sel.value);
+}
+
+function renderWeightEvolution() {
+  const el = document.getElementById('weightEvoChart');
+  el.innerHTML = FACTOR_KEYS.map(k => {
+    const base = BASELINE_WEIGHTS[k];
+    const curr = engine.weights[k];
+    const delta = curr - base;
+    const deltaColor = delta > 0.5 ? '#22c55e' : delta < -0.5 ? '#ef4444' : '#f59e0b';
+    const maxW = 35;
+    return `<div class="weight-evolution-row">
+      <div class="weight-evo-label">🔹 ${FACTOR_LABELS[k]}</div>
+      <div class="weight-evo-bars">
+        <div class="weight-evo-baseline">
+          <div style="width:${(base/maxW)*100}%;height:100%;background:rgba(255,255,255,0.2);border-radius:4px"></div>
+        </div>
+        <div class="weight-evo-current">
+          <div style="width:${(curr/maxW)*100}%;height:100%;background:${deltaColor};border-radius:4px;transition:width 0.8s ease"></div>
+        </div>
+        <div class="weight-evo-vals"><span>Baseline: ${base}%</span><span>Current: ${curr.toFixed(1)}%</span></div>
+      </div>
+      <div class="weight-delta" style="color:${deltaColor}">${delta>0?'+':''}${delta.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+
+  // Weight history mini chart
+  const histEl = document.getElementById('weightHistoryChart');
+  if (engine.history.length === 0) {
+    histEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;padding:10px">Log match results to see weight evolution over time.</div>';
+    return;
+  }
+  histEl.innerHTML = `<h3 style="font-size:0.9rem;margin-bottom:14px">📜 Weight Changes After Each Match</h3>` +
+    engine.history.map((h,i) => `
+    <div style="margin-bottom:12px;background:var(--card2);border-radius:8px;padding:10px 14px">
+      <div style="font-size:0.78rem;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between">
+        <span>Match ${i+1}: ${h.home} vs ${h.away} → <span style="color:${h.correct?'var(--green)':'var(--red)'}">${h.actualResult==='H'?h.home:h.actualResult==='D'?'Draw':h.away} ${h.correct?'✓':'✗'}</span></span>
+        <span style="color:var(--muted)">BS: ${h.brierScore}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${FACTOR_KEYS.filter(k=>Math.abs((h.weightsAfter[k]||0)-(h.weightsBefore[k]||0))>0.1).map(k=>{
+          const d = (h.weightsAfter[k]||0)-(h.weightsBefore[k]||0);
+          return `<span style="font-size:0.7rem;padding:2px 7px;border-radius:8px;background:${d>0?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'};color:${d>0?'var(--green)':'var(--red)'};border:1px solid ${d>0?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)'}">${FACTOR_LABELS[k]}: ${d>0?'+':''}${d.toFixed(1)}%</span>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAccuracy() {
+  const n = engine.history.length;
+
+  // Accuracy panel
+  const accEl = document.getElementById('accuracyPanel');
+  if (n === 0) { accEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">No results logged yet.</div>'; }
+  else {
+    const acc = Math.round((engine.correctPredictions/n)*100);
+    accEl.innerHTML = `
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:3rem;font-weight:900;color:${acc>=65?'var(--green)':acc>=50?'var(--yellow)':'var(--red)'}">${acc}%</div>
+        <div style="color:var(--muted);font-size:0.8rem">${engine.correctPredictions}/${n} correct</div>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px">
+        <div style="width:${acc}%;height:100%;background:${acc>=65?'var(--green)':acc>=50?'var(--yellow)':'var(--red)'};border-radius:8px;transition:width 0.8s"></div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted)">Random baseline: 33% · Good model: 55%+ · Expert model: 70%+</div>
+    `;
+  }
+
+  // Brier panel
+  const bsEl = document.getElementById('brierPanel');
+  if (n === 0) { bsEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">No results logged yet.</div>'; }
+  else {
+    const scores = engine.history.map(h=>h.brierScore);
+    const avg = (scores.reduce((s,v)=>s+v,0)/n).toFixed(3);
+    bsEl.innerHTML = `
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:2.5rem;font-weight:900;color:${avg<0.2?'var(--green)':avg<0.3?'var(--yellow)':'var(--red)'}">${avg}</div>
+        <div style="color:var(--muted);font-size:0.8rem">avg Brier Score (lower=better)</div>
+      </div>
+      <div style="margin-bottom:8px">
+        ${scores.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="font-size:0.72rem;color:var(--muted);width:60px">Match ${i+1}</span>
+          <div style="flex:1;height:6px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="width:${Math.min(s/0.5*100,100)}%;height:100%;background:${s<0.2?'var(--green)':s<0.3?'var(--yellow)':'var(--red)'};border-radius:4px"></div>
+          </div>
+          <span style="font-size:0.72rem;font-weight:700;color:${s<0.2?'var(--green)':s<0.3?'var(--yellow)':'var(--red)'};width:40px">${s}</span>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:0.72rem;color:var(--muted)">0 = perfect · 0.25 = good · 0.5 = poor</div>
+    `;
+  }
+
+  // Calibration panel
+  const calEl = document.getElementById('calibPanel');
+  if (n < 3) { calEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">Need at least 3 results for calibration analysis.</div>'; }
+  else {
+    const buckets = [{label:'50-60%',min:50,max:60,correct:0,total:0},{label:'60-70%',min:60,max:70,correct:0,total:0},{label:'70-80%',min:70,max:80,correct:0,total:0},{label:'80%+',min:80,max:100,correct:0,total:0}];
+    engine.history.forEach(h => {
+      const favProb = h.actualResult==='H'?h.predictedH:h.actualResult==='D'?h.predictedD:h.predictedA;
+      const predictedFavProb = Math.max(h.predictedH,h.predictedD,h.predictedA);
+      buckets.forEach(b => {
+        if (predictedFavProb>=b.min && predictedFavProb<b.max) {
+          b.total++;
+          if (h.correct) b.correct++;
+        }
+      });
+    });
+    calEl.innerHTML = `<div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px">Actual win rate vs predicted confidence band:</div>` +
+      buckets.map(b => b.total===0 ? '' : `
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px">
+            <span>${b.label} confidence</span>
+            <span style="color:var(--text)">${b.total>0?Math.round(b.correct/b.total*100):'-'}% actual (${b.correct}/${b.total})</span>
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="width:${b.total>0?Math.round(b.correct/b.total*100):0}%;height:100%;background:var(--blue);border-radius:4px"></div>
+          </div>
+        </div>`
+      ).join('');
+  }
+
+  // History table
+  const htEl = document.getElementById('historyTable');
+  if (n === 0) { htEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">No results logged yet.</div>'; }
+  else {
+    htEl.innerHTML = `<table class="odds-table" style="min-width:600px">
+      <thead><tr><th>#</th><th>Match</th><th>Predicted</th><th>Actual</th><th>Result</th><th>Brier</th></tr></thead>
+      <tbody>${engine.history.map((h,i)=>`<tr>
+        <td style="color:var(--muted)">${i+1}</td>
+        <td><strong>${h.home}</strong> vs <strong>${h.away}</strong><div style="font-size:0.7rem;color:var(--muted)">${h.date}</div></td>
+        <td style="font-size:0.78rem">${h.home} ${h.predictedH}% · D ${h.predictedD}% · ${h.away} ${h.predictedA}%</td>
+        <td style="font-weight:700;color:var(--gold)">${h.actualResult==='H'?h.home:h.actualResult==='D'?'Draw':h.away}</td>
+        <td><span class="conf-badge ${h.correct?'conf-high':'conf-low'}">${h.correct?'✓ Correct':'✗ Wrong'}</span></td>
+        <td style="font-weight:700;color:${h.brierScore<0.2?'var(--green)':h.brierScore<0.3?'var(--yellow)':'var(--red)'}">${h.brierScore}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+}
+
+function renderRecalibrated() {
+  const el = document.getElementById('recalGrid');
+  const loggedIds = new Set(engine.history.map(h => h.matchId));
+  const remaining = matches.filter(m => !loggedIds.has(m.date+m.home.name+m.away.name));
+
+  if (remaining.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:0.88rem">All tracked matches have been logged. Add more matches to see recalibrated predictions.</div>'; return; }
+
+  el.innerHTML = remaining.map(m => {
+    const cal = calibrateProbs(m);
+    const dH = cal.h - m.homeProb, dD = cal.d - m.drawProb, dA = cal.a - m.awayProb;
+    const newWinner = predictedWinner(cal.h, cal.d, cal.a);
+    const oldWinner = predictedWinner(m.homeProb, m.drawProb, m.awayProb);
+    const flipped = newWinner !== oldWinner;
+    return `<div class="recal-card" ${flipped?'style="border-color:rgba(245,158,11,0.5)"':''}>
+      <div class="recal-match">
+        ${m.home.flag} <strong>${m.home.name}</strong> vs ${m.away.flag} <strong>${m.away.name}</strong>
+        <div style="font-size:0.7rem;color:var(--muted)">${m.date} · ${m.group}</div>
+        ${flipped?'<div style="font-size:0.7rem;color:var(--yellow);margin-top:2px">⚠️ Prediction flipped!</div>':''}
+      </div>
+      <div class="prob-shift">
+        <span class="old">${m.home.name} ${m.homeProb}%</span>
+        <span class="arrow">→</span>
+        <span class="new" style="color:${dH>0?'var(--green)':dH<0?'var(--red)':'var(--text)'}">${cal.h}% ${dH>0?'▲'+dH:'▼'+Math.abs(dH)}</span>
+      </div>
+      <div class="prob-shift">
+        <span class="old">Draw ${m.drawProb}%</span>
+        <span class="arrow">→</span>
+        <span class="new" style="color:${dD>0?'var(--green)':dD<0?'var(--red)':'var(--text)'}">${cal.d}% ${dD>0?'▲'+dD:'▼'+Math.abs(dD)}</span>
+      </div>
+      <div class="prob-shift">
+        <span class="old">${m.away.name} ${m.awayProb}%</span>
+        <span class="arrow">→</span>
+        <span class="new" style="color:${dA>0?'var(--green)':dA<0?'var(--red)':'var(--text)'}">${cal.a}% ${dA>0?'▲'+dA:'▼'+Math.abs(dA)}</span>
+      </div>
+      <span class="conf-badge conf-high" style="font-size:0.68rem">New pick: ${newWinner==='H'?m.home.name:newWinner==='D'?'Draw':m.away.name}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderInsights() {
+  document.getElementById('insightsPanel').innerHTML = generateInsights().join('');
+}
+
+function showIntelView(view, btn) {
+  document.querySelectorAll('#intelSubTabs .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['results','weights','accuracy','recal','insights'].forEach(v=>{
+    document.getElementById(`view-${v}`).style.display = v===view ? 'block':'none';
+  });
+}
+
+// ── INIT ──
+renderGroups();
+renderPredictions();
+renderOdds();
+renderInjuries();
+renderMethodology();
+renderGoldenBoot();
+renderTopPlayers();
+renderByTeam();
+renderBreakout();
+renderMatchLines();
+renderBookComp();
+renderValueBets();
+renderAPICards();
+renderIntelligence();
+renderSources();
+</script>
+</body>
+</html>

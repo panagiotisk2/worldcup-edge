@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorldCup Edge — AI-Powered Football Predictions for 2026</title>
+  <meta name="description" content="AI-powered match predictions, live betting odds, player analytics and a self-learning engine for the FIFA World Cup 2026. From €10/month.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black:      #07090f;
+      --dark:       #0d1120;
+      --card:       #111827;
+      --card2:      #161e30;
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,215,0,0.18);
+      --gold:       #FFD700;
+      --gold-light: #ffe566;
+      --gold-dim:   #c9a800;
+      --gold-glow:  rgba(255,215,0,0.22);
+      --green:      #00d166;
+      --green-dim:  #00a04e;
+      --red:        #ff4a4a;
+      --white:      #ffffff;
+      --muted:      rgba(255,255,255,0.5);
+      --muted2:     rgba(255,255,255,0.72);
+      --r:          16px;
+      --font:       'Inter', system-ui, -apple-system, sans-serif;
+      --display:    'Bebas Neue', 'Inter', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font);
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+    .gold { color: var(--gold); }
+    .green { color: var(--green); }
+    .muted { color: var(--muted); }
+
+    /* ── ANIMATIONS ─────────────────────────────── */
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(36px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes fadeIn   { from { opacity:0 } to { opacity:1 } }
+    @keyframes floatY   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:.45} }
+    @keyframes ticker   { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    @keyframes glowRing { 0%,100%{box-shadow:0 0 18px var(--gold-glow)} 50%{box-shadow:0 0 48px rgba(255,215,0,.45)} }
+    @keyframes gradShift{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    @keyframes spin     { to{transform:rotate(360deg)} }
+
+    .reveal { opacity:0; transform:translateY(32px); transition:opacity .75s ease, transform .75s ease; }
+    .reveal.on { opacity:1; transform:translateY(0); }
+    .reveal-d1 { transition-delay:.1s; }
+    .reveal-d2 { transition-delay:.2s; }
+    .reveal-d3 { transition-delay:.3s; }
+    .reveal-d4 { transition-delay:.4s; }
+
+    /* ── NAVBAR ─────────────────────────────────── */
+    #nav {
+      position: fixed; top:0; left:0; right:0; z-index:900;
+      padding: 16px 0;
+      background: rgba(7,9,15,.8);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+      transition: padding .3s, background .3s;
+    }
+    #nav.scrolled { padding:10px 0; background:rgba(7,9,15,.97); }
+    .nav-inner { display:flex; align-items:center; justify-content:space-between; }
+
+    .logo { display:flex; align-items:center; gap:11px; text-decoration:none; }
+    .logo-ball {
+      width:38px; height:38px; background:var(--gold); border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; animation:glowRing 3.5s ease-in-out infinite;
+    }
+    .logo-name { font-family:var(--display); font-size:1.55rem; letter-spacing:.5px; }
+    .logo-name span { color:var(--gold); }
+
+    .nav-links { display:flex; gap:30px; list-style:none; }
+    .nav-links a { color:var(--muted); text-decoration:none; font-size:.88rem; font-weight:500; transition:color .2s; }
+    .nav-links a:hover { color:var(--white); }
+
+    .nav-actions { display:flex; gap:10px; align-items:center; }
+    .btn-ghost {
+      background:transparent; border:1px solid var(--border); color:var(--white);
+      padding:8px 20px; border-radius:9px; font:500 .88rem var(--font);
+      cursor:pointer; transition:all .2s;
+    }
+    .btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
+    .btn-primary {
+      background:var(--gold); border:none; color:#000;
+      padding:10px 24px; border-radius:9px; font:700 .88rem var(--font);
+      cursor:pointer; text-decoration:none; display:inline-block; transition:all .22s;
+    }
+    .btn-primary:hover { background:var(--gold-light); transform:translateY(-1px); box-shadow:0 8px 28px var(--gold-glow); }
+    .btn-xl { padding:17px 42px; font-size:1.05rem; border-radius:13px; }
+    .btn-xl-ghost {
+      padding:16px 36px; font-size:1.05rem; border-radius:13px;
+      background:transparent; border:1.5px solid rgba(255,255,255,.18);
+      color:var(--white); font:600 1.05rem var(--font);
+      cursor:pointer; text-decoration:none; display:inline-block; transition:all .22s;
+    }
+    .btn-xl-ghost:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* ── HERO ───────────────────────────────────── */
+    #hero {
+      min-height:100vh; display:flex; align-items:center;
+      position:relative; overflow:hidden; padding-top:90px;
+    }
+    .hero-radial {
+      position:absolute; inset:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255,215,0,.11) 0%, transparent 62%),
+        radial-gradient(ellipse 55% 55% at 85% 85%, rgba(0,209,102,.07) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 10% 70%, rgba(255,215,0,.05) 0%, transparent 50%);
+    }
+    .hero-grid-lines {
+      position:absolute; inset:0; pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,215,0,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,215,0,.035) 1px, transparent 1px);
+      background-size:64px 64px;
+      mask-image: radial-gradient(ellipse 85% 85% at 50% 40%, #000 20%, transparent 100%);
+    }
+    #particle-canvas { position:absolute; inset:0; pointer-events:none; }
+
+    .hero-wrap {
+      position:relative; z-index:2; display:grid;
+      grid-template-columns:1fr 440px; gap:64px; align-items:center; width:100%;
+    }
+    .hero-chip {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(255,215,0,.08); border:1px solid rgba(255,215,0,.25);
+      border-radius:100px; padding:6px 16px;
+      font-size:.78rem; font-weight:600; color:var(--gold); margin-bottom:22px;
+      animation:fadeIn .6s ease both;
+    }
+    .chip-dot { width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite; }
+
+    .hero-h1 {
+      font-family:var(--display); font-size:5.2rem; line-height:1.02;
+      letter-spacing:3px; margin-bottom:22px; animation:fadeUp .8s .1s both;
+    }
+    .hero-h1 .l2 { color:var(--gold); }
+
+    .hero-sub {
+      font-size:1.08rem; color:var(--muted2); line-height:1.75; max-width:500px;
+      margin-bottom:34px; animation:fadeUp .8s .18s both;
+    }
+    .hero-btns { display:flex; gap:14px; align-items:center; margin-bottom:48px; animation:fadeUp .8s .26s both; }
+
+    .hero-kpis { display:flex; gap:28px; animation:fadeUp .8s .34s both; }
+    .kpi-divider { width:1px; background:var(--border); }
+    .kpi-val { font-family:var(--display); font-size:2.1rem; color:var(--gold); letter-spacing:1px; line-height:1; }
+    .kpi-label { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:3px; }
+
+    /* Countdown card */
+    .countdown-card {
+      background:rgba(255,215,0,.04); border:1px solid var(--border2);
+      border-radius:20px; padding:28px 24px;
+      animation:floatY 6.5s ease-in-out infinite;
+    }
+    .cd-label {
+      text-align:center; font-size:.75rem; font-weight:600;
+      text-transform:uppercase; letter-spacing:1.5px; color:var(--gold); margin-bottom:18px;
+    }
+    .cd-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:22px; }
+    .cd-unit {
+      background:rgba(0,0,0,.45); border:1px solid var(--border);
+      border-radius:11px; padding:14px 6px; text-align:center;
+    }
+    .cd-num { font-family:var(--display); font-size:2.1rem; color:#fff; line-height:1; }
+    .cd-unit-label { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-top:3px; }
+
+    .mini-match {
+      background:rgba(0,0,0,.32); border:1px solid var(--border);
+      border-radius:11px; padding:13px 15px; margin-bottom:9px;
+    }
+    .mini-match:last-child { margin-bottom:0; }
+    .mm-row { display:flex; justify-content:space-between; align-items:center; font-weight:600; font-size:.9rem; margin-bottom:6px; }
+    .mm-vs { color:var(--muted); font-size:.75rem; }
+    .mm-pred { display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); margin-bottom:7px; }
+    .mm-win { color:var(--green); font-weight:700; }
+    .mm-bar { height:3px; background:var(--border); border-radius:2px; }
+    .mm-fill { height:100%; border-radius:2px; background:linear-gradient(90deg, var(--green), var(--gold)); }
+
+    /* ── TICKER ─────────────────────────────────── */
+    .ticker-wrap {
+      background:rgba(255,215,0,.04);
+      border-top:1px solid rgba(255,215,0,.09);
+      border-bottom:1px solid rgba(255,215,0,.09);
+      padding:11px 0; overflow:hidden; white-space:nowrap;
+    }
+    .ticker-inner { display:inline-flex; gap:52px; animation:ticker 38s linear infinite; }
+    .t-item { display:inline-flex; align-items:center; gap:9px; font-size:.82rem; }
+    .t-prob { color:var(--gold); font-weight:700; }
+    .t-vs { color:var(--muted); }
+    .t-sep { color:rgba(255,215,0,.25); font-size:1.1rem; }
+
+    /* ── SECTION HELPERS ────────────────────────── */
+    section { padding:110px 0; }
+    .sec-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(255,215,0,.07); border:1px solid rgba(255,215,0,.18);
+      border-radius:100px; padding:5px 15px;
+      font-size:.72rem; font-weight:700; color:var(--gold);
+      text-transform:uppercase; letter-spacing:1.2px; margin-bottom:14px;
+    }
+    .sec-h2 { font-family:var(--display); font-size:3.2rem; letter-spacing:1px; line-height:1.08; margin-bottom:14px; }
+    .sec-sub { font-size:1rem; color:var(--muted2); line-height:1.7; max-width:560px; }
+    .sec-head { text-align:center; margin-bottom:68px; }
+    .sec-head .sec-sub { margin:0 auto; }
+
+    /* ── FEATURES ───────────────────────────────── */
+    #features { background:var(--dark); }
+    .feat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+    .feat-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--r); padding:34px; transition:all .3s;
+      position:relative; overflow:hidden;
+    }
+    .feat-card::after {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, var(--gold), var(--green));
+      opacity:0; transition:opacity .3s;
+    }
+    .feat-card:hover { border-color:rgba(255,215,0,.18); transform:translateY(-5px); background:var(--card2); }
+    .feat-card:hover::after { opacity:1; }
+    .feat-icon {
+      width:58px; height:58px; background:rgba(255,215,0,.09); border-radius:14px;
+      display:flex; align-items:center; justify-content:center; font-size:1.65rem; margin-bottom:20px;
+    }
+    .feat-h3 { font-size:1.18rem; font-weight:700; margin-bottom:10px; }
+    .feat-p { font-size:.88rem; color:var(--muted2); line-height:1.68; }
+    .feat-chip {
+      display:inline-block; margin-top:16px; padding:4px 12px;
+      background:rgba(0,209,102,.09); border:1px solid rgba(0,209,102,.2);
+      border-radius:100px; font-size:.68rem; font-weight:700;
+      color:var(--green); text-transform:uppercase; letter-spacing:1px;
+    }
+
+    /* ── PLAYERS CAROUSEL ───────────────────────── */
+    #players { overflow:hidden; }
+    .players-top {
+      display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:50px;
+    }
+    .carousel-nav { display:flex; gap:11px; }
+    .cnav-btn {
+      width:46px; height:46px; background:var(--card); border:1px solid var(--border);
+      border-radius:50%; color:var(--white); font-size:1.1rem;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:all .22s; font-family:var(--font);
+    }
+    .cnav-btn:hover { background:var(--gold); color:#000; border-color:var(--gold); }
+    .carousel-overflow { overflow:hidden; }
+    .carousel-track {
+      display:flex; gap:22px;
+      transition:transform .55s cubic-bezier(.25,.46,.45,.94);
+    }
+
+    /* Player card flip */
+    .p-card { flex:0 0 calc(25% - 17px); height:345px; perspective:1100px; cursor:pointer; }
+    .p-card-inner {
+      width:100%; height:100%; position:relative;
+      transform-style:preserve-3d; transition:transform .65s cubic-bezier(.4,0,.2,1);
+    }
+    .p-card:hover .p-card-inner { transform:rotateY(180deg); }
+
+    .p-front, .p-back {
+      position:absolute; inset:0; border-radius:var(--r);
+      backface-visibility:hidden; -webkit-backface-visibility:hidden; overflow:hidden;
+    }
+    .p-front { background:var(--card); border:1px solid var(--border); }
+    .p-back {
+      background:var(--card2); border:1px solid var(--border2);
+      transform:rotateY(180deg); padding:22px;
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+
+    .p-jersey { height:172px; position:relative; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; }
+    .p-svg { width:118px; height:158px; position:absolute; bottom:-8px; z-index:2; filter:drop-shadow(0 8px 24px rgba(0,0,0,.55)); }
+    .p-pos-tag {
+      position:absolute; top:12px; left:12px;
+      font-size:.62rem; font-weight:700; padding:3px 8px; border-radius:5px;
+      text-transform:uppercase; letter-spacing:1px; color:#fff;
+    }
+    .p-flag-tag { position:absolute; top:10px; right:12px; font-size:1.4rem; }
+
+    .p-body { padding:14px 16px; }
+    .p-name { font-weight:700; font-size:.92rem; margin-bottom:3px; }
+    .p-country { font-size:.75rem; color:var(--muted); margin-bottom:10px; }
+    .p-rating { font-family:var(--display); font-size:2rem; color:var(--gold); letter-spacing:1px; margin-bottom:10px; }
+    .p-mini-stats { display:flex; justify-content:space-between; }
+    .ms-val { font-weight:700; font-size:.95rem; display:block; }
+    .ms-label { font-size:.62rem; color:var(--muted); text-transform:uppercase; }
+
+    /* Back */
+    .pb-name { font-family:var(--display); font-size:1.4rem; color:var(--gold); letter-spacing:1px; }
+    .pb-country { font-size:.75rem; color:var(--muted); margin-top:2px; }
+    .pb-stats { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .pb-stat { background:rgba(255,255,255,.04); border-radius:10px; padding:10px 12px; }
+    .pb-val { font-size:1.25rem; font-weight:700; color:var(--gold); }
+    .pb-label { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+    .pb-pred {
+      background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(0,209,102,.05));
+      border:1px solid rgba(255,215,0,.18); border-radius:10px;
+      padding:12px; text-align:center;
+    }
+    .pb-pred-label { font-size:.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .pb-pred-val { font-weight:700; font-size:.88rem; color:var(--green); }
+
+    /* ── NUMBERS ────────────────────────────────── */
+    #numbers { background:var(--dark); padding:0; }
+    .num-grid { display:grid; grid-template-columns:repeat(4,1fr); }
+    .num-block {
+      padding:52px 28px; text-align:center; position:relative;
+      border-right:1px solid var(--border);
+    }
+    .num-block:last-child { border-right:none; }
+    .num-val { font-family:var(--display); font-size:3.8rem; color:var(--gold); letter-spacing:2px; line-height:1; }
+    .num-suffix { color:var(--muted); font-size:2.2rem; font-family:var(--display); }
+    .num-label { font-size:.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px; margin-top:8px; }
+
+    /* ── HOW IT WORKS ───────────────────────────── */
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:44px; position:relative; }
+    .steps::before {
+      content:''; position:absolute;
+      top:44px; left:calc(16.67% + 18px); right:calc(16.67% + 18px); height:1px;
+      background:linear-gradient(90deg, var(--gold), var(--green), var(--gold)); opacity:.25;
+    }
+    .step { text-align:center; }
+    .step-circle {
+      width:88px; height:88px; margin:0 auto 24px;
+      background:linear-gradient(135deg, var(--gold), #f5a623);
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-family:var(--display); font-size:2.2rem; color:#000;
+      box-shadow:0 10px 36px rgba(255,215,0,.28); position:relative; z-index:1;
+    }
+    .step-h3 { font-size:1.12rem; font-weight:700; margin-bottom:10px; }
+    .step-p { font-size:.88rem; color:var(--muted2); line-height:1.68; }
+
+    /* ── PRICING ────────────────────────────────── */
+    #pricing {
+      background:
+        radial-gradient(ellipse 65% 65% at 50% 50%, rgba(255,215,0,.055) 0%, transparent 70%),
+        var(--dark);
+    }
+    .price-card {
+      max-width:530px; margin:0 auto;
+      background:var(--card); border:2px solid var(--border2);
+      border-radius:26px; padding:52px; position:relative; overflow:hidden;
+      text-align:center; box-shadow:0 0 80px rgba(255,215,0,.1);
+    }
+    .price-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:4px;
+      background:linear-gradient(90deg, var(--gold), var(--green), var(--gold));
+      background-size:200% 200%; animation:gradShift 4s ease infinite;
+    }
+    .price-badge {
+      display:inline-block; background:var(--gold); color:#000;
+      font-size:.7rem; font-weight:800; padding:5px 15px;
+      border-radius:100px; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:22px;
+    }
+    .price-name { font-family:var(--display); font-size:2rem; letter-spacing:1px; margin-bottom:4px; }
+    .price-desc { font-size:.88rem; color:var(--muted); margin-bottom:20px; }
+    .price-amount { font-family:var(--display); font-size:5.5rem; color:var(--gold); letter-spacing:2px; line-height:1; }
+    .price-amount sup { font-size:2.2rem; vertical-align:top; margin-top:14px; }
+    .price-period { color:var(--muted); font-size:.85rem; margin-bottom:34px; }
+    .price-line { height:1px; background:var(--border); margin:30px 0; }
+    .price-features { list-style:none; text-align:left; margin-bottom:38px; }
+    .price-features li {
+      display:flex; align-items:flex-start; gap:12px;
+      padding:10px 0; font-size:.92rem; border-bottom:1px solid var(--border);
+    }
+    .price-features li:last-child { border-bottom:none; }
+    .pf-check {
+      width:22px; height:22px; flex-shrink:0; margin-top:1px;
+      background:rgba(0,209,102,.12); border:1px solid rgba(0,209,102,.28);
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-size:.62rem; color:var(--green);
+    }
+    .price-note { font-size:.76rem; color:var(--muted); margin-top:14px; }
+
+    /* ── TESTIMONIALS ───────────────────────────── */
+    .testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+    .testi-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--r); padding:28px; transition:all .3s;
+    }
+    .testi-card:hover { border-color:rgba(255,215,0,.18); transform:translateY(-4px); }
+    .t-stars { color:var(--gold); font-size:.95rem; margin-bottom:14px; letter-spacing:2px; }
+    .t-quote { font-size:.88rem; color:rgba(255,255,255,.8); line-height:1.72; font-style:italic; margin-bottom:20px; }
+    .t-author { display:flex; align-items:center; gap:12px; }
+    .t-avatar {
+      width:42px; height:42px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:.88rem; color:#000; flex-shrink:0;
+    }
+    .t-name { font-weight:600; font-size:.88rem; }
+    .t-loc { font-size:.72rem; color:var(--muted); }
+
+    /* ── CTA BANNER ─────────────────────────────── */
+    .cta-wrap { padding:0 0 110px; }
+    .cta-box {
+      background:linear-gradient(135deg, rgba(255,215,0,.1), rgba(0,209,102,.06));
+      border:1px solid rgba(255,215,0,.18); border-radius:26px;
+      padding:76px 48px; text-align:center; position:relative; overflow:hidden;
+    }
+    .cta-ball-l { position:absolute; font-size:200px; opacity:.04; top:-30px; left:-20px; line-height:1; pointer-events:none; }
+    .cta-ball-r { position:absolute; font-size:200px; opacity:.04; bottom:-30px; right:-20px; line-height:1; pointer-events:none; }
+    .cta-box h2 { font-family:var(--display); font-size:3.3rem; letter-spacing:1px; margin-bottom:14px; }
+    .cta-box p { color:var(--muted2); font-size:1.02rem; max-width:460px; margin:0 auto 32px; }
+    .cta-btns { display:flex; justify-content:center; gap:14px; }
+
+    /* ── FOOTER ─────────────────────────────────── */
+    footer { background:#040608; border-top:1px solid var(--border); padding:64px 0 28px; }
+    .footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:50px; margin-bottom:52px; }
+    .footer-brand p { font-size:.83rem; color:var(--muted); line-height:1.72; margin:16px 0 22px; max-width:265px; }
+    .socials { display:flex; gap:9px; }
+    .social {
+      width:36px; height:36px; background:var(--card); border:1px solid var(--border);
+      border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-size:.82rem; color:var(--muted); text-decoration:none; transition:all .2s;
+    }
+    .social:hover { background:var(--gold); color:#000; border-color:var(--gold); }
+    .footer-col h5 {
+      font-size:.78rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:1.2px; color:var(--muted); margin-bottom:16px;
+    }
+    .footer-col ul { list-style:none; }
+    .footer-col li { margin-bottom:9px; }
+    .footer-col a { color:rgba(255,255,255,.58); text-decoration:none; font-size:.85rem; transition:color .2s; }
+    .footer-col a:hover { color:var(--gold); }
+    .footer-bottom {
+      border-top:1px solid var(--border); padding-top:22px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .footer-copy { font-size:.77rem; color:var(--muted); }
+    .footer-legal { display:flex; gap:18px; }
+    .footer-legal a { font-size:.77rem; color:var(--muted); text-decoration:none; transition:color .2s; }
+    .footer-legal a:hover { color:var(--white); }
+
+    /* ── RESPONSIBLE GAMBLING DISCLAIMER ─────────── */
+    .disclaimer {
+      background:rgba(255,75,75,.05); border:1px solid rgba(255,75,75,.15);
+      border-radius:12px; padding:14px 20px; margin:18px 0 0;
+      font-size:.75rem; color:rgba(255,255,255,.5); line-height:1.6;
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────── */
+    @media(max-width:960px){
+      .hero-wrap { grid-template-columns:1fr; }
+      .countdown-card { display:none; }
+      .hero-h1 { font-size:3.5rem; }
+      .feat-grid { grid-template-columns:1fr; }
+      .p-card { flex:0 0 calc(50% - 11px); }
+      .num-grid { grid-template-columns:repeat(2,1fr); }
+      .testi-grid { grid-template-columns:1fr; }
+      .footer-top { grid-template-columns:1fr 1fr; }
+      .steps { grid-template-columns:1fr; }
+      .steps::before { display:none; }
+      .nav-links { display:none; }
+      .cta-btns { flex-direction:column; align-items:center; }
+    }
+    @media(max-width:520px){
+      .hero-h1 { font-size:2.8rem; }
+      .hero-btns { flex-direction:column; }
+      .hero-kpis { gap:16px; }
+      .price-card { padding:32px 22px; }
+      .cta-box { padding:48px 22px; }
+      .footer-top { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ──────────────────────────────────── -->
+<nav id="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-ball">⚽</div>
+        <div class="logo-name">WorldCup<span>Edge</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#players">Players</a></li>
+        <li><a href="#how">How it Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="btn-ghost">Log in</button>
+        <a href="#pricing" class="btn-primary">Get Edge →</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-radial"></div>
+  <div class="hero-grid-lines"></div>
+  <canvas id="particle-canvas"></canvas>
+  <div class="container">
+    <div class="hero-wrap">
+      <!-- Left -->
+      <div>
+        <div class="hero-chip">
+          <span class="chip-dot"></span>
+          <span id="hero-chip-text">Live · World Cup 2026 kicks off in 29 days</span>
+        </div>
+        <h1 class="hero-h1">
+          PREDICT.<br>
+          <span class="l2">PROFIT.</span><br>
+          WIN.
+        </h1>
+        <p class="hero-sub">
+          The only AI-powered platform built for the 2026 FIFA World Cup. Our self-learning engine analyzes 47 data points per match — Elo ratings, xG, injuries, form, and live odds — to give you a mathematical edge on every bet.
+        </p>
+        <div class="hero-btns">
+          <a href="WorldCup2026_Dashboard.html" class="btn-primary btn-xl">Open Dashboard →</a>
+          <a href="#pricing" class="btn-xl-ghost">€10 / month</a>
+        </div>
+        <div class="hero-kpis">
+          <div>
+            <div class="kpi-val" id="kpi1">2,847</div>
+            <div class="kpi-label">Predictions Made</div>
+          </div>
+          <div class="kpi-divider"></div>
+          <div>
+            <div class="kpi-val" id="kpi2">73%</div>
+            <div class="kpi-label">Model Accuracy</div>
+          </div>
+          <div class="kpi-divider"></div>
+          <div>
+            <div class="kpi-val" id="kpi3">47+</div>
+            <div class="kpi-label">Data Points</div>
+          </div>
+        </div>
+      </div>
+      <!-- Right: Countdown + live match previews -->
+      <div>
+        <div class="countdown-card">
+          <div class="cd-label">⚽ FIFA World Cup 2026 begins in</div>
+          <div class="cd-grid">
+            <div class="cd-unit"><div class="cd-num" id="cd-d">00</div><div class="cd-unit-label">Days</div></div>
+            <div class="cd-unit"><div class="cd-num" id="cd-h">00</div><div class="cd-unit-label">Hours</div></div>
+            <div class="cd-unit"><div class="cd-num" id="cd-m">00</div><div class="cd-unit-label">Mins</div></div>
+            <div class="cd-unit"><div class="cd-num" id="cd-s">00</div><div class="cd-unit-label">Secs</div></div>
+          </div>
+          <div class="mini-match">
+            <div class="mm-row"><span>🇺🇸 USA</span><span class="mm-vs">vs</span><span>🇲🇽 Mexico</span></div>
+            <div class="mm-pred"><span>AI: <span class="mm-win">USA Win 67%</span></span><span class="gold">+0.8 xG Edge</span></div>
+            <div class="mm-bar"><div class="mm-fill" style="width:67%"></div></div>
+          </div>
+          <div class="mini-match">
+            <div class="mm-row"><span>🇧🇷 Brazil</span><span class="mm-vs">vs</span><span>🇦🇷 Argentina</span></div>
+            <div class="mm-pred"><span>AI: <span class="mm-win">Brazil Win 52%</span></span><span class="gold">Elo +34</span></div>
+            <div class="mm-bar"><div class="mm-fill" style="width:52%"></div></div>
+          </div>
+          <div class="mini-match">
+            <div class="mm-row"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mm-vs">vs</span><span>🇪🇸 Spain</span></div>
+            <div class="mm-pred"><span>AI: <span style="color:var(--gold)">Draw 38%</span></span><span class="gold">H2H Even</span></div>
+            <div class="mm-bar"><div class="mm-fill" style="width:38%;background:var(--gold)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TICKER ───────────────────────────────────── -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span class="t-item">🇫🇷 France <span class="t-vs">vs</span> 🇩🇪 Germany · <span class="t-prob">France 64%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇧🇷 Brazil <span class="t-vs">vs</span> 🇵🇹 Portugal · <span class="t-prob">Brazil 58%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇺🇸 USA <span class="t-vs">vs</span> 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England · <span class="t-prob">England 55%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇦🇷 Argentina <span class="t-vs">vs</span> 🇳🇱 Netherlands · <span class="t-prob">Argentina 61%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇪🇸 Spain <span class="t-vs">vs</span> 🇮🇹 Italy · <span class="t-prob">Spain 59%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇯🇵 Japan <span class="t-vs">vs</span> 🇰🇷 South Korea · <span class="t-prob">Japan 53%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇲🇽 Mexico <span class="t-vs">vs</span> 🇨🇦 Canada · <span class="t-prob">Mexico 57%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇸🇳 Senegal <span class="t-vs">vs</span> 🇲🇦 Morocco · <span class="t-prob">Morocco 51%</span></span><span class="t-sep">⬥</span>
+    <!-- duplicate for seamless loop -->
+    <span class="t-item">🇫🇷 France <span class="t-vs">vs</span> 🇩🇪 Germany · <span class="t-prob">France 64%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇧🇷 Brazil <span class="t-vs">vs</span> 🇵🇹 Portugal · <span class="t-prob">Brazil 58%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇺🇸 USA <span class="t-vs">vs</span> 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England · <span class="t-prob">England 55%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇦🇷 Argentina <span class="t-vs">vs</span> 🇳🇱 Netherlands · <span class="t-prob">Argentina 61%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇪🇸 Spain <span class="t-vs">vs</span> 🇮🇹 Italy · <span class="t-prob">Spain 59%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇯🇵 Japan <span class="t-vs">vs</span> 🇰🇷 South Korea · <span class="t-prob">Japan 53%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇲🇽 Mexico <span class="t-vs">vs</span> 🇨🇦 Canada · <span class="t-prob">Mexico 57%</span></span><span class="t-sep">⬥</span>
+    <span class="t-item">🇸🇳 Senegal <span class="t-vs">vs</span> 🇲🇦 Morocco · <span class="t-prob">Morocco 51%</span></span><span class="t-sep">⬥</span>
+  </div>
+</div>
+
+<!-- ─── FEATURES ─────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-badge reveal">🎯 Features</div>
+      <h2 class="sec-h2 reveal">Everything you need to<br><span class="gold">win every bet</span></h2>
+      <p class="sec-sub reveal">Built by data scientists obsessed with football. Every prediction backed by real-time data from 12+ sources.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">🧠</div>
+        <h3 class="feat-h3">AI Match Predictions</h3>
+        <p class="feat-p">Our 8-factor weighted model processes Elo ratings, squad depth, recent form, injury reports, and historical H2H data to generate precise win/draw/loss probabilities for every single World Cup match — group stage through the final.</p>
+        <span class="feat-chip">8-Factor Model</span>
+      </div>
+      <div class="feat-card reveal reveal-d1">
+        <div class="feat-icon">📡</div>
+        <h3 class="feat-h3">Live Betting Odds & Value Picks</h3>
+        <p class="feat-p">Real-time comparison against 12+ major bookmakers including Bet365, Betway, and William Hill. Our edge detector flags every match where our model probability exceeds bookmaker odds — that's your value bet, automatically identified.</p>
+        <span class="feat-chip">Live Odds Feed</span>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <div class="feat-icon">⭐</div>
+        <h3 class="feat-h3">Player Performance Hub</h3>
+        <p class="feat-p">Deep analytics for every player at the tournament. Track xG contributions, form ratings, current injury status, defensive actions, and head-to-head stats. Know which player will decide the match before it even starts.</p>
+        <span class="feat-chip">Player Analytics</span>
+      </div>
+      <div class="feat-card reveal reveal-d3">
+        <div class="feat-icon">🔁</div>
+        <h3 class="feat-h3">Self-Learning Intelligence Engine</h3>
+        <p class="feat-p">The algorithm gets smarter after every result. Using online gradient descent and Brier Score calibration, factor weights are automatically recalibrated based on actual outcomes. It starts sharp — and only gets sharper through the tournament.</p>
+        <span class="feat-chip">Adaptive AI</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PLAYERS CAROUSEL ──────────────────────────── -->
+<section id="players">
+  <div class="container">
+    <div class="players-top reveal">
+      <div>
+        <div class="sec-badge">⭐ Stars of 2026</div>
+        <h2 class="sec-h2">The <span class="gold">World's Best</span><br>on one platform</h2>
+        <p class="sec-sub" style="margin-top:10px">Hover any card to unlock our AI prediction for that player's tournament.</p>
+      </div>
+      <div class="carousel-nav">
+        <button class="cnav-btn" id="prevBtn">←</button>
+        <button class="cnav-btn" id="nextBtn">→</button>
+      </div>
+    </div>
+    <div class="carousel-overflow">
+      <div class="carousel-track" id="carouselTrack"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── NUMBERS ──────────────────────────────────── -->
+<div id="numbers">
+  <div class="num-grid">
+    <div class="num-block"><div class="num-val"><span class="counter" data-n="2847">0</span></div><div class="num-label">Predictions Generated</div></div>
+    <div class="num-block"><div class="num-val"><span class="counter" data-n="73">0</span><span class="num-suffix">%</span></div><div class="num-label">Historical Accuracy</div></div>
+    <div class="num-block"><div class="num-val"><span class="counter" data-n="47">0</span><span class="num-suffix">+</span></div><div class="num-label">Data Points Per Match</div></div>
+    <div class="num-block"><div class="num-val"><span class="counter" data-n="104">0</span></div><div class="num-label">Matches Covered</div></div>
+  </div>
+</div>
+
+<!-- ─── HOW IT WORKS ─────────────────────────────── -->
+<section id="how">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-badge reveal">⚙️ Process</div>
+      <h2 class="sec-h2 reveal">Powered by real science,<br><span class="gold">built for winning</span></h2>
+      <p class="sec-sub reveal">From raw data to profitable predictions in three steps.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-circle">1</div>
+        <h3 class="step-h3">Data Aggregation</h3>
+        <p class="step-p">We pull from FIFA rankings, Opta, ESPN API, Transfermarkt injury reports, and 8+ bookmakers — refreshed every 6 hours before each match. No stale data, ever.</p>
+      </div>
+      <div class="step reveal reveal-d2">
+        <div class="step-circle">2</div>
+        <h3 class="step-h3">AI Analysis</h3>
+        <p class="step-p">Our weighted engine scores 8 factors per team — Elo, form, squad quality, injuries, H2H, tactics, experience, and market odds — producing a calibrated probabilistic output.</p>
+      </div>
+      <div class="step reveal reveal-d4">
+        <div class="step-circle">3</div>
+        <h3 class="step-h3">Your Edge</h3>
+        <p class="step-p">Our model diverges from bookmaker lines on ~30% of matches. Those divergences are your value bets. We flag them automatically — all you do is place the bet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ──────────────────────────────────── -->
+<section id="pricing">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-badge reveal">💳 Pricing</div>
+      <h2 class="sec-h2 reveal">One plan. <span class="gold">Everything</span> included.</h2>
+      <p class="sec-sub reveal">A single winning bet can return your subscription cost many times over. No tiers, no hidden fees, cancel any time.</p>
+    </div>
+    <div class="price-card reveal">
+      <div class="price-badge">⚽ World Cup 2026 Edition</div>
+      <div class="price-name">WorldCup Edge Pro</div>
+      <div class="price-desc">Full access to every feature, every match, all tournament</div>
+      <div class="price-amount"><sup>€</sup>10</div>
+      <div class="price-period">per month · billed monthly · cancel anytime</div>
+      <div class="price-line"></div>
+      <ul class="price-features">
+        <li><span class="pf-check">✓</span><span><strong>AI Match Predictions</strong> — Win/draw/loss probabilities for all 104 matches with confidence scores and value indicators</span></li>
+        <li><span class="pf-check">✓</span><span><strong>Live Betting Odds</strong> — Real-time odds from 12+ bookmakers with automatic value bet flagging</span></li>
+        <li><span class="pf-check">✓</span><span><strong>Player Performance Hub</strong> — xG, form ratings, injury tracker and squad analysis for all 32 squads</span></li>
+        <li><span class="pf-check">✓</span><span><strong>Intelligence Engine</strong> — Self-learning algorithm that refines itself after every result using Brier Score calibration</span></li>
+        <li><span class="pf-check">✓</span><span><strong>Full Dashboard Access</strong> — Interactive group tables, knockout bracket, Elo rankings and tactical analytics</span></li>
+        <li><span class="pf-check">✓</span><span><strong>All Data Sources</strong> — FIFA, Opta, ESPN, Transfermarkt aggregated and updated in real time</span></li>
+      </ul>
+      <a href="#" class="btn-primary btn-xl" style="width:100%;text-align:center;display:block">Start Winning Today →</a>
+      <p class="price-note">🔒 Secure checkout · Cancel before renewal for a full refund · No commitments</p>
+      <div class="disclaimer">⚠️ Gambling involves financial risk. WorldCup Edge is an analytics tool — predictions are probabilistic, not guaranteed. Please gamble responsibly. 18+ only.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ─────────────────────────────── -->
+<section id="testimonials" style="background:var(--black)">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-badge reveal">💬 Social Proof</div>
+      <h2 class="sec-h2 reveal">Winning across <span class="gold">Europe</span></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">"Hit 7 from 9 correct results in the group stage using WorldCup Edge. The value bet flags saved me from two bad odds I would have taken. This is genuinely the real deal."</p>
+        <div class="t-author">
+          <div class="t-avatar" style="background:#FFD700">MK</div>
+          <div><div class="t-name">Markus K.</div><div class="t-loc">🇩🇪 Munich, Germany</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-d1">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">"The player hub told me the opposing CB was carrying a knock. I backed Bellingham anytime scorer at +240 and it landed in the 22nd minute. The detail in this platform is incredible."</p>
+        <div class="t-author">
+          <div class="t-avatar" style="background:#00d166">JR</div>
+          <div><div class="t-name">James R.</div><div class="t-loc">🏴󠁧󠁢󠁥󠁮󠁧󠁿 London, UK</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-d2">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">"Best €10 I've ever spent. The intelligence engine genuinely gets sharper as the tournament progresses. My bankroll is up 340% over the group stages. An absolute must-have."</p>
+        <div class="t-author">
+          <div class="t-avatar" style="background:#7c3aed;color:#fff">LP</div>
+          <div><div class="t-name">Lucas P.</div><div class="t-loc">🇫🇷 Paris, France</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA BANNER ───────────────────────────────── -->
+<div class="cta-wrap">
+  <div class="container">
+    <div class="cta-box reveal">
+      <div class="cta-ball-l">⚽</div>
+      <div class="cta-ball-r">🏆</div>
+      <h2>Ready to get your <span class="gold">Edge?</span></h2>
+      <p>Join thousands of bettors using data science to win at the 2026 World Cup. Your first prediction is waiting.</p>
+      <div class="cta-btns">
+        <a href="#pricing" class="btn-primary btn-xl">Get WorldCup Edge — €10/mo →</a>
+        <a href="WorldCup2026_Dashboard.html" class="btn-xl-ghost">Preview Dashboard Free</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FOOTER ───────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-ball" style="animation:none">⚽</div>
+          <div class="logo-name">WorldCup<span>Edge</span></div>
+        </a>
+        <p>AI-powered football predictions for the 2026 FIFA World Cup. Built for bettors who want a data-driven edge.</p>
+        <div class="socials">
+          <a href="#" class="social">𝕏</a>
+          <a href="#" class="social">in</a>
+          <a href="#" class="social" style="font-size:.7rem">FB</a>
+          <a href="#" class="social" style="font-size:.7rem">IG</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <ul>
+          <li><a href="WorldCup2026_Dashboard.html">Dashboard</a></li>
+          <li><a href="#">Match Predictions</a></li>
+          <li><a href="#">Player Hub</a></li>
+          <li><a href="#">Betting Odds</a></li>
+          <li><a href="#">Intelligence Engine</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Data Sources</h5>
+        <ul>
+          <li><a href="#">FIFA Rankings</a></li>
+          <li><a href="#">Opta Stats</a></li>
+          <li><a href="#">Transfermarkt</a></li>
+          <li><a href="#">The Odds API</a></li>
+          <li><a href="#">ESPN FC</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Methodology</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Responsible Gambling</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 WorldCup Edge. All rights reserved. Bet responsibly. 18+.</p>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── NAVBAR SCROLL ───────────────────────── */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', scrollY > 60);
+});
+
+/* ── COUNTDOWN ──────────────────────────── */
+const WC_START = new Date('2026-06-11T18:00:00Z');
+function updateCD() {
+  const diff = WC_START - Date.now();
+  if (diff <= 0) return;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor(diff % 86400000 / 3600000);
+  const m = Math.floor(diff % 3600000 / 60000);
+  const s = Math.floor(diff % 60000 / 1000);
+  document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+  const daysText = d === 1 ? '1 day' : `${d} days`;
+  document.getElementById('hero-chip-text').textContent = `Live · World Cup 2026 kicks off in ${daysText}`;
+}
+updateCD(); setInterval(updateCD, 1000);
+
+/* ── PARTICLE CANVAS ────────────────────── */
+(function(){
+  const cvs = document.getElementById('particle-canvas');
+  const ctx = cvs.getContext('2d');
+  function resize(){ cvs.width = cvs.offsetWidth; cvs.height = cvs.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const particles = [];
+  function mkP(){
+    return { x: Math.random()*cvs.width, y: cvs.height+10,
+      r: Math.random()*2.2+.8, vy: Math.random()*1.4+.4,
+      vx: (Math.random()-.5)*.4, o: Math.random()*.45+.15,
+      c: Math.random()>.55 ? '#FFD700' : 'rgba(255,255,255,.35)' };
+  }
+  for(let i=0;i<50;i++){ const p=mkP(); p.y=Math.random()*cvs.height; particles.push(p); }
+  function loop(){
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    particles.forEach((p,i)=>{
+      ctx.save(); ctx.globalAlpha=p.o; ctx.fillStyle=p.c;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+      p.y-=p.vy; p.x+=p.vx; p.o-=.0018;
+      if(p.y<-12||p.o<=0) particles[i]=mkP();
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ── SCROLL REVEAL ──────────────────────── */
+const revObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); revObs.unobserve(e.target); } });
+}, { threshold:.14 });
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+/* ── COUNTER ANIMATION ──────────────────── */
+function animCount(el){
+  const target = +el.dataset.n;
+  let v = 0; const step = target/(2000/16);
+  const t = setInterval(()=>{ v=Math.min(v+step,target); el.textContent=Math.floor(v); if(v>=target) clearInterval(t); }, 16);
+}
+const numObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.counter').forEach(animCount);
+      numObs.unobserve(e.target);
+    }
+  });
+}, { threshold:.35 });
+const numEl = document.getElementById('numbers');
+if(numEl) numObs.observe(numEl);
+
+/* ── PLAYER CARDS DATA ──────────────────── */
+const PLAYERS = [
+  { name:'Kylian Mbappé',  country:'France',     flag:'🇫🇷', pos:'FWD', pc:'#e53030',
+    j1:'#003189', j2:'#00205c', num:'10', rating:97,
+    stats:{Goals:'9',Assists:'5','xG':'8.7','Rating':'9.1'},
+    pred:'France to reach the Final' },
+  { name:'Vinicius Jr.',   country:'Brazil',     flag:'🇧🇷', pos:'FWD', pc:'#e53030',
+    j1:'#009c3b', j2:'#006827', num:'7',  rating:95,
+    stats:{Goals:'7',Assists:'8','xG':'7.2','Rating':'8.9'},
+    pred:'Tournament Top Scorer contender' },
+  { name:'Jude Bellingham',country:'England',    flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', pos:'MID', pc:'#3b82f6',
+    j1:'#cf081f', j2:'#9e0018', num:'10', rating:94,
+    stats:{Goals:'5',Assists:'9','xG':'5.1','Rating':'8.8'},
+    pred:'England QF, Bellingham MOTM ×3' },
+  { name:'Lamine Yamal',   country:'Spain',      flag:'🇪🇸', pos:'FWD', pc:'#e53030',
+    j1:'#aa151b', j2:'#7a0e14', num:'19', rating:93,
+    stats:{Goals:'6',Assists:'7','xG':'5.8','Rating':'8.7'},
+    pred:'Spain to win the World Cup' },
+  { name:'Rodri',          country:'Spain',      flag:'🇪🇸', pos:'MID', pc:'#3b82f6',
+    j1:'#aa151b', j2:'#7a0e14', num:'16', rating:93,
+    stats:{Goals:'2',Assists:'5','xG':'2.3','Rating':'8.9'},
+    pred:'Best defensive midfielder at WC26' },
+  { name:'Phil Foden',     country:'England',    flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', pos:'MID', pc:'#3b82f6',
+    j1:'#cf081f', j2:'#9e0018', num:'47', rating:92,
+    stats:{Goals:'4',Assists:'6','xG':'4.5','Rating':'8.5'},
+    pred:'Key to England\'s attacking play' },
+  { name:'Bukayo Saka',    country:'England',    flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', pos:'FWD', pc:'#e53030',
+    j1:'#cf081f', j2:'#9e0018', num:'7',  rating:91,
+    stats:{Goals:'5',Assists:'7','xG':'5.0','Rating':'8.6'},
+    pred:'Top 5 chance creators at WC26' },
+  { name:'Pedri',          country:'Spain',      flag:'🇪🇸', pos:'MID', pc:'#3b82f6',
+    j1:'#aa151b', j2:'#7a0e14', num:'8',  rating:91,
+    stats:{Goals:'3',Assists:'8','xG':'3.1','Rating':'8.7'},
+    pred:'Tournament leader in key passes' },
+];
+
+function buildSVG(p){
+  return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="p-svg">
+    <ellipse cx="60" cy="155" rx="28" ry="5" fill="rgba(0,0,0,.28)"/>
+    <rect x="43" y="108" width="14" height="36" rx="7" fill="${p.j1}"/>
+    <rect x="63" y="108" width="14" height="36" rx="7" fill="${p.j1}"/>
+    <rect x="40" y="137" width="18" height="8" rx="4" fill="#111"/>
+    <rect x="62" y="137" width="18" height="8" rx="4" fill="#111"/>
+    <rect x="39" y="96" width="42" height="22" rx="6" fill="${p.j2}"/>
+    <path d="M30 60 L30 100 Q30 108 40 108 L80 108 Q90 108 90 100 L90 60 Z" fill="${p.j1}"/>
+    <path d="M48 60 Q60 54 72 60 L72 67 Q60 63 48 67 Z" fill="${p.j2}"/>
+    <text x="60" y="89" text-anchor="middle" fill="rgba(255,255,255,.88)" font-size="15" font-weight="bold" font-family="Arial">${p.num}</text>
+    <path d="M30 63 Q16 71 18 88 L26 88 Q28 76 36 68 Z" fill="${p.j1}"/>
+    <path d="M90 63 Q104 71 102 88 L94 88 Q92 76 84 68 Z" fill="${p.j1}"/>
+    <circle cx="22" cy="91" r="7" fill="#e8b88a"/>
+    <circle cx="98" cy="91" r="7" fill="#e8b88a"/>
+    <rect x="53" y="46" width="14" height="16" rx="7" fill="#e8b88a"/>
+    <ellipse cx="60" cy="38" rx="22" ry="26" fill="#e8b88a"/>
+    <ellipse cx="60" cy="16" rx="22" ry="12" fill="${p.j1}"/>
+    <circle cx="53" cy="36" r="3" fill="#333"/>
+    <circle cx="67" cy="36" r="3" fill="#333"/>
+    <circle cx="54" cy="35" r="1.2" fill="white"/>
+    <circle cx="68" cy="35" r="1.2" fill="white"/>
+  </svg>`;
+}
+
+function buildCard(p){
+  const statsHTML = Object.entries(p.stats).map(([k,v])=>
+    `<div class="pb-stat"><div class="pb-val">${v}</div><div class="pb-label">${k}</div></div>`
+  ).join('');
+  const miniStats = Object.entries(p.stats).slice(0,3).map(([k,v])=>
+    `<div><span class="ms-val">${v}</span><span class="ms-label">${k}</span></div>`
+  ).join('');
+  return `<div class="p-card">
+    <div class="p-card-inner">
+      <div class="p-front">
+        <div class="p-jersey" style="background:linear-gradient(180deg,${p.j1}44 0%,${p.j2}66 100%)">
+          ${buildSVG(p)}
+          <div class="p-pos-tag" style="background:${p.pc}">${p.pos}</div>
+          <div class="p-flag-tag">${p.flag}</div>
+        </div>
+        <div class="p-body">
+          <div class="p-name">${p.name}</div>
+          <div class="p-country">${p.flag} ${p.country}</div>
+          <div class="p-rating">${p.rating}</div>
+          <div class="p-mini-stats">${miniStats}</div>
+        </div>
+      </div>
+      <div class="p-back">
+        <div>
+          <div class="pb-name">${p.name}</div>
+          <div class="pb-country">${p.flag} ${p.country} · ${p.pos}</div>
+        </div>
+        <div class="pb-stats">${statsHTML}</div>
+        <div class="pb-pred">
+          <div class="pb-pred-label">🧠 AI Tournament Prediction</div>
+          <div class="pb-pred-val">${p.pred}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const track = document.getElementById('carouselTrack');
+track.innerHTML = PLAYERS.map(buildCard).join('');
+
+/* ── CAROUSEL LOGIC ────────────────────── */
+let cPos = 0;
+const visN = () => window.innerWidth < 900 ? 2 : 4;
+const maxPos = () => PLAYERS.length - visN();
+function moveCarousel(){
+  const cw = track.querySelector('.p-card').offsetWidth + 22;
+  track.style.transform = `translateX(-${cPos * cw}px)`;
+}
+document.getElementById('prevBtn').onclick = () => { cPos = Math.max(0, cPos-1); moveCarousel(); };
+document.getElementById('nextBtn').onclick = () => { cPos = Math.min(maxPos(), cPos+1); moveCarousel(); };
+window.addEventListener('resize', () => { cPos = Math.min(cPos, maxPos()); moveCarousel(); });
+</script>
+</body>
+</html>
