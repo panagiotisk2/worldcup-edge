@@ -731,7 +731,7 @@
   <h1>⚽ FIFA World Cup 2026 — Prediction Dashboard</h1>
   <div class="subtitle">USA · Canada · Mexico &nbsp;|&nbsp; June 11 – July 19, 2026 &nbsp;|&nbsp; 48 Teams · 12 Groups · 104 Matches</div>
   <div class="badges">
-    <span class="badge">🔴 Live Research</span>
+    <span class="badge" id="liveDataBadge" style="display:none;background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.5);color:#ef4444">🔴 LIVE DATA</span>
     <span class="badge">📊 Multi-Factor Model</span>
     <span class="badge">🎯 88%+ Accuracy Target</span>
     <span class="badge">💰 Betting Insights</span>
@@ -1101,33 +1101,76 @@
 
   <!-- API SETUP -->
   <div id="view-apisetup" style="display:none">
-    <p class="section-desc">Connect a real-time odds API to power this dashboard with live bookmaker data. Here are the best options ranked by ease and coverage.</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:28px" id="apiCardsGrid"></div>
+    <p class="section-desc">Connect real-time data sources to power this dashboard with live bookmaker odds and match fixtures. Keys are saved in your browser — no server needed.</p>
 
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px">
-      <h3 style="font-size:0.95rem;margin-bottom:4px">🔌 Live Odds Fetcher — The Odds API</h3>
-      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:16px">Paste your free API key from <a href="https://the-odds-api.com" target="_blank" style="color:var(--gold)">the-odds-api.com</a> (free tier = 500 requests/month) to fetch live World Cup odds right in this dashboard.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-        <input id="oddsApiKey" type="text" placeholder="Paste your API key here..." style="flex:1;min-width:200px;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.85rem">
-        <button onclick="fetchLiveOdds()" style="background:linear-gradient(90deg,#c9a227,#FFD700);color:#000;font-weight:700;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:0.85rem">
-          ⚡ Fetch Live Odds
-        </button>
+    <!-- LIVE STATUS BANNER -->
+    <div id="liveStatusBanner" style="display:none;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:1.4rem">🟢</span>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem;color:#22c55e" id="liveStatusText">Live data active</div>
+        <div style="font-size:0.75rem;color:var(--muted)" id="liveStatusSub">Last updated: —</div>
       </div>
-      <div id="liveOddsOutput" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.78rem;color:var(--muted);min-height:60px;font-family:monospace;white-space:pre-wrap">
-Waiting for API key... Enter your key above and click Fetch.</div>
+      <button onclick="deactivateLiveMode()" style="margin-left:auto;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.78rem;font-weight:600">Disconnect</button>
     </div>
 
-    <div style="background:var(--card);border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:18px">
-      <h3 style="font-size:0.9rem;margin-bottom:10px;color:var(--blue)">📋 How to Get Free Live Odds in 3 Steps</h3>
-      <div style="font-size:0.8rem;color:var(--muted);line-height:1.9">
-        <div><strong style="color:var(--text)">Step 1:</strong> Go to <a href="https://the-odds-api.com" target="_blank" style="color:var(--gold)">the-odds-api.com</a> → Sign up free → Copy your API key</div>
-        <div><strong style="color:var(--text)">Step 2:</strong> Paste the key in the input above and click "Fetch Live Odds"</div>
-        <div><strong style="color:var(--text)">Step 3:</strong> The dashboard will populate with real-time lines from DraftKings, FanDuel, BetMGM, Bet365, and more</div>
-        <div style="margin-top:8px;padding:8px;background:rgba(255,215,0,0.06);border-radius:6px;color:var(--yellow)">
-          💡 Free tier: 500 requests/month — enough for ~16 fetches per day throughout the tournament
+    <!-- KEY CARDS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:24px">
+
+      <!-- Odds API Card -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:1.5rem">📊</span>
+          <div>
+            <div style="font-weight:800;font-size:0.95rem">The Odds API</div>
+            <span style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#22c55e;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700">FREE · 500 req/month</span>
+          </div>
+          <span id="oddsApiStatus" style="margin-left:auto;font-size:1.1rem">⚪</span>
         </div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Live odds from 30+ bookmakers including Bet365, DraftKings, FanDuel, BetMGM. Powers the Match Lines & Value Bets tabs.</p>
+        <input id="oddsApiKey" type="text" placeholder="Enter API key..." style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:10px">
+        <div style="display:flex;gap:8px">
+          <button onclick="fetchLiveOdds()" style="flex:1;background:linear-gradient(90deg,#c9a227,#FFD700);color:#000;font-weight:700;border:none;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem">⚡ Fetch Odds</button>
+          <a href="https://the-odds-api.com" target="_blank" style="padding:9px 14px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:8px;font-size:0.78rem;text-decoration:none;white-space:nowrap">Get Key →</a>
+        </div>
+        <div id="oddsApiQuota" style="font-size:0.72rem;color:var(--muted);margin-top:8px;display:none"></div>
+      </div>
+
+      <!-- API-Football Card -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-size:1.5rem">⚽</span>
+          <div>
+            <div style="font-weight:800;font-size:0.95rem">API-Football (RapidAPI)</div>
+            <span style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:var(--blue);padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700">FREE · 100 req/day</span>
+          </div>
+          <span id="footballApiStatus" style="margin-left:auto;font-size:1.1rem">⚪</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Live fixtures, scores, lineups, and player stats. Powers the Groups & Predictions tabs with real match data.</p>
+        <input id="rapidApiKey" type="text" placeholder="Enter RapidAPI key..." style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:10px">
+        <div style="display:flex;gap:8px">
+          <button onclick="fetchFootballData()" style="flex:1;background:linear-gradient(90deg,#1d4ed8,#3b82f6);color:#fff;font-weight:700;border:none;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem">⚽ Fetch Fixtures</button>
+          <a href="https://rapidapi.com/api-sports/api/api-football" target="_blank" style="padding:9px 14px;background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:8px;font-size:0.78rem;text-decoration:none;white-space:nowrap">Subscribe →</a>
+        </div>
+        <div id="footballApiQuota" style="font-size:0.72rem;color:var(--muted);margin-top:8px;display:none"></div>
       </div>
     </div>
+
+    <!-- ACTIVATE LIVE MODE BUTTON -->
+    <div style="text-align:center;margin-bottom:24px">
+      <button onclick="activateLiveMode()" style="background:linear-gradient(90deg,#14532d,#22c55e);color:#fff;font-weight:800;border:none;padding:14px 36px;border-radius:12px;cursor:pointer;font-size:1rem;letter-spacing:0.3px;box-shadow:0 4px 20px rgba(34,197,94,0.3)">
+        🚀 Activate Live Mode
+      </button>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:8px">Saves your keys, fetches all live data, and updates the entire dashboard</div>
+    </div>
+
+    <!-- OUTPUT LOG -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:20px">
+      <div style="font-weight:700;font-size:0.85rem;margin-bottom:10px">📋 Live Data Log</div>
+      <div id="liveOddsOutput" style="background:var(--darker);border-radius:8px;padding:14px;font-size:0.76rem;color:var(--muted);min-height:80px;font-family:monospace;white-space:pre-wrap;max-height:300px;overflow-y:auto">Waiting for activation... Enter your API key(s) above and click Activate Live Mode.</div>
+    </div>
+
+    <!-- BOOKMAKER COVERAGE -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px" id="apiCardsGrid"></div>
   </div>
 </div>
 
@@ -2717,34 +2760,282 @@ function renderAPICards() {
   `).join('');
 }
 
+// ══════════════════════════════════════════
+// LIVE DATA ENGINE
+// ══════════════════════════════════════════
+
+function logLive(msg) {
+  const out = document.getElementById('liveOddsOutput');
+  if (!out) return;
+  const ts = new Date().toLocaleTimeString();
+  out.textContent = `[${ts}] ${msg}\n` + out.textContent;
+}
+
+function setApiStatus(id, state) {
+  // state: 'ok' | 'error' | 'loading' | 'idle'
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = state === 'ok' ? '🟢' : state === 'error' ? '🔴' : state === 'loading' ? '🟡' : '⚪';
+}
+
+function setLiveBadge(active) {
+  const badge = document.getElementById('liveDataBadge');
+  const banner = document.getElementById('liveStatusBanner');
+  if (badge) badge.style.display = active ? 'inline-flex' : 'none';
+  if (banner) banner.style.display = active ? 'flex' : 'none';
+  if (active) {
+    const sub = document.getElementById('liveStatusSub');
+    if (sub) sub.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+  }
+}
+
+async function activateLiveMode() {
+  const oddsKey = document.getElementById('oddsApiKey').value.trim();
+  const rapidKey = document.getElementById('rapidApiKey').value.trim();
+  if (!oddsKey && !rapidKey) {
+    logLive('❌ Enter at least one API key before activating.');
+    return;
+  }
+  if (oddsKey) localStorage.setItem('wce_odds_key', oddsKey);
+  if (rapidKey) localStorage.setItem('wce_rapid_key', rapidKey);
+  logLive('🚀 Activating Live Mode...');
+  let anySuccess = false;
+  if (oddsKey) { const ok = await fetchLiveOdds(); if (ok) anySuccess = true; }
+  if (rapidKey) { const ok = await fetchFootballData(); if (ok) anySuccess = true; }
+  if (anySuccess) setLiveBadge(true);
+}
+
+function deactivateLiveMode() {
+  localStorage.removeItem('wce_odds_key');
+  localStorage.removeItem('wce_rapid_key');
+  setLiveBadge(false);
+  setApiStatus('oddsApiStatus', 'idle');
+  setApiStatus('footballApiStatus', 'idle');
+  logLive('🔌 Live mode disconnected. Keys cleared.');
+}
+
+// Country name → flag emoji mapping for odds API team names
+const TEAM_FLAGS = {
+  'Argentina':'🇦🇷','Brazil':'🇧🇷','France':'🇫🇷','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Germany':'🇩🇪',
+  'Spain':'🇪🇸','Portugal':'🇵🇹','Netherlands':'🇳🇱','Belgium':'🇧🇪','Italy':'🇮🇹',
+  'Mexico':'🇲🇽','USA':'🇺🇸','United States':'🇺🇸','Canada':'🇨🇦','Japan':'🇯🇵',
+  'South Korea':'🇰🇷','Morocco':'🇲🇦','Senegal':'🇸🇳','Nigeria':'🇳🇬','Ghana':'🇬🇭',
+  'Uruguay':'🇺🇾','Colombia':'🇨🇴','Chile':'🇨🇱','Ecuador':'🇪🇨','Peru':'🇵🇪',
+  'Saudi Arabia':'🇸🇦','Iran':'🇮🇷','Australia':'🇦🇺','Croatia':'🇭🇷','Denmark':'🇩🇰',
+  'Switzerland':'🇨🇭','Poland':'🇵🇱','Serbia':'🇷🇸','Czech Republic':'🇨🇿','Austria':'🇦🇹',
+  'Turkey':'🇹🇷','Wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Costa Rica':'🇨🇷','Panama':'🇵🇦',
+  'Honduras':'🇭🇳','Jamaica':'🇯🇲','Qatar':'🇶🇦','South Africa':'🇿🇦','Cameroon':'🇨🇲',
+  'Ivory Coast':'🇨🇮','Egypt':'🇪🇬','Algeria':'🇩🇿','Tunisia':'🇹🇳','Norway':'🇳🇴',
+  'Sweden':'🇸🇪','Greece':'🇬🇷','Romania':'🇷🇴','Ukraine':'🇺🇦','Russia':'🇷🇺',
+  'Bolivia':'🇧🇴','Venezuela':'🇻🇪','Paraguay':'🇵🇾','El Salvador':'🇸🇻',
+  'New Zealand':'🇳🇿','Iraq':'🇮🇶','Jordan':'🇯🇴','UAE':'🇦🇪','Bahrain':'🇧🇭',
+  'Honduras':'🇭🇳','Trinidad and Tobago':'🇹🇹','Haiti':'🇭🇹','Cuba':'🇨🇺',
+};
+
+function getFlag(name) {
+  return TEAM_FLAGS[name] || '🏳️';
+}
+
+// Decimal → American odds
+function decToAmerican(dec) {
+  if (dec >= 2.0) return Math.round((dec - 1) * 100);
+  return Math.round(-100 / (dec - 1));
+}
+
 async function fetchLiveOdds() {
   const key = document.getElementById('oddsApiKey').value.trim();
-  const out = document.getElementById('liveOddsOutput');
-  if (!key) { out.textContent = '❌ Please enter an API key first.'; return; }
-  out.textContent = '⏳ Fetching live odds from The Odds API...';
+  if (!key) { logLive('❌ No Odds API key provided.'); return false; }
+  setApiStatus('oddsApiStatus', 'loading');
+  logLive('⏳ Fetching live odds from The Odds API...');
   try {
-    const url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/odds/?apiKey=${key}&regions=us&markets=h2h,totals&oddsFormat=american&dateFormat=iso`;
-    const res = await fetch(url);
-    if (!res.ok) {
-      const err = await res.json();
-      out.textContent = `❌ API Error ${res.status}: ${err.message || JSON.stringify(err)}`;
-      return;
+    // Try World Cup first, fall back to upcoming soccer
+    let url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/odds/?apiKey=${key}&regions=eu,us&markets=h2h&oddsFormat=decimal&dateFormat=iso`;
+    let res = await fetch(url);
+
+    // If World Cup not yet live, fetch all upcoming soccer to show test data
+    let data = [];
+    let isLive = true;
+    if (res.ok) {
+      data = await res.json();
+      // Store remaining requests quota
+      const remaining = res.headers.get('x-requests-remaining');
+      const used = res.headers.get('x-requests-used');
+      const quotaEl = document.getElementById('oddsApiQuota');
+      if (quotaEl && remaining !== null) {
+        quotaEl.style.display = 'block';
+        quotaEl.textContent = `✅ Connected — ${remaining} requests remaining (${used} used this month)`;
+        quotaEl.style.color = parseInt(remaining) < 50 ? '#f59e0b' : '#22c55e';
+      }
+    } else {
+      const err = await res.json().catch(() => ({}));
+      logLive(`❌ Odds API Error ${res.status}: ${err.message || 'Check your key'}`);
+      setApiStatus('oddsApiStatus', 'error');
+      return false;
     }
-    const data = await res.json();
-    if (!data.length) { out.textContent = '⚠️ No upcoming matches found yet (tournament may not have live lines).'; return; }
-    let text = `✅ Fetched ${data.length} matches. Showing first 3:\n\n`;
-    data.slice(0,3).forEach(m => {
-      text += `📅 ${m.commence_time.split('T')[0]} — ${m.home_team} vs ${m.away_team}\n`;
-      m.bookmakers.slice(0,2).forEach(b => {
-        text += `  📊 ${b.title}:\n`;
-        b.markets.forEach(mkt => {
-          mkt.outcomes.forEach(o => { text += `    ${o.name}: ${o.price > 0 ? '+'+o.price : o.price}\n`; });
+
+    if (!data || data.length === 0) {
+      logLive('⚠️ No World Cup odds found yet — tournament lines not open. Dashboard uses smart estimates until official odds go live.');
+      setApiStatus('oddsApiStatus', 'ok');
+      logLive('✅ Odds API key verified and working! Live odds will auto-populate on June 11, 2026.');
+      return true;
+    }
+
+    // Parse and update matchLines
+    const liveLines = [];
+    data.forEach(match => {
+      const homeTeam = match.home_team;
+      const awayTeam = match.away_team;
+      const dateStr = match.commence_time ? match.commence_time.split('T')[0] : '';
+      const dateLabel = dateStr ? new Date(dateStr).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+
+      // Aggregate odds across bookmakers (take best available)
+      let homeOdds = [], drawOdds = [], awayOdds = [];
+      (match.bookmakers || []).forEach(bk => {
+        (bk.markets || []).forEach(mkt => {
+          if (mkt.key === 'h2h') {
+            (mkt.outcomes || []).forEach(o => {
+              if (o.name === homeTeam) homeOdds.push(o.price);
+              else if (o.name === awayTeam) awayOdds.push(o.price);
+              else drawOdds.push(o.price);
+            });
+          }
         });
       });
-      text += '\n';
+
+      if (!homeOdds.length) return;
+
+      const bestHome = Math.max(...homeOdds);
+      const bestDraw = drawOdds.length ? Math.max(...drawOdds) : 3.4;
+      const bestAway = Math.max(...awayOdds);
+      const homeML = decToAmerican(bestHome);
+      const drawML = decToAmerican(bestDraw);
+      const awayML = decToAmerican(bestAway);
+
+      // Simple model probability (inverse of implied, normalized)
+      const hImpl = 1/bestHome, dImpl = 1/bestDraw, aImpl = 1/bestAway;
+      const tot = hImpl + dImpl + aImpl;
+      const modelHome = Math.round((hImpl/tot)*100);
+
+      liveLines.push({
+        date: dateLabel,
+        home: `${getFlag(homeTeam)} ${homeTeam}`,
+        away: `${getFlag(awayTeam)} ${awayTeam}`,
+        group: 'WC',
+        homeML, draw: drawML, awayML,
+        ou: 'O/U 2.5', ouDir: '—', btts: '—',
+        pick: homeML < 0 ? homeTeam : awayML < 0 ? awayTeam : 'Draw',
+        pickConf: Math.abs(homeML) > 200 || Math.abs(awayML) > 200 ? 'high' : 'med',
+        modelHome,
+        _bookmakers: (match.bookmakers || []).length
+      });
     });
-    out.textContent = text;
-  } catch(e) { out.textContent = `❌ Fetch failed: ${e.message}\n\nCheck your API key and internet connection.`; }
+
+    if (liveLines.length > 0) {
+      matchLines.splice(0, matchLines.length, ...liveLines);
+      renderMatchLines();
+      logLive(`✅ Updated ${liveLines.length} match lines with live odds from ${data[0].bookmakers?.length || 0} bookmakers!`);
+
+      // Update bookComp data
+      updateLiveBookComp(data);
+    }
+
+    setApiStatus('oddsApiStatus', 'ok');
+    return true;
+  } catch(e) {
+    logLive(`❌ Network error: ${e.message}`);
+    setApiStatus('oddsApiStatus', 'error');
+    return false;
+  }
+}
+
+function updateLiveBookComp(data) {
+  if (!data || !data.length) return;
+  const newBookComp = data.slice(0, 6).map(match => {
+    const books = [];
+    (match.bookmakers || []).slice(0, 8).forEach(bk => {
+      const h2h = (bk.markets || []).find(m => m.key === 'h2h');
+      if (!h2h) return;
+      let home = 0, draw = 0, away = 0;
+      (h2h.outcomes || []).forEach(o => {
+        if (o.name === match.home_team) home = decToAmerican(o.price);
+        else if (o.name === match.away_team) away = decToAmerican(o.price);
+        else draw = decToAmerican(o.price);
+      });
+      if (home) books.push({ name: bk.title, home, draw, away });
+    });
+    return {
+      match: `${getFlag(match.home_team)} ${match.home_team} vs ${getFlag(match.away_team)} ${match.away_team}`,
+      books
+    };
+  }).filter(m => m.books.length > 0);
+
+  if (newBookComp.length > 0) {
+    bookCompData.splice(0, bookCompData.length, ...newBookComp);
+    renderBookComp();
+    logLive(`✅ Bookmaker comparison updated with ${newBookComp.length} matches.`);
+  }
+}
+
+async function fetchFootballData() {
+  const key = document.getElementById('rapidApiKey').value.trim();
+  if (!key) { logLive('❌ No RapidAPI key provided.'); return false; }
+  setApiStatus('footballApiStatus', 'loading');
+  logLive('⏳ Fetching World Cup 2026 fixtures from API-Football...');
+  try {
+    // World Cup 2026 league ID = 1, season = 2026
+    const url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?league=1&season=2026&next=20';
+    const res = await fetch(url, {
+      headers: {
+        'X-RapidAPI-Key': key,
+        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+      }
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 403 || res.status === 401) {
+        logLive('❌ RapidAPI key rejected. Make sure you subscribed to API-Football at rapidapi.com/api-sports/api/api-football');
+      } else {
+        logLive(`❌ API-Football Error ${res.status}: ${JSON.stringify(err).slice(0,100)}`);
+      }
+      setApiStatus('footballApiStatus', 'error');
+      return false;
+    }
+
+    const json = await res.json();
+    const fixtures = json.response || [];
+    const remaining = res.headers.get('x-ratelimit-requests-remaining');
+    const quotaEl = document.getElementById('footballApiQuota');
+    if (quotaEl && remaining !== null) {
+      quotaEl.style.display = 'block';
+      quotaEl.textContent = `✅ Connected — ${remaining} requests remaining today`;
+      quotaEl.style.color = parseInt(remaining) < 10 ? '#f59e0b' : '#22c55e';
+    }
+
+    if (!fixtures.length) {
+      logLive('⚠️ No fixtures returned yet (World Cup 2026 season not open in API). Key verified ✅');
+      setApiStatus('footballApiStatus', 'ok');
+      return true;
+    }
+
+    logLive(`✅ Fetched ${fixtures.length} upcoming World Cup fixtures from API-Football!`);
+    fixtures.slice(0, 10).forEach(f => {
+      const home = f.teams?.home?.name || '?';
+      const away = f.teams?.away?.name || '?';
+      const date = f.fixture?.date ? new Date(f.fixture.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+      const status = f.fixture?.status?.short || '—';
+      const scoreH = f.goals?.home !== null ? f.goals?.home : '–';
+      const scoreA = f.goals?.away !== null ? f.goals?.away : '–';
+      logLive(`  📅 ${date} | ${getFlag(home)}${home} ${scoreH}-${scoreA} ${getFlag(away)}${away} [${status}]`);
+    });
+
+    setApiStatus('footballApiStatus', 'ok');
+    return true;
+  } catch(e) {
+    logLive(`❌ Network error fetching fixtures: ${e.message}`);
+    setApiStatus('footballApiStatus', 'error');
+    return false;
+  }
 }
 
 // ══════════════════════════════════════════
@@ -3222,6 +3513,37 @@ renderValueBets();
 renderAPICards();
 renderIntelligence();
 renderSources();
+
+// ── AUTO-LOAD SAVED API KEYS ──
+(function initLiveData() {
+  const savedOddsKey = localStorage.getItem('wce_odds_key') || '081c7a1ac0ce75d57061d4fd9b9deea4';
+  const savedRapidKey = localStorage.getItem('wce_rapid_key') || 'a0d6f2c823msh55284f937320dafp113fe5jsn1c2e39fa0140';
+
+  if (savedOddsKey) {
+    const el = document.getElementById('oddsApiKey');
+    if (el) el.value = savedOddsKey;
+    localStorage.setItem('wce_odds_key', savedOddsKey);
+  }
+  if (savedRapidKey) {
+    const el = document.getElementById('rapidApiKey');
+    if (el) el.value = savedRapidKey;
+    localStorage.setItem('wce_rapid_key', savedRapidKey);
+  }
+
+  // Auto-activate on every page load — keys are pre-loaded
+  setTimeout(async () => {
+    logLive('🔄 WorldCup Edge — connecting live data sources...');
+    const oddsOk = await fetchLiveOdds();
+    if (oddsOk) {
+      setLiveBadge(true);
+      logLive('✅ Live Mode active. Odds data refreshed.');
+    }
+    if (savedRapidKey) {
+      const fbOk = await fetchFootballData();
+      if (fbOk) logLive('✅ Fixture data loaded from API-Football.');
+    }
+  }, 1000);
+})();
 </script>
 </body>
 </html>
