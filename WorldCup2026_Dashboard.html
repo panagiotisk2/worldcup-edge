@@ -737,6 +737,13 @@
     <span class="badge">💰 Betting Insights</span>
     <span class="badge">🤕 Injury Tracker</span>
   </div>
+  <!-- REFRESH BUTTON -->
+  <div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+    <button id="refreshBtn" onclick="refreshAllData()" style="background:linear-gradient(90deg,#c9a227,#FFD700);color:#000;font-weight:800;border:none;padding:10px 24px;border-radius:10px;cursor:pointer;font-size:0.88rem;display:flex;align-items:center;gap:8px;transition:opacity 0.2s">
+      <span id="refreshIcon">🔄</span> Refresh Live Data
+    </button>
+    <span id="lastRefreshTime" style="font-size:0.75rem;color:rgba(255,255,255,0.4)">Last updated: —</span>
+  </div>
 </div>
 
 <!-- TABS -->
@@ -780,10 +787,10 @@
         <div style="font-size:2.5rem">🇫🇷</div>
         <div style="font-weight:800;font-size:1.1rem;margin-top:8px">France</div>
         <div style="color:var(--muted);font-size:0.8rem">Group I</div>
-        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+500</div>
-        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~16.7%</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+450</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~18.2%</div>
         <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">⚠️ Mbappe injury concern</div>
-        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Co-Favorite</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Market Favorite</div>
       </div>
     </div>
 
@@ -804,8 +811,8 @@
         <div style="font-size:2.5rem">🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
         <div style="font-weight:800;font-size:1.1rem;margin-top:8px">England</div>
         <div style="color:var(--muted);font-size:0.8rem">Group L</div>
-        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+600</div>
-        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~14.3%</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+650</div>
+        <div style="font-size:0.72rem;color:var(--green)">Win Prob: ~13.3%</div>
         <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">✅ Full squad available</div>
         <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">3rd Favorite</div>
       </div>
@@ -1366,7 +1373,7 @@ const groups = [
     { flag:'🇨🇻', name:'Cape Verde', rank:'#71', odds:'+50000' },
   ]},
   { letter: 'I', city: 'Various US Cities', teams: [
-    { flag:'🇫🇷', name:'France', rank:'#2', odds:'+500' },
+    { flag:'🇫🇷', name:'France', rank:'#2', odds:'+450' },
     { flag:'🇸🇳', name:'Senegal', rank:'#18', odds:'+6000' },
     { flag:'🇳🇴', name:'Norway', rank:'#29', odds:'+7000' },
     { flag:'🇮🇶', name:'Iraq', rank:'#62', odds:'+25000' },
@@ -1384,7 +1391,7 @@ const groups = [
     { flag:'🇨🇩', name:'DR Congo', rank:'#47', odds:'+18000' },
   ]},
   { letter: 'L', city: 'Various US Cities', teams: [
-    { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England', rank:'#5', odds:'+600' },
+    { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England', rank:'#5', odds:'+650' },
     { flag:'🇭🇷', name:'Croatia', rank:'#10', odds:'+3500' },
     { flag:'🇬🇭', name:'Ghana', rank:'#60', odds:'+20000' },
     { flag:'🇵🇦', name:'Panama', rank:'#72', odds:'+30000' },
@@ -1576,9 +1583,9 @@ const matches = [
 ];
 
 const oddsData = [
-  { flag:'🇫🇷', name:'France', group:'I', odds:'+500', impliedPct:16.7, modelPct:18, note:'Co-Favorite', assessment:'BUY — slight value', color:'#22c55e' },
-  { flag:'🇪🇸', name:'Spain', group:'H', odds:'+500', impliedPct:16.7, modelPct:17, note:'Co-Favorite', assessment:'NEUTRAL — fair price', color:'#f59e0b' },
-  { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England', group:'L', odds:'+600', impliedPct:14.3, modelPct:15, note:'3rd Fav', assessment:'BUY — slight value', color:'#22c55e' },
+  { flag:'🇫🇷', name:'France', group:'I', odds:'+450', impliedPct:18.2, modelPct:18, note:'Market Favorite', assessment:'NEUTRAL — fair price', color:'#f59e0b' },
+  { flag:'🇪🇸', name:'Spain', group:'H', odds:'+500', impliedPct:16.7, modelPct:17, note:'Co-Favorite', assessment:'BUY — slight value', color:'#22c55e' },
+  { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England', group:'L', odds:'+650', impliedPct:13.3, modelPct:15, note:'3rd Fav', assessment:'BUY — model above market', color:'#22c55e' },
   { flag:'🇧🇷', name:'Brazil', group:'C', odds:'+800', impliedPct:11.1, modelPct:10, note:'Rodrygo OUT', assessment:'SELL — Rodrygo loss', color:'#ef4444' },
   { flag:'🇦🇷', name:'Argentina', group:'J', odds:'+850', impliedPct:10.5, modelPct:12, note:'Reigning champs', assessment:'BUY — good value', color:'#22c55e' },
   { flag:'🇩🇪', name:'Germany', group:'E', odds:'+1400', impliedPct:6.7, modelPct:7, note:'Gnabry OUT', assessment:'NEUTRAL — fair price', color:'#f59e0b' },
@@ -3497,6 +3504,64 @@ function showIntelView(view, btn) {
   });
 }
 
+// ── REFRESH ALL DATA ──
+async function refreshAllData() {
+  const btn = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  const timeEl = document.getElementById('lastRefreshTime');
+
+  // Animate button
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; }
+  if (icon) icon.textContent = '⏳';
+
+  // Spin animation
+  let dots = 0;
+  const spin = setInterval(() => {
+    if (icon) icon.textContent = ['⏳','🔄','⌛','🔄'][dots++ % 4];
+  }, 400);
+
+  showToast('🔄 Refreshing live data...', 'green');
+  logLive('🔄 Manual refresh triggered...');
+
+  try {
+    const oddsKey = localStorage.getItem('wce_odds_key') || document.getElementById('oddsApiKey')?.value;
+    const rapidKey = localStorage.getItem('wce_rapid_key') || document.getElementById('rapidApiKey')?.value;
+
+    let anyOk = false;
+    if (oddsKey) {
+      if (document.getElementById('oddsApiKey')) document.getElementById('oddsApiKey').value = oddsKey;
+      const ok = await fetchLiveOdds();
+      if (ok) anyOk = true;
+    }
+    if (rapidKey) {
+      if (document.getElementById('rapidApiKey')) document.getElementById('rapidApiKey').value = rapidKey;
+      const ok = await fetchFootballData();
+      if (ok) anyOk = true;
+    }
+
+    // Update last refresh time
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    const dateStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    if (timeEl) timeEl.textContent = `Last updated: ${dateStr} at ${timeStr}`;
+    localStorage.setItem('wce_last_refresh', now.toISOString());
+
+    if (anyOk) {
+      setLiveBadge(true);
+      showToast('✅ Data refreshed successfully!', 'green');
+    } else {
+      showToast('⚠️ Refresh complete — no live lines yet (opens June 11)', 'green');
+    }
+  } catch(e) {
+    logLive(`❌ Refresh error: ${e.message}`);
+    showToast('❌ Refresh failed — check connection', 'red');
+  } finally {
+    clearInterval(spin);
+    if (icon) icon.textContent = '🔄';
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+  }
+}
+
 // ── INIT ──
 renderGroups();
 renderPredictions();
@@ -3530,12 +3595,24 @@ renderSources();
     localStorage.setItem('wce_rapid_key', savedRapidKey);
   }
 
+  // Show last refresh time from previous session
+  const lastRefresh = localStorage.getItem('wce_last_refresh');
+  if (lastRefresh) {
+    const d = new Date(lastRefresh);
+    const timeEl = document.getElementById('lastRefreshTime');
+    if (timeEl) timeEl.textContent = `Last updated: ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
+  }
+
   // Auto-activate on every page load — keys are pre-loaded
   setTimeout(async () => {
     logLive('🔄 WorldCup Edge — connecting live data sources...');
     const oddsOk = await fetchLiveOdds();
     if (oddsOk) {
       setLiveBadge(true);
+      const now = new Date();
+      const timeEl = document.getElementById('lastRefreshTime');
+      if (timeEl) timeEl.textContent = `Last updated: ${now.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
+      localStorage.setItem('wce_last_refresh', now.toISOString());
       logLive('✅ Live Mode active. Odds data refreshed.');
     }
     if (savedRapidKey) {
