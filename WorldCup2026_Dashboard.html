@@ -1059,6 +1059,13 @@
 
   <!-- MATCH LINES -->
   <div id="view-matchlines">
+    <div id="oddsSourceBanner" style="display:flex;align-items:center;gap:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+      <span style="font-size:1.2rem">📡</span>
+      <div style="flex:1">
+        <span id="oddsSourceLabel" style="font-size:0.8rem;color:#f59e0b;font-weight:600">Using research-based estimates</span>
+        <span style="font-size:0.75rem;color:var(--muted);margin-left:8px">— WC 2026 bookmaker lines open ~late May. Press <strong>🔄 Refresh</strong> to pull live odds once available.</span>
+      </div>
+    </div>
     <p class="section-desc">Three-way moneylines (Win / Draw / Win), totals, and BTTS for all opening group stage matches. Odds in American format.</p>
     <div style="overflow-x:auto">
       <table class="odds-table" style="min-width:900px;margin-bottom:20px">
@@ -2940,6 +2947,11 @@ async function fetchLiveOdds() {
     if (liveLines.length > 0) {
       matchLines.splice(0, matchLines.length, ...liveLines);
       renderMatchLines();
+      // Update the source banner to show LIVE
+      const banner = document.getElementById('oddsSourceBanner');
+      const label = document.getElementById('oddsSourceLabel');
+      if (banner) banner.style.background = 'rgba(34,197,94,0.08)', banner.style.borderColor = 'rgba(34,197,94,0.3)';
+      if (label) label.style.color = '#22c55e', label.textContent = '🔴 LIVE odds — updated ' + new Date().toLocaleTimeString();
       logLive(`✅ Updated ${liveLines.length} match lines with live odds from ${data[0].bookmakers?.length || 0} bookmakers!`);
 
       // Update bookComp data
