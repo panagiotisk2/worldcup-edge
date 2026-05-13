@@ -1324,6 +1324,19 @@ function showTab(id, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (el) el.classList.add('active');
+  // Persist active tab in URL hash so Cmd+R restores it
+  history.replaceState(null, '', '#' + id);
+}
+
+// ── RESTORE TAB FROM URL HASH ──
+function restoreTabFromHash() {
+  const hash = window.location.hash.replace('#', '');
+  const validTabs = ['overview','groups','predictions','odds','injuries','method','players','betting','intelligence','sources'];
+  if (hash && validTabs.includes(hash)) {
+    // Find the matching tab button and activate it
+    const tabEl = document.querySelector(`.tab[onclick*="'${hash}'"]`);
+    showTab(hash, tabEl);
+  }
 }
 
 // ══════════════════════════════════════════
@@ -3590,6 +3603,9 @@ renderValueBets();
 renderAPICards();
 renderIntelligence();
 renderSources();
+
+// ── RESTORE ACTIVE TAB (Cmd+R / F5 stays on same section) ──
+restoreTabFromHash();
 
 // ── AUTO-LOAD SAVED API KEYS ──
 (function initLiveData() {
