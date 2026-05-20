@@ -1232,56 +1232,57 @@
 
   <!-- GOLDEN BOOT RACE -->
   <h2 style="margin-bottom:12px">🥇 Golden Boot <span>Race (Top Scorers)</span></h2>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:28px" id="plGoldenBootGrid"></div>
+  <div style="overflow-x:auto;margin-bottom:28px">
+    <table class="odds-table" id="plGoldenBootOddsTable" style="min-width:700px"></table>
+  </div>
 
   <!-- RELEGATION SURVIVAL -->
   <h2 style="margin-bottom:12px">🚨 Relegation <span>Survival Odds</span></h2>
   <p class="section-desc">3 clubs relegated. Burnley &amp; Wolves already down. West Ham (36pts, 18th) must win and hope Tottenham (38pts, 17th) slip up on Final Day.</p>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:28px">
-    <div class="group-card" style="border-color:rgba(34,197,94,0.4)">
-      <div style="padding:16px;text-align:center">
-        <div style="font-size:2rem">⚪</div>
-        <div style="font-weight:800;font-size:1rem;margin-top:6px">Tottenham Hotspur</div>
-        <div style="color:var(--muted);font-size:0.8rem">17th · 38pts</div>
-        <div style="color:var(--green);font-size:1.5rem;font-weight:900;margin:8px 0">-400</div>
-        <div style="font-size:0.72rem;color:var(--green)">Survival Prob: ~83%</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Everton (Final Day)</div>
-        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">Likely Safe</div>
-      </div>
-    </div>
-    <div class="group-card" style="border-color:rgba(245,158,11,0.4)">
-      <div style="padding:16px;text-align:center">
-        <div style="font-size:2rem">🔴</div>
-        <div style="font-weight:800;font-size:1rem;margin-top:6px">West Ham United</div>
-        <div style="color:var(--muted);font-size:0.8rem">18th · 36pts</div>
-        <div style="color:var(--yellow);font-size:1.5rem;font-weight:900;margin:8px 0">+280</div>
-        <div style="font-size:0.72rem;color:var(--yellow)">Survival Prob: ~28%</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Leeds (Final Day)</div>
-        <div class="conf-badge conf-med" style="margin-top:8px;justify-content:center">⚠️ In Danger</div>
-      </div>
-    </div>
-    <div class="group-card" style="border-color:rgba(239,68,68,0.4)">
-      <div style="padding:16px;text-align:center">
-        <div style="font-size:2rem">🟡</div>
-        <div style="font-weight:800;font-size:1rem;margin-top:6px">Burnley</div>
-        <div style="color:var(--muted);font-size:0.8rem">19th · 21pts</div>
-        <div style="color:var(--red);font-size:1.5rem;font-weight:900;margin:8px 0">—</div>
-        <div style="font-size:0.72rem;color:var(--red)">RELEGATED ✗</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Wolves (Final Day)</div>
-        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">Relegated</div>
-      </div>
-    </div>
-    <div class="group-card" style="border-color:rgba(239,68,68,0.4)">
-      <div style="padding:16px;text-align:center">
-        <div style="font-size:2rem">🟡</div>
-        <div style="font-weight:800;font-size:1rem;margin-top:6px">Wolverhampton</div>
-        <div style="color:var(--muted);font-size:0.8rem">20th · 19pts</div>
-        <div style="color:var(--red);font-size:1.5rem;font-weight:900;margin:8px 0">—</div>
-        <div style="font-size:0.72rem;color:var(--red)">RELEGATED ✗</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Burnley (Final Day)</div>
-        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">Relegated</div>
-      </div>
-    </div>
+  <div style="overflow-x:auto;margin-bottom:28px">
+    <table class="odds-table" style="min-width:620px">
+      <thead><tr>
+        <th style="text-align:left">Club</th><th>Pos</th><th>Pts</th><th>Final Day Opponent</th><th>Survival Odds</th><th>Survival %</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span style="margin-right:6px">⚪</span><strong>Tottenham Hotspur</strong></td>
+          <td style="text-align:center;color:var(--muted)">17th</td>
+          <td style="text-align:center;font-weight:800;color:var(--gold)">38</td>
+          <td style="text-align:center;color:var(--muted)">vs Everton</td>
+          <td style="text-align:center;color:var(--green);font-weight:700">-400</td>
+          <td style="text-align:center;color:var(--green)">~83%</td>
+          <td style="text-align:center"><span class="conf-badge conf-high" style="display:inline-flex">Likely Safe</span></td>
+        </tr>
+        <tr>
+          <td><span style="margin-right:6px">🔴</span><strong>West Ham United</strong></td>
+          <td style="text-align:center;color:var(--yellow)">18th</td>
+          <td style="text-align:center;font-weight:800;color:var(--yellow)">36</td>
+          <td style="text-align:center;color:var(--muted)">vs Leeds United</td>
+          <td style="text-align:center;color:var(--yellow);font-weight:700">+280</td>
+          <td style="text-align:center;color:var(--yellow)">~28%</td>
+          <td style="text-align:center"><span class="conf-badge conf-med" style="display:inline-flex">⚠️ In Danger</span></td>
+        </tr>
+        <tr>
+          <td><span style="margin-right:6px">🟡</span><strong>Burnley</strong></td>
+          <td style="text-align:center;color:var(--red)">19th</td>
+          <td style="text-align:center;font-weight:800;color:var(--red)">21</td>
+          <td style="text-align:center;color:var(--muted)">vs Wolverhampton</td>
+          <td style="text-align:center;color:var(--red);font-weight:700">—</td>
+          <td style="text-align:center;color:var(--red)">0%</td>
+          <td style="text-align:center"><span class="conf-badge conf-low" style="display:inline-flex">Relegated ✗</span></td>
+        </tr>
+        <tr>
+          <td><span style="margin-right:6px">🟡</span><strong>Wolverhampton</strong></td>
+          <td style="text-align:center;color:var(--red)">20th</td>
+          <td style="text-align:center;font-weight:800;color:var(--red)">19</td>
+          <td style="text-align:center;color:var(--muted)">vs Burnley</td>
+          <td style="text-align:center;color:var(--red);font-weight:700">—</td>
+          <td style="text-align:center;color:var(--red)">0%</td>
+          <td style="text-align:center"><span class="conf-badge conf-low" style="display:inline-flex">Relegated ✗</span></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- NEXT SEASON TITLE EARLY ODDS -->
@@ -1416,13 +1417,19 @@
 
   <div id="plview-boots">
     <div class="disclaimer">🥇 PL Golden Boot race 2025/26 — Erling Haaland chasing his 3rd consecutive PL scoring title. GW37 goals.</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px" id="plGoldenBootCards"></div>
+    <div style="overflow-x:auto">
+      <table class="odds-table" id="plGoldenBootTable" style="min-width:700px"></table>
+    </div>
   </div>
   <div id="plview-stars" style="display:none">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px" id="plStarsGrid"></div>
+    <div style="overflow-x:auto">
+      <table class="odds-table" id="plStarsTable" style="min-width:680px"></table>
+    </div>
   </div>
   <div id="plview-assists" style="display:none">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px" id="plAssistsGrid"></div>
+    <div style="overflow-x:auto">
+      <table class="odds-table" id="plAssistsTable" style="min-width:640px"></table>
+    </div>
   </div>
 </div>
 </div>
@@ -1916,76 +1923,71 @@ function renderPLFinalDay() {
   }).join('');
 }
 
-function renderPLGoldenBoot() {
-  const grid = document.getElementById('plGoldenBootCards');
-  if (!grid) return;
-  grid.innerHTML = plTopScorers.slice(0,8).map((p,i) => `
-    <div class="group-card">
-      <div style="padding:14px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="font-size:1.6rem">${p.nat}</div>
-          <div>
-            <div style="font-weight:800;font-size:0.9rem">${p.name}</div>
-            <div style="font-size:0.72rem;color:var(--muted)">${p.club}</div>
-          </div>
-          <div style="margin-left:auto;font-size:1.4rem;font-weight:900;color:var(--gold)">${p.goals}</div>
-        </div>
-        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px">Goals</div>
-        <div style="height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px">
-          <div style="height:100%;background:var(--gold);border-radius:6px;width:${Math.round((p.goals/31)*100)}%;transition:width 0.8s"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted)">
-          <span>⚽ ${p.goals}G &nbsp;🎯 ${p.assists}A</span>
-          <span>Boot odds: <strong style="color:var(--gold)">${p.odds}</strong></span>
-        </div>
-      </div>
-    </div>`).join('');
+function plBootImplied(odds) {
+  if (!odds || odds === '—') return '—';
+  const n = parseInt(odds);
+  if (isNaN(n)) return '—';
+  return n < 0 ? Math.round((-n)/(-n+100)*100)+'%' : Math.round(100/(n+100)*100)+'%';
+}
 
-  // Also render in odds tab
-  const oddsGrid = document.getElementById('plGoldenBootGrid');
-  if (oddsGrid) oddsGrid.innerHTML = grid.innerHTML;
+function renderPLGoldenBoot() {
+  const rows = plTopScorers.map(p => `<tr>
+    <td style="text-align:center;color:var(--muted)">${p.rank}</td>
+    <td style="font-weight:700">${p.name}</td>
+    <td style="text-align:center;color:var(--muted)">${p.club}</td>
+    <td style="text-align:center">${p.nat}</td>
+    <td style="text-align:center;color:var(--green);font-weight:800">${p.goals}</td>
+    <td style="text-align:center;color:var(--blue)">${p.assists}</td>
+    <td style="text-align:center;color:var(--muted)">${p.apps}</td>
+    <td style="text-align:center;color:var(--gold);font-weight:700">${p.rating}</td>
+    <td style="text-align:center;color:var(--gold);font-weight:700">${p.odds}</td>
+    <td style="text-align:center;color:var(--muted)">${plBootImplied(p.odds)}</td>
+  </tr>`).join('');
+  const head = `<thead><tr>
+    <th>#</th><th style="text-align:left">Player</th><th>Club</th><th>Nat</th>
+    <th>Goals</th><th>Assists</th><th>Apps</th><th>Rating</th><th>Boot Odds</th><th>Implied %</th>
+  </tr></thead><tbody>${rows}</tbody>`;
+
+  const t1 = document.getElementById('plGoldenBootTable');
+  if (t1) t1.innerHTML = head;
+  const t2 = document.getElementById('plGoldenBootOddsTable');
+  if (t2) t2.innerHTML = head;
 }
 
 function renderPLStars() {
-  const grid = document.getElementById('plStarsGrid');
-  if (!grid) return;
-  grid.innerHTML = plSeasonStars.map(p => `
-    <div class="group-card">
-      <div style="padding:16px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <div style="font-size:2rem">${p.nat}</div>
-          <div>
-            <div style="font-weight:800">${p.name}</div>
-            <div style="font-size:0.75rem;color:var(--muted)">${p.club}</div>
-          </div>
-          <div style="margin-left:auto;font-size:1.8rem;font-weight:900;color:var(--gold)">${p.rating}</div>
-        </div>
-        <div style="display:flex;gap:12px;font-size:0.78rem;margin-bottom:8px">
-          <span style="color:var(--green)">⚽ ${p.goals} G</span>
-          <span style="color:var(--blue)">🎯 ${p.assists} A</span>
-        </div>
-        <div style="font-size:0.75rem;color:var(--muted);font-style:italic">${p.note}</div>
-      </div>
-    </div>`).join('');
+  const table = document.getElementById('plStarsTable');
+  if (!table) return;
+  table.innerHTML = `<thead><tr>
+    <th>#</th><th style="text-align:left">Player</th><th>Club</th><th>Nat</th>
+    <th>Goals</th><th>Assists</th><th>Rating</th><th style="text-align:left">Season Note</th>
+  </tr></thead><tbody>${plSeasonStars.map((p,i) => `<tr>
+    <td style="text-align:center;color:var(--muted)">${i+1}</td>
+    <td style="font-weight:700">${p.name}</td>
+    <td style="text-align:center;color:var(--muted)">${p.club}</td>
+    <td style="text-align:center">${p.nat}</td>
+    <td style="text-align:center;color:var(--green);font-weight:800">${p.goals}</td>
+    <td style="text-align:center;color:var(--blue)">${p.assists}</td>
+    <td style="text-align:center;color:var(--gold);font-weight:700">${p.rating}</td>
+    <td style="color:var(--muted);font-size:0.8rem;font-style:italic">${p.note}</td>
+  </tr>`).join('')}</tbody>`;
 }
 
 function renderPLAssists() {
-  const grid = document.getElementById('plAssistsGrid');
-  if (!grid) return;
-  grid.innerHTML = plTopAssists.map(p => `
-    <div class="group-card">
-      <div style="padding:14px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="font-size:1.6rem">${p.nat}</div>
-          <div><div style="font-weight:800;font-size:0.9rem">${p.name}</div><div style="font-size:0.72rem;color:var(--muted)">${p.club}</div></div>
-          <div style="margin-left:auto;font-size:1.4rem;font-weight:900;color:var(--blue)">${p.assists}</div>
-        </div>
-        <div style="height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px">
-          <div style="height:100%;background:var(--blue);border-radius:6px;width:${Math.round((p.assists/15)*100)}%;transition:width 0.8s"></div>
-        </div>
-        <div style="font-size:0.72rem;color:var(--muted)">🎯 ${p.assists} assists &nbsp;⚽ ${p.goals} goals &nbsp;⭐ ${p.rating}/10</div>
-      </div>
-    </div>`).join('');
+  const table = document.getElementById('plAssistsTable');
+  if (!table) return;
+  table.innerHTML = `<thead><tr>
+    <th>#</th><th style="text-align:left">Player</th><th>Club</th><th>Nat</th>
+    <th>Assists</th><th>Goals</th><th>Apps</th><th>Rating</th>
+  </tr></thead><tbody>${plTopAssists.map(p => `<tr>
+    <td style="text-align:center;color:var(--muted)">${p.rank}</td>
+    <td style="font-weight:700">${p.name}</td>
+    <td style="text-align:center;color:var(--muted)">${p.club}</td>
+    <td style="text-align:center">${p.nat}</td>
+    <td style="text-align:center;color:var(--blue);font-weight:800">${p.assists}</td>
+    <td style="text-align:center;color:var(--green)">${p.goals}</td>
+    <td style="text-align:center;color:var(--muted)">${p.apps}</td>
+    <td style="text-align:center;color:var(--gold);font-weight:700">${p.rating}</td>
+  </tr>`).join('')}</tbody>`;
 }
 
 function renderPLInjuries() {
@@ -3683,6 +3685,9 @@ async function fetchLiveOdds() {
 
       // Update bookComp data
       updateLiveBookComp(data);
+
+      // If PL mode, also update prediction cards with real odds
+      if (currentCompetition === 'pl') updatePLMatchCardsFromOdds(data);
     }
 
     setApiStatus('oddsApiStatus', 'ok');
@@ -3719,6 +3724,80 @@ function updateLiveBookComp(data) {
     bookCompData.splice(0, bookCompData.length, ...newBookComp);
     renderBookComp();
     logLive(`✅ Bookmaker comparison updated with ${newBookComp.length} matches.`);
+  }
+}
+
+function updatePLMatchCardsFromOdds(data) {
+  const grid = document.getElementById('predGridPL');
+  if (!grid || !data || !data.length) return;
+  const cards = data.slice(0, 12).map(match => {
+    const home = match.home_team;
+    const away = match.away_team;
+    const dateStr = match.commence_time ? match.commence_time.split('T')[0] : '';
+    const dateLabel = dateStr ? new Date(dateStr).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
+    let homeOdds = [], drawOdds = [], awayOdds = [];
+    (match.bookmakers || []).forEach(bk => {
+      (bk.markets || []).forEach(mkt => {
+        if (mkt.key === 'h2h') (mkt.outcomes || []).forEach(o => {
+          if (o.name === home) homeOdds.push(o.price);
+          else if (o.name === away) awayOdds.push(o.price);
+          else drawOdds.push(o.price);
+        });
+      });
+    });
+    if (!homeOdds.length) return null;
+    const bH = Math.max(...homeOdds), bD = drawOdds.length ? Math.max(...drawOdds) : 3.4, bA = Math.max(...awayOdds);
+    const iH = 1/bH, iD = 1/bD, iA = 1/bA, tot = iH+iD+iA;
+    const hPct = Math.round((iH/tot)*100), dPct = Math.round((iD/tot)*100), aPct = 100-hPct-dPct;
+    const pick = hPct>aPct&&hPct>dPct ? home : aPct>hPct&&aPct>dPct ? away : 'Draw';
+    const maxP = Math.max(hPct,dPct,aPct);
+    const pickConf = maxP>55 ? 'high' : maxP>42 ? 'med' : 'low';
+    const books = (match.bookmakers||[]).length;
+    const hML = decToAmerican(bH), dML = decToAmerican(bD), aML = decToAmerican(bA);
+    const fmt = n => n>=0 ? '+'+n : String(n);
+    return `<div class="match-card">
+      <div class="match-header">
+        <span class="match-date" style="color:var(--gold)">⚽ ${dateLabel}</span>
+        <span class="match-venue">${books} bookmaker${books!==1?'s':''}</span>
+        <span class="match-group" style="color:var(--gold)">Premier League</span>
+      </div>
+      <div class="match-body">
+        <div class="team-block">
+          <div class="flag">${getFlag(home)}</div>
+          <div class="name">${home}</div>
+          <div class="prob ${hPct>aPct&&hPct>dPct?'prob-home':'prob-balanced'}">${hPct}%</div>
+          <div class="prob-label">Win</div>
+        </div>
+        <div class="vs-block">
+          <div class="vs">VS</div>
+          <div class="draw-prob">${dPct}%</div>
+          <div class="draw-label">Draw</div>
+          <div class="score-pred">Pick: ${pick}</div>
+        </div>
+        <div class="team-block">
+          <div class="flag">${getFlag(away)}</div>
+          <div class="name">${away}</div>
+          <div class="prob ${aPct>hPct&&aPct>dPct?'prob-home':'prob-away'}">${aPct}%</div>
+          <div class="prob-label">Win</div>
+        </div>
+      </div>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar">
+          <div class="seg-h" style="width:${hPct}%"></div>
+          <div class="seg-d" style="width:${dPct}%"></div>
+          <div class="seg-a" style="width:${aPct}%"></div>
+        </div>
+        <div class="prob-bar-labels"><span style="color:var(--green)">${home} ${hPct}%</span><span>Draw ${dPct}%</span><span style="color:var(--red)">${away} ${aPct}%</span></div>
+      </div>
+      <div class="factors" style="padding:0 20px 16px">
+        <div class="factors-title">Best available odds (${books} books)</div>
+        <div style="font-size:0.8rem;color:var(--muted);line-height:1.5">${home} ${fmt(hML)} &nbsp;·&nbsp; Draw ${fmt(dML)} &nbsp;·&nbsp; ${away} ${fmt(aML)}</div>
+      </div>
+    </div>`;
+  }).filter(Boolean);
+  if (cards.length) {
+    grid.innerHTML = cards.join('');
+    logLive(`✅ Updated ${cards.length} PL prediction cards with live odds.`);
   }
 }
 
