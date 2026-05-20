@@ -2825,16 +2825,20 @@ function setLiveBadge(active) {
 async function activateLiveMode() {
   const oddsKey = document.getElementById('oddsApiKey').value.trim();
   const rapidKey = document.getElementById('rapidApiKey').value.trim();
-  if (!oddsKey && !rapidKey) {
-    logLive('❌ Enter at least one API key before activating.');
+  const useProxy = window.location.protocol !== 'file:' &&
+                   !window.location.hostname.includes('localhost') &&
+                   !window.location.hostname.includes('127.0.0.1');
+  // On Netlify: keys are optional (server proxy handles it). Local dev: need at least one key.
+  if (!useProxy && !oddsKey && !rapidKey) {
+    logLive('❌ Local dev: enter at least one API key before activating.');
     return;
   }
   if (oddsKey) localStorage.setItem('wce_odds_key', oddsKey);
   if (rapidKey) localStorage.setItem('wce_rapid_key', rapidKey);
   logLive('🚀 Activating Live Mode...');
   let anySuccess = false;
-  if (oddsKey) { const ok = await fetchLiveOdds(); if (ok) anySuccess = true; }
-  if (rapidKey) { const ok = await fetchFootballData(); if (ok) anySuccess = true; }
+  const oddsOk = await fetchLiveOdds(); if (oddsOk) anySuccess = true;
+  const fbOk = await fetchFootballData(); if (fbOk) anySuccess = true;
   if (anySuccess) setLiveBadge(true);
 }
 
@@ -2876,13 +2880,22 @@ function decToAmerican(dec) {
 }
 
 async function fetchLiveOdds() {
-  const key = document.getElementById('oddsApiKey').value.trim();
-  if (!key) { logLive('❌ No Odds API key provided.'); return false; }
   setApiStatus('oddsApiStatus', 'loading');
-  logLive('⏳ Fetching live odds from The Odds API...');
+  logLive('⏳ Fetching live odds...');
   try {
-    // Try World Cup first, fall back to upcoming soccer
-    let url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/odds/?apiKey=${key}&regions=eu,us&markets=h2h&oddsFormat=decimal&dateFormat=iso`;
+    // On Netlify: call server proxy so API key stays secret in env vars.
+    // Local dev (file:// or localhost): fall back to direct call with localStorage key.
+    const useProxy = window.location.protocol !== 'file:' &&
+                     !window.location.hostname.includes('localhost') &&
+                     !window.location.hostname.includes('127.0.0.1');
+    let url;
+    if (useProxy) {
+      url = '/api/odds?sport=soccer_fifa_world_cup&markets=h2h&regions=eu,us';
+    } else {
+      const key = localStorage.getItem('wce_odds_key') || document.getElementById('oddsApiKey')?.value?.trim();
+      if (!key) { logLive('⚠️ Local dev: enter Odds API key in the API Setup tab.'); setApiStatus('oddsApiStatus', 'idle'); return false; }
+      url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/odds/?apiKey=${key}&regions=eu,us&markets=h2h&oddsFormat=decimal&dateFormat=iso`;
+    }
     let res = await fetch(url);
 
     // If World Cup not yet live, fetch all upcoming soccer to show test data
@@ -3015,19 +3028,22 @@ function updateLiveBookComp(data) {
 }
 
 async function fetchFootballData() {
-  const key = document.getElementById('rapidApiKey').value.trim();
-  if (!key) { logLive('❌ No RapidAPI key provided.'); return false; }
   setApiStatus('footballApiStatus', 'loading');
   logLive('⏳ Fetching World Cup 2026 fixtures from API-Football...');
   try {
-    // World Cup 2026 league ID = 1, season = 2026
-    const url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?league=1&season=2026&next=20';
-    const res = await fetch(url, {
-      headers: {
-        'X-RapidAPI-Key': key,
-        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
-      }
-    });
+    const useProxy = window.location.protocol !== 'file:' &&
+                     !window.location.hostname.includes('localhost') &&
+                     !window.location.hostname.includes('127.0.0.1');
+    let url, options = {};
+    if (useProxy) {
+      url = '/api/fixtures?league=1&season=2026&next=20';
+    } else {
+      const key = localStorage.getItem('wce_rapid_key') || document.getElementById('rapidApiKey')?.value?.trim();
+      if (!key) { logLive('⚠️ Local dev: enter RapidAPI key in the API Setup tab.'); setApiStatus('footballApiStatus', 'idle'); return false; }
+      url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?league=1&season=2026&next=20';
+      options = { headers: { 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com' } };
+    }
+    const res = await fetch(url, options);
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -3615,19 +3631,11 @@ restoreTabFromHash();
 
 // ── AUTO-LOAD SAVED API KEYS ──
 (function initLiveData() {
-  const savedOddsKey = localStorage.getItem('wce_odds_key') || '081c7a1ac0ce75d57061d4fd9b9deea4';
-  const savedRapidKey = localStorage.getItem('wce_rapid_key') || 'a0d6f2c823msh55284f937320dafp113fe5jsn1c2e39fa0140';
-
-  if (savedOddsKey) {
-    const el = document.getElementById('oddsApiKey');
-    if (el) el.value = savedOddsKey;
-    localStorage.setItem('wce_odds_key', savedOddsKey);
-  }
-  if (savedRapidKey) {
-    const el = document.getElementById('rapidApiKey');
-    if (el) el.value = savedRapidKey;
-    localStorage.setItem('wce_rapid_key', savedRapidKey);
-  }
+  // Restore any locally-saved keys into the setup tab inputs (local dev only)
+  const savedOddsKey = localStorage.getItem('wce_odds_key');
+  const savedRapidKey = localStorage.getItem('wce_rapid_key');
+  if (savedOddsKey) { const el = document.getElementById('oddsApiKey'); if (el) el.value = savedOddsKey; }
+  if (savedRapidKey) { const el = document.getElementById('rapidApiKey'); if (el) el.value = savedRapidKey; }
 
   // Show last refresh time from previous session
   const lastRefresh = localStorage.getItem('wce_last_refresh');
@@ -3649,10 +3657,8 @@ restoreTabFromHash();
       localStorage.setItem('wce_last_refresh', now.toISOString());
       logLive('✅ Live Mode active. Odds data refreshed.');
     }
-    if (savedRapidKey) {
-      const fbOk = await fetchFootballData();
-      if (fbOk) logLive('✅ Fixture data loaded from API-Football.');
-    }
+    const fbOk = await fetchFootballData();
+    if (fbOk) logLive('✅ Fixture data loaded from API-Football.');
   }, 1000);
 })();
 </script>

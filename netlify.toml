@@ -1,5 +1,13 @@
 [build]
   publish = "."
+  functions = "netlify/functions"
+
+# API proxy — routes /api/* to Netlify Functions (server-side, keys stay secret)
+# Phase 2: remove this block when FastAPI backend on Hetzner is live
+[[redirects]]
+  from = "/api/*"
+  to   = "/.netlify/functions/:splat"
+  status = 200
 
 [[redirects]]
   from = "/dashboard"
