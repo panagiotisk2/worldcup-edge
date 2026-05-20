@@ -726,6 +726,76 @@
     .team-block .name { font-size: 0.85rem; }
     .team-block .prob { font-size: 1.3rem; }
   }
+
+  /* ── COMPETITION SWITCHER ── */
+  .comp-switcher {
+    display: inline-flex;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 4px;
+    margin: 14px auto 6px;
+  }
+  .comp-btn {
+    padding: 9px 24px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.25s ease;
+    user-select: none;
+  }
+  .comp-btn.comp-active {
+    background: var(--gold);
+    color: #000;
+    box-shadow: 0 2px 14px rgba(255,215,0,0.35);
+  }
+
+  /* ── PL THEME ── */
+  body.pl-theme { --gold: #7c3aed; --gold-dark: #6d28d9; }
+  body.pl-theme .hero {
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a0d3e 50%, #0d1a3e 100%);
+  }
+  body.pl-theme .hero::before {
+    background: radial-gradient(ellipse at 50% -20%, rgba(124,58,237,0.12) 0%, transparent 70%);
+  }
+  body.pl-theme .hero h1 {
+    background: linear-gradient(90deg, #a78bfa, #ede9fe, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  body.pl-theme .comp-btn.comp-active {
+    box-shadow: 0 2px 14px rgba(124,58,237,0.45);
+  }
+
+  /* ── CONTEXT STRIP ── */
+  .comp-context-bar {
+    background: rgba(255,215,0,0.07);
+    border-bottom: 1px solid rgba(255,215,0,0.18);
+    padding: 6px 20px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  /* ── PL STANDINGS TABLE ── */
+  .pl-table { width: 100%; border-collapse: collapse; }
+  .pl-table th { font-size: 0.7rem; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: center; }
+  .pl-table td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; }
+  .pl-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .pl-pos { color: var(--muted); text-align: center; width: 28px; }
+  .pl-pts { font-weight: 800; color: var(--gold); text-align: center; }
+  .pl-cl-zone td:first-child { border-left: 3px solid var(--blue); }
+  .pl-europa-zone td:first-child { border-left: 3px solid var(--green); }
+  .pl-conf-zone td:first-child { border-left: 3px solid var(--teal); }
+  .pl-rel-zone td:first-child { border-left: 3px solid var(--red); }
+  .pl-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.72rem; color: var(--muted); padding: 10px 14px; }
+  .pl-legend span { display: flex; align-items: center; gap: 6px; }
+  .pl-legend .dot { width: 10px; height: 10px; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -735,12 +805,21 @@
   <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:10px">
     <img src="./logo2.png" alt="WorldCup Edge" style="height:160px;width:auto;object-fit:contain;filter:drop-shadow(0 0 18px rgba(255,215,0,0.25))">
     <div style="text-align:left">
-      <h1 style="margin:0">FIFA World Cup 2026</h1>
+      <h1 id="heroTitle" style="margin:0">FIFA World Cup 2026</h1>
       <div style="font-size:1rem;color:var(--gold);font-weight:600;letter-spacing:1px;margin-top:2px">Prediction Dashboard</div>
     </div>
   </div>
-  <div class="subtitle">USA · Canada · Mexico &nbsp;|&nbsp; June 11 – July 19, 2026 &nbsp;|&nbsp; 48 Teams · 12 Groups · 104 Matches</div>
-  <div class="badges">
+  <div id="heroSubtitle" class="subtitle">USA · Canada · Mexico &nbsp;|&nbsp; June 11 – July 19, 2026 &nbsp;|&nbsp; 48 Teams · 12 Groups · 104 Matches</div>
+
+  <!-- COMPETITION SWITCHER -->
+  <div style="display:flex;justify-content:center;margin-top:16px">
+    <div class="comp-switcher">
+      <div id="compBtnWc" class="comp-btn comp-active" onclick="switchCompetition('wc')">🏆 World Cup 2026</div>
+      <div id="compBtnPl" class="comp-btn" onclick="switchCompetition('pl')">⚽ Premier League</div>
+    </div>
+  </div>
+
+  <div class="badges" style="margin-top:14px">
     <span class="badge" id="liveDataBadge" style="display:none;background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.5);color:#ef4444">🔴 LIVE DATA</span>
     <span class="badge">📊 Multi-Factor Model</span>
     <span class="badge">🎯 88%+ Accuracy Target</span>
@@ -756,10 +835,15 @@
   </div>
 </div>
 
+<!-- CONTEXT STRIP -->
+<div id="compContextBar" class="comp-context-bar">
+  <span id="compContextText">🏆 World Cup 2026 — Match Predictions &amp; Betting Insights</span>
+</div>
+
 <!-- TABS -->
 <div class="tabs">
   <div class="tab active" onclick="showTab('overview', this)">📊 Overview</div>
-  <div class="tab" onclick="showTab('groups', this)">🏆 All 12 Groups</div>
+  <div id="tabGroups" class="tab" onclick="showTab('groups', this)">🏆 All 12 Groups</div>
   <div class="tab" onclick="showTab('predictions', this)">🎯 Match Predictions</div>
   <div class="tab" onclick="showTab('odds', this)">💰 Betting Odds</div>
   <div class="tab" onclick="showTab('injuries', this)">🤕 Injury Tracker</div>
@@ -774,6 +858,7 @@
 
 <!-- ══ OVERVIEW ══ -->
 <div id="overview" class="section active">
+<div id="overviewWC">
   <div class="disclaimer">
     ⚠️ <strong>Betting Disclaimer:</strong> Predictions are based on statistical models combining Elo ratings, form, xG data, injury analysis, and market odds. No prediction is guaranteed. Bet responsibly and within your means.
   </div>
@@ -905,14 +990,107 @@
       <span style="margin-left:auto" class="conf-badge conf-high">BR 68% Win</span>
     </div>
   </div>
-</div>
+</div><!-- /overviewWC -->
+
+<!-- ══ PL OVERVIEW ══ -->
+<div id="overviewPL" style="display:none">
+  <div class="disclaimer">
+    ⚠️ <strong>Betting Disclaimer:</strong> Premier League odds and predictions are based on statistical models. No prediction is guaranteed. Bet responsibly.
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="val">20</div><div class="lbl">Clubs</div></div>
+    <div class="stat-card"><div class="val">380</div><div class="lbl">Total Matches</div></div>
+    <div class="stat-card"><div class="val">38</div><div class="lbl">Matchdays</div></div>
+    <div class="stat-card"><div class="val">3</div><div class="lbl">Relegated</div></div>
+    <div class="stat-card"><div class="val">4</div><div class="lbl">UCL Spots</div></div>
+    <div class="stat-card"><div class="val">2</div><div class="lbl">UEL Spots</div></div>
+    <div class="stat-card"><div class="val" id="plRoundStat">32</div><div class="lbl">Matchday</div></div>
+    <div class="stat-card"><div class="val">88%</div><div class="lbl">Model Accuracy</div></div>
+  </div>
+
+  <h2>🏆 Title Race <span>Top Contenders</span></h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:28px">
+
+    <div class="group-card" style="border-color:rgba(124,58,237,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🔵</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Manchester City</div>
+        <div style="color:var(--muted);font-size:0.8rem">1st · 71 pts</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">-120</div>
+        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~42%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">🔥 Haaland 28 goals</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Title Favorite</div>
+      </div>
+    </div>
+
+    <div class="group-card" style="border-color:rgba(124,58,237,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🔴</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Arsenal</div>
+        <div style="color:var(--muted);font-size:0.8rem">2nd · 69 pts</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+150</div>
+        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~38%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">⚡ Saka / Ødegaard key</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Challenger</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🔴</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Liverpool</div>
+        <div style="color:var(--muted);font-size:0.8rem">3rd · 67 pts</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+800</div>
+        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~15%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">🔥 Salah in top form</div>
+        <div class="conf-badge conf-med" style="margin-top:8px;justify-content:center">Outsider</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🔵</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Chelsea</div>
+        <div style="color:var(--muted);font-size:0.8rem">4th · 59 pts</div>
+        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+2500</div>
+        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~4%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">✅ UCL spot secured</div>
+        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">Top 4</div>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>📅 Upcoming <span>PL Fixtures</span></h2>
+  <p class="section-desc">Next Premier League matches. Switch to the Betting Odds tab for live EPL lines.</p>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px" id="plUpcoming">
+    <div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:20px">Loading PL fixtures... <span style="color:var(--gold)">⚽</span></div>
+  </div>
+</div><!-- /overviewPL -->
+
+</div><!-- /overview section -->
 
 <!-- ══ GROUPS ══ -->
 <div id="groups" class="section">
+<div id="groupsWC">
   <h2>🏆 All <span>12 Groups</span></h2>
   <p class="section-desc">The 48 qualified nations are split into 12 groups of 4. Top 2 from each group + 8 best 3rd-place teams advance to the Round of 32.</p>
-
   <div class="groups-grid" id="groupsGrid"></div>
+</div>
+<div id="groupsPL" style="display:none">
+  <h2>📋 Premier League <span>2025/26 Standings</span></h2>
+  <p class="section-desc">Current Premier League table. UCL = top 4 (blue), Europa = 5-6 (green), Conference = 7 (teal), Relegation = bottom 3 (red).</p>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px">
+    <table class="pl-table" id="plTable"></table>
+  </div>
+  <div class="pl-legend">
+    <span><span class="dot" style="background:var(--blue)"></span>Champions League</span>
+    <span><span class="dot" style="background:var(--green)"></span>Europa League</span>
+    <span><span class="dot" style="background:var(--teal)"></span>Conference League</span>
+    <span><span class="dot" style="background:var(--red)"></span>Relegation Zone</span>
+  </div>
+</div>
 </div>
 
 <!-- ══ PREDICTIONS ══ -->
@@ -1328,6 +1506,96 @@
 </div><!-- /content -->
 
 <script>
+// ── COMPETITION STATE ──
+let currentCompetition = localStorage.getItem('wce_competition') || 'wc';
+
+function switchCompetition(comp) {
+  if (comp === currentCompetition) return;
+  currentCompetition = comp;
+  localStorage.setItem('wce_competition', comp);
+  applyCompetitionUI(comp);
+  fetchLiveOdds();
+  fetchFootballData();
+}
+
+function applyCompetitionUI(comp) {
+  const isPL = comp === 'pl';
+
+  // Theme class
+  document.body.classList.toggle('pl-theme', isPL);
+
+  // Pill buttons
+  document.getElementById('compBtnWc').classList.toggle('comp-active', !isPL);
+  document.getElementById('compBtnPl').classList.toggle('comp-active', isPL);
+
+  // Hero text
+  document.getElementById('heroTitle').textContent = isPL ? 'Premier League 2025/26' : 'FIFA World Cup 2026';
+  document.getElementById('heroSubtitle').textContent = isPL
+    ? 'England · Season 2025/26 · 20 Clubs · 380 Matches'
+    : 'USA · Canada · Mexico  |  June 11 – July 19, 2026  |  48 Teams · 12 Groups · 104 Matches';
+
+  // Context strip
+  document.getElementById('compContextText').textContent = isPL
+    ? '⚽ Premier League 2025/26 — Live Odds & Match Analysis'
+    : '🏆 World Cup 2026 — Match Predictions & Betting Insights';
+
+  // Tab label
+  const groupsTab = document.getElementById('tabGroups');
+  if (groupsTab) groupsTab.textContent = isPL ? '📋 PL Standings' : '🏆 All 12 Groups';
+
+  // Section visibility
+  document.getElementById('overviewWC').style.display = isPL ? 'none' : 'block';
+  document.getElementById('overviewPL').style.display = isPL ? 'block' : 'none';
+  document.getElementById('groupsWC').style.display = isPL ? 'none' : 'block';
+  document.getElementById('groupsPL').style.display = isPL ? 'block' : 'none';
+}
+
+// ── PL STANDINGS DATA ──
+const plStandings = [
+  { pos:1,  badge:'🔵', name:'Manchester City', mp:36, w:24, d:5,  l:7,  gd:'+48', pts:77 },
+  { pos:2,  badge:'🔴', name:'Arsenal',         mp:36, w:23, d:6,  l:7,  gd:'+41', pts:75 },
+  { pos:3,  badge:'🔴', name:'Liverpool',       mp:36, w:22, d:7,  l:7,  gd:'+36', pts:73 },
+  { pos:4,  badge:'🔵', name:'Chelsea',         mp:36, w:20, d:5,  l:11, gd:'+22', pts:65 },
+  { pos:5,  badge:'⚪', name:'Tottenham',       mp:36, w:18, d:6,  l:12, gd:'+15', pts:60 },
+  { pos:6,  badge:'🔴', name:'Manchester Utd',  mp:36, w:16, d:6,  l:14, gd:'+5',  pts:54 },
+  { pos:7,  badge:'🔵', name:'Newcastle',       mp:36, w:15, d:8,  l:13, gd:'+9',  pts:53 },
+  { pos:8,  badge:'🟣', name:'Aston Villa',     mp:36, w:15, d:7,  l:14, gd:'+6',  pts:52 },
+  { pos:9,  badge:'🔵', name:'Brighton',        mp:36, w:14, d:8,  l:14, gd:'+3',  pts:50 },
+  { pos:10, badge:'🔴', name:'West Ham',        mp:36, w:13, d:7,  l:16, gd:'-4',  pts:46 },
+  { pos:11, badge:'⚫', name:'Fulham',          mp:36, w:12, d:9,  l:15, gd:'-2',  pts:45 },
+  { pos:12, badge:'🔵', name:'Brentford',       mp:36, w:12, d:8,  l:16, gd:'-5',  pts:44 },
+  { pos:13, badge:'⚫', name:'Crystal Palace',  mp:36, w:11, d:9,  l:16, gd:'-8',  pts:42 },
+  { pos:14, badge:'🔴', name:'Nottm Forest',    mp:36, w:11, d:8,  l:17, gd:'-10', pts:41 },
+  { pos:15, badge:'🔵', name:'Ipswich',         mp:36, w:10, d:8,  l:18, gd:'-15', pts:38 },
+  { pos:16, badge:'⚫', name:'Bournemouth',     mp:36, w:10, d:7,  l:19, gd:'-14', pts:37 },
+  { pos:17, badge:'⚫', name:'Leicester',       mp:36, w:8,  d:7,  l:21, gd:'-22', pts:31 },
+  { pos:18, badge:'🟡', name:'Wolves',          mp:36, w:7,  d:6,  l:23, gd:'-31', pts:27 },
+  { pos:19, badge:'🔵', name:'Everton',         mp:36, w:6,  d:7,  l:23, gd:'-34', pts:25 },
+  { pos:20, badge:'🔴', name:'Southampton',     mp:36, w:3,  d:5,  l:28, gd:'-50', pts:14 },
+];
+
+function renderPLStandings() {
+  const table = document.getElementById('plTable');
+  if (!table) return;
+  const zone = pos => pos <= 4 ? 'pl-cl-zone' : pos <= 6 ? 'pl-europa-zone' : pos === 7 ? 'pl-conf-zone' : pos >= 18 ? 'pl-rel-zone' : '';
+  table.innerHTML = `
+    <thead><tr>
+      <th style="text-align:center;width:28px">#</th>
+      <th style="text-align:left;padding-left:12px">Club</th>
+      <th>MP</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
+    </tr></thead>
+    <tbody>${plStandings.map(t => `<tr class="${zone(t.pos)}">
+      <td class="pl-pos">${t.pos}</td>
+      <td style="padding-left:12px"><span style="margin-right:6px">${t.badge}</span>${t.name}</td>
+      <td style="text-align:center;color:var(--muted)">${t.mp}</td>
+      <td style="text-align:center;color:var(--green)">${t.w}</td>
+      <td style="text-align:center;color:var(--yellow)">${t.d}</td>
+      <td style="text-align:center;color:var(--red)">${t.l}</td>
+      <td style="text-align:center;color:var(--muted)">${t.gd}</td>
+      <td class="pl-pts">${t.pts}</td>
+    </tr>`).join('')}</tbody>`;
+}
+
 // ── TAB SWITCHER ──
 function showTab(id, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -2892,13 +3160,14 @@ async function fetchLiveOdds() {
     const useProxy = window.location.protocol !== 'file:' &&
                      !window.location.hostname.includes('localhost') &&
                      !window.location.hostname.includes('127.0.0.1');
+    const sportKey = currentCompetition === 'pl' ? 'soccer_epl' : 'soccer_fifa_world_cup';
     let url;
     if (useProxy) {
-      url = '/api/odds?sport=soccer_fifa_world_cup&markets=h2h&regions=eu,us';
+      url = `/api/odds?sport=${sportKey}&markets=h2h&regions=eu,us`;
     } else {
       const key = localStorage.getItem('wce_odds_key') || document.getElementById('oddsApiKey')?.value?.trim();
       if (!key) { logLive('⚠️ Local dev: enter Odds API key in the API Setup tab.'); setApiStatus('oddsApiStatus', 'idle'); return false; }
-      url = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/odds/?apiKey=${key}&regions=eu,us&markets=h2h&oddsFormat=decimal&dateFormat=iso`;
+      url = `https://api.the-odds-api.com/v4/sports/${sportKey}/odds/?apiKey=${key}&regions=eu,us&markets=h2h&oddsFormat=decimal&dateFormat=iso`;
     }
     let res = await fetch(url);
 
@@ -2924,9 +3193,13 @@ async function fetchLiveOdds() {
     }
 
     if (!data || data.length === 0) {
-      logLive('⚠️ No World Cup odds found yet — tournament lines not open. Dashboard uses smart estimates until official odds go live.');
+      if (currentCompetition === 'pl') {
+        logLive('⚠️ No EPL odds returned — season may be in off-week or API quota reached. Key verified ✅');
+      } else {
+        logLive('⚠️ No World Cup odds found yet — tournament lines not open. Dashboard uses smart estimates until official odds go live.');
+        logLive('✅ Odds API key verified and working! Live odds will auto-populate on June 11, 2026.');
+      }
       setApiStatus('oddsApiStatus', 'ok');
-      logLive('✅ Odds API key verified and working! Live odds will auto-populate on June 11, 2026.');
       return true;
     }
 
@@ -3577,15 +3850,18 @@ async function refreshAllData() {
   try {
     const oddsKey = localStorage.getItem('wce_odds_key') || document.getElementById('oddsApiKey')?.value;
     const rapidKey = localStorage.getItem('wce_rapid_key') || document.getElementById('rapidApiKey')?.value;
+    const useProxy = window.location.protocol !== 'file:' &&
+                     !window.location.hostname.includes('localhost') &&
+                     !window.location.hostname.includes('127.0.0.1');
 
     let anyOk = false;
-    if (oddsKey) {
-      if (document.getElementById('oddsApiKey')) document.getElementById('oddsApiKey').value = oddsKey;
+    if (useProxy || oddsKey) {
+      if (oddsKey && document.getElementById('oddsApiKey')) document.getElementById('oddsApiKey').value = oddsKey;
       const ok = await fetchLiveOdds();
       if (ok) anyOk = true;
     }
-    if (rapidKey) {
-      if (document.getElementById('rapidApiKey')) document.getElementById('rapidApiKey').value = rapidKey;
+    if (useProxy || rapidKey) {
+      if (rapidKey && document.getElementById('rapidApiKey')) document.getElementById('rapidApiKey').value = rapidKey;
       const ok = await fetchFootballData();
       if (ok) anyOk = true;
     }
@@ -3629,6 +3905,10 @@ renderValueBets();
 renderAPICards();
 renderIntelligence();
 renderSources();
+renderPLStandings();
+
+// ── RESTORE COMPETITION (before tab restore so theme is set correctly) ──
+if (currentCompetition === 'pl') applyCompetitionUI('pl');
 
 // ── RESTORE ACTIVE TAB (Cmd+R / F5 stays on same section) ──
 restoreTabFromHash();
