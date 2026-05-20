@@ -1,9 +1,10 @@
-// Netlify Function — API-Football Fixtures Proxy
+// Netlify Function — SportAPI Fixtures Proxy
+// Uses SportAPI (sportapi7.p.rapidapi.com) — subscribed via RapidAPI Hub.
 // API key lives in Netlify env vars (RAPIDAPI_KEY), never exposed to the browser.
 // Phase 2: swap this whole function for a FastAPI endpoint on Hetzner.
 
 exports.handler = async (event) => {
-  const { league = '1', season = '2026', next = '20' } = event.queryStringParameters || {};
+  const { date } = event.queryStringParameters || {};
 
   if (!process.env.RAPIDAPI_KEY) {
     return {
@@ -14,30 +15,45 @@ exports.handler = async (event) => {
   }
 
   try {
-    const url = `https://api-football-v1.p.rapidapi.com/v3/fixtures?league=${league}&season=${season}&next=${next}`;
-    const response = await fetch(url, {
+    // Fetch live football events from SportAPI
+    const liveUrl = 'https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live';
+    const liveRes = await fetch(liveUrl, {
       headers: {
         'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com',
+        'X-RapidAPI-Host': 'sportapi7.p.rapidapi.com',
       },
     });
-    const data = await response.json();
+    const liveData = await liveRes.json();
+
+    // Also fetch scheduled events for today
+    const today = date || new Date().toISOString().split('T')[0];
+    const schedUrl = `https://sportapi7.p.rapidapi.com/api/v1/sport/football/scheduled-events/${today}`;
+    const schedRes = await fetch(schedUrl, {
+      headers: {
+        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+        'X-RapidAPI-Host': 'sportapi7.p.rapidapi.com',
+      },
+    });
+    const schedData = await schedRes.json();
 
     return {
-      statusCode: response.status,
+      statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        // Forward rate limit headers
-        'x-ratelimit-requests-remaining': response.headers.get('x-ratelimit-requests-remaining') || '',
+        'x-ratelimit-requests-remaining': liveRes.headers.get('x-ratelimit-requests-remaining') || '',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        live: liveData.events || [],
+        scheduled: schedData.events || [],
+        date: today,
+      }),
     };
   } catch (err) {
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: `Fixtures API fetch failed: ${err.message}` }),
+      body: JSON.stringify({ error: `Fixtures fetch failed: ${err.message}` }),
     };
   }
 };
