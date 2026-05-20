@@ -89,12 +89,16 @@
     background: var(--card);
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) rgba(255,255,255,0.05);
     position: sticky;
     top: 0;
     z-index: 100;
   }
-  .tabs::-webkit-scrollbar { display: none; }
+  .tabs::-webkit-scrollbar { height: 4px; }
+  .tabs::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+  .tabs::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+  .tabs::-webkit-scrollbar-thumb:hover { background: #fff; }
   .tab {
     padding: 14px 20px;
     cursor: pointer;
