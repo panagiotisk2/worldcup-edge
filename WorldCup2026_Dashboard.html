@@ -847,11 +847,11 @@
   <div id="tabPredictions" class="tab" onclick="showTab('predictions', this)">🎯 Match Predictions</div>
   <div id="tabOdds" class="tab" onclick="showTab('odds', this)">💰 Betting Odds</div>
   <div id="tabInjuries" class="tab" onclick="showTab('injuries', this)">🤕 Injury Tracker</div>
-  <div class="tab" onclick="showTab('method', this)">🧠 Methodology</div>
+  <div class="tab" onclick="showTab('method', this)" style="display:none">🧠 Methodology</div>
   <div id="tabPlayers" class="tab" onclick="showTab('players', this)">⭐ Player Hub</div>
   <div class="tab" onclick="showTab('betting', this)">📡 Live Betting Lines</div>
-  <div class="tab" onclick="showTab('intelligence', this)">🧠 Intelligence Engine</div>
-  <div class="tab" onclick="showTab('sources', this)">📚 Data Sources</div>
+  <div class="tab" onclick="showTab('intelligence', this)">🧠 Intelligence Engine <span id="intelPendingBadge" style="display:none;background:var(--gold);color:#000;font-size:0.65rem;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle"></span></div>
+  <div class="tab" onclick="showTab('sources', this)" style="display:none">📚 Data Sources</div>
 </div>
 
 <div class="content">
@@ -1590,15 +1590,19 @@
 
   <!-- TABS -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="intelSubTabs">
-    <button class="filter-btn active" onclick="showIntelView('results',this)">📋 Log Results</button>
+    <button class="filter-btn active" onclick="showIntelView('autolearn',this)">🤖 Auto-Learning</button>
+    <button class="filter-btn" onclick="showIntelView('results',this)">📋 Results Log</button>
     <button class="filter-btn" onclick="showIntelView('weights',this)">⚖️ Weight Evolution</button>
     <button class="filter-btn" onclick="showIntelView('accuracy',this)">📈 Accuracy & Brier</button>
     <button class="filter-btn" onclick="showIntelView('recal',this)">🔄 Recalibrated Predictions</button>
     <button class="filter-btn" onclick="showIntelView('insights',this)">💡 AI Insights</button>
   </div>
 
+  <!-- AUTO-LEARNING (default view) -->
+  <div id="view-autolearn"></div>
+
   <!-- LOG RESULTS -->
-  <div id="view-results">
+  <div id="view-results" style="display:none">
     <div class="engine-panel">
       <div class="engine-panel-header">
         <span style="font-size:1.2rem">📋</span>
@@ -1615,6 +1619,7 @@
 
   <!-- WEIGHT EVOLUTION -->
   <div id="view-weights" style="display:none">
+
     <div class="engine-panel">
       <div class="engine-panel-header">
         <span style="font-size:1.2rem">⚖️</span>
@@ -3831,7 +3836,13 @@ async function fetchFootballData() {
     }
 
     const json = await res.json();
-    const fixtures = json.response || [];
+
+    // Handle both SportAPI format { live:[...], scheduled:[...] } and API-Football { response:[...] }
+    const liveEvents    = json.live      || [];
+    const schedEvents   = json.scheduled || [];
+    const apiFootball   = json.response  || [];
+    const allEvents     = [...liveEvents, ...schedEvents, ...apiFootball];
+
     const remaining = res.headers.get('x-ratelimit-requests-remaining');
     const quotaEl = document.getElementById('footballApiQuota');
     if (quotaEl && remaining !== null) {
@@ -3840,21 +3851,32 @@ async function fetchFootballData() {
       quotaEl.style.color = parseInt(remaining) < 10 ? '#f59e0b' : '#22c55e';
     }
 
-    if (!fixtures.length) {
-      logLive('⚠️ No fixtures returned yet (World Cup 2026 season not open in API). Key verified ✅');
+    if (!allEvents.length) {
+      logLive('⚠️ No fixtures returned yet. Key verified ✅');
       setApiStatus('footballApiStatus', 'ok');
       return true;
     }
 
-    logLive(`✅ Fetched ${fixtures.length} upcoming World Cup fixtures from API-Football!`);
-    fixtures.slice(0, 10).forEach(f => {
-      const home = f.teams?.home?.name || '?';
-      const away = f.teams?.away?.name || '?';
-      const date = f.fixture?.date ? new Date(f.fixture.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
-      const status = f.fixture?.status?.short || '—';
-      const scoreH = f.goals?.home !== null ? f.goals?.home : '–';
-      const scoreA = f.goals?.away !== null ? f.goals?.away : '–';
-      logLive(`  📅 ${date} | ${getFlag(home)}${home} ${scoreH}-${scoreA} ${getFlag(away)}${away} [${status}]`);
+    const liveCount = liveEvents.filter(e => e.status?.type === 'inprogress').length;
+    const finishedCount = allEvents.filter(e => {
+      const t = (e.status?.type || e.fixture?.status?.short || '').toLowerCase();
+      return t === 'finished' || t === 'ended' || t === 'ft' || t === 'aet';
+    }).length;
+
+    logLive(`✅ SportAPI: ${liveCount} live · ${finishedCount} finished · ${allEvents.length} total events`);
+
+    // Auto-resolve any finished matches against pending predictions
+    autoResolveFromEvents(allEvents);
+
+    // Log a sample of events
+    allEvents.slice(0, 6).forEach(e => {
+      const home = e.homeTeam?.name || e.teams?.home?.name || '?';
+      const away = e.awayTeam?.name || e.teams?.away?.name || '?';
+      const scoreH = e.homeScore?.current ?? e.goals?.home ?? '–';
+      const scoreA = e.awayScore?.current ?? e.goals?.away ?? '–';
+      const status = e.status?.description || e.fixture?.status?.short || '?';
+      const ts = e.startTimestamp ? new Date(e.startTimestamp*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (e.fixture?.date ? new Date(e.fixture.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—');
+      logLive(`  📅 ${ts} | ${getFlag(home)}${home} ${scoreH}-${scoreA} ${getFlag(away)}${away} [${status}]`);
     });
 
     setApiStatus('footballApiStatus', 'ok');
@@ -3897,9 +3919,12 @@ function loadEngine() {
   } catch(e) {}
   return {
     weights: { ...BASELINE_WEIGHTS },
-    history: [],       // [{matchId, date, home, away, predictedH, predictedD, predictedA, actualResult, brierScore, weightsBefore, weightsAfter}]
+    history: [],
     totalMatches: 0,
     correctPredictions: 0,
+    pendingPredictions: [],  // snapshots awaiting API result
+    autoResolved: 0,
+    lastAutoResolve: null,
   };
 }
 
@@ -3908,11 +3933,12 @@ function saveEngine() {
 }
 
 function resetEngine() {
-  if (!confirm('Reset all learned weights and match history? This cannot be undone.')) return;
-  engine = { weights: { ...BASELINE_WEIGHTS }, history: [], totalMatches: 0, correctPredictions: 0 };
+  if (!confirm('Reset all learned weights, match history, and pending predictions? This cannot be undone.')) return;
+  engine = { weights: { ...BASELINE_WEIGHTS }, history: [], totalMatches: 0, correctPredictions: 0, pendingPredictions: [], autoResolved: 0, lastAutoResolve: null };
   saveEngine();
+  snapshotMatchPredictions();
   renderIntelligence();
-  alert('Engine reset to baseline weights.');
+  showToast('Engine reset to baseline weights.', 'green');
 }
 
 // ── Brier Score ──
@@ -4075,13 +4101,263 @@ function generateInsights() {
 }
 
 // ── RENDER INTELLIGENCE ──
+// ══════════════════════════════════════════
+// AUTO-LEARNING ENGINE
+// ══════════════════════════════════════════
+
+function normalizeTeamName(name) {
+  return (name || '').toLowerCase()
+    .replace(/\s+(fc|sc|united|city|athletic|cf|afc|utd|hotspur|wanderers|wednesday|albion|palace|county|rovers|town|villa)\s*$/gi, '')
+    .replace(/[^a-z0-9]/g, '').trim();
+}
+
+function teamsMatch(a, b) {
+  const na = normalizeTeamName(a), nb = normalizeTeamName(b);
+  if (na === nb) return true;
+  if (na.length > 4 && nb.length > 4) return na.includes(nb) || nb.includes(na);
+  return false;
+}
+
+function snapshotMatchPredictions() {
+  if (!engine.pendingPredictions) engine.pendingPredictions = [];
+  const loggedIds = new Set(engine.history.map(h => h.matchId));
+  const pendingIds = new Set(engine.pendingPredictions.map(p => p.id));
+
+  // WC matches
+  matches.forEach(m => {
+    const id = m.date + m.home.name + m.away.name;
+    if (!loggedIds.has(id) && !pendingIds.has(id)) {
+      engine.pendingPredictions.push({
+        id, source: 'wc',
+        home: m.home.name, away: m.away.name,
+        homeFlag: m.home.flag, awayFlag: m.away.flag,
+        group: m.group, date: m.date,
+        probs: { h: m.homeProb, d: m.drawProb, a: m.awayProb },
+        factors: m.factors.map(f => ({ name: f.name, val: f.val })),
+        weightsAtSnapshot: { ...engine.weights },
+        snappedAt: Date.now()
+      });
+    }
+  });
+
+  // PL Final Day matches — generate synthetic factor scores from probabilities
+  if (typeof plFinalDayMatches !== 'undefined') {
+    plFinalDayMatches.forEach(m => {
+      const id = 'PL_GW38_' + m.home + '_' + m.away;
+      if (!loggedIds.has(id) && !pendingIds.has(id)) {
+        const diff = m.homeProb - m.awayProb;
+        engine.pendingPredictions.push({
+          id, source: 'pl',
+          home: m.home, away: m.away,
+          homeFlag: m.homeFlag, awayFlag: m.awayFlag,
+          group: 'Premier League GW38', date: 'May 24, 2026',
+          probs: { h: m.homeProb, d: m.draw, a: m.awayProb },
+          factors: [
+            { name: 'Elo Rating',       val: Math.max(10, Math.min(90, 50 + diff * 0.6)) },
+            { name: 'Recent Form',      val: Math.max(10, Math.min(90, 50 + diff * 0.4)) },
+            { name: 'Squad Quality',    val: Math.max(10, Math.min(90, 50 + diff * 0.3)) },
+            { name: 'Injury Impact',    val: 70 },
+            { name: 'H2H History',      val: Math.max(30, Math.min(70, 50 + diff * 0.2)) },
+            { name: 'Tournament Exp.',  val: 50 },
+          ],
+          weightsAtSnapshot: { ...engine.weights },
+          snappedAt: Date.now()
+        });
+      }
+    });
+  }
+
+  saveEngine();
+  updateIntelPendingBadge();
+}
+
+function updateIntelPendingBadge() {
+  const badge = document.getElementById('intelPendingBadge');
+  if (!badge) return;
+  const count = (engine.pendingPredictions || []).length;
+  badge.style.display = count > 0 ? 'inline' : 'none';
+  badge.textContent = count;
+}
+
+function autoResolveMatch(pending, actualResult, scoreStr) {
+  const before = { ...engine.weights };
+  const bs = brierScore(pending.probs, actualResult);
+  const predicted = predictedWinner(pending.probs.h, pending.probs.d, pending.probs.a);
+  const correct = predicted === actualResult;
+
+  // Gradient descent using saved factor scores
+  pending.factors.forEach(f => {
+    const key = FACTOR_NAME_MAP[f.name] || null;
+    if (!key || engine.weights[key] === undefined) return;
+    const contribution = factorContribution(f.val, actualResult);
+    engine.weights[key] += LEARNING_RATE * contribution * 10;
+    engine.weights[key] = Math.max(0.5, engine.weights[key]);
+  });
+
+  // Normalize weights to 100%
+  const total = Object.values(engine.weights).reduce((s,v) => s+v, 0);
+  FACTOR_KEYS.forEach(k => { engine.weights[k] = Math.round((engine.weights[k]/total)*100*10)/10; });
+
+  const resultLabel = actualResult === 'H' ? pending.home : actualResult === 'D' ? 'Draw' : pending.away;
+  engine.history.push({
+    matchId: pending.id,
+    date: pending.date,
+    home: pending.home, away: pending.away,
+    predictedH: pending.probs.h, predictedD: pending.probs.d, predictedA: pending.probs.a,
+    predictedWinner: predicted,
+    actualResult, scoreStr: scoreStr || '',
+    brierScore: Math.round(bs * 1000) / 1000,
+    correct, autoResolved: true,
+    weightsBefore: before, weightsAfter: { ...engine.weights }
+  });
+  engine.totalMatches++;
+  if (correct) engine.correctPredictions++;
+  engine.autoResolved = (engine.autoResolved || 0) + 1;
+  engine.lastAutoResolve = Date.now();
+
+  saveEngine();
+  renderIntelligence();
+
+  showToast(
+    `🧠 Auto-resolved: ${pending.home} ${scoreStr||''} ${pending.away} → ${resultLabel} · BS: ${bs.toFixed(3)} · ${correct ? '✓ Correct' : '✗ Wrong'}`,
+    correct ? 'green' : 'red'
+  );
+}
+
+function autoResolveFromEvents(events) {
+  if (!events || !events.length) return;
+  const pending = engine.pendingPredictions;
+  if (!pending || !pending.length) return;
+
+  let resolved = 0;
+  events.forEach(ev => {
+    // Handle both SportAPI format and API-Football format
+    const apiHome = ev.homeTeam?.name || ev.home_team || ev.teams?.home?.name || '';
+    const apiAway = ev.awayTeam?.name || ev.away_team || ev.teams?.away?.name || '';
+    const statusType = ev.status?.type || ev.fixture?.status?.short || '';
+    const isFinished = ['finished','ended','after extra time','after penalties'].some(s => statusType.toLowerCase().includes(s))
+      || statusType === 'FT' || statusType === 'AET' || statusType === 'PEN';
+    if (!apiHome || !apiAway || !isFinished) return;
+
+    const homeScore = ev.homeScore?.current ?? ev.goals?.home ?? null;
+    const awayScore = ev.awayScore?.current ?? ev.goals?.away ?? null;
+    if (homeScore === null || awayScore === null) return;
+
+    const idx = pending.findIndex(p => teamsMatch(apiHome, p.home) && teamsMatch(apiAway, p.away));
+    if (idx === -1) return;
+
+    const p = pending.splice(idx, 1)[0];
+    const actualResult = homeScore > awayScore ? 'H' : awayScore > homeScore ? 'A' : 'D';
+    autoResolveMatch(p, actualResult, `${homeScore}-${awayScore}`);
+    resolved++;
+  });
+
+  if (resolved > 0) {
+    logLive(`🧠 Auto-resolved ${resolved} match${resolved>1?'es':''} — weights recalibrated!`);
+    updateIntelPendingBadge();
+  }
+}
+
+function renderAutoLearning() {
+  const el = document.getElementById('view-autolearn');
+  if (!el) return;
+  const pending = engine.pendingPredictions || [];
+  const autoCount = engine.autoResolved || 0;
+  const lastTime = engine.lastAutoResolve
+    ? new Date(engine.lastAutoResolve).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
+    : 'Never';
+
+  const autoHistory = engine.history.filter(h => h.autoResolved);
+
+  el.innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+      <div class="metric-pill"><div class="val" style="color:var(--blue)">${pending.length}</div><div class="lbl">Tracking (Pending)</div></div>
+      <div class="metric-pill"><div class="val" style="color:var(--green)">${autoCount}</div><div class="lbl">Auto-Resolved</div></div>
+      <div class="metric-pill"><div class="val" style="color:var(--gold);font-size:0.85rem">${lastTime}</div><div class="lbl">Last Auto-Update</div></div>
+    </div>
+
+    <div class="engine-panel" style="margin-bottom:16px">
+      <div class="engine-panel-header"><span style="font-size:1.2rem">🤖</span><h3>How the Self-Learning Loop Works</h3></div>
+      <div class="engine-panel-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;font-size:0.8rem;color:var(--muted);line-height:1.7">
+          <div style="background:var(--card2);border-radius:10px;padding:12px">
+            <div style="font-weight:700;color:var(--gold);margin-bottom:6px">① Snapshot</div>
+            Every match prediction is saved with its exact probabilities and the 6 factor scores that produced them.
+          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:12px">
+            <div style="font-weight:700;color:var(--blue);margin-bottom:6px">② Monitor</div>
+            Each time live data is fetched from SportAPI, the engine scans for finished matches in the pending queue.
+          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:12px">
+            <div style="font-weight:700;color:var(--green);margin-bottom:6px">③ Cross-Reference</div>
+            Actual result is compared to the prediction. Brier Score measures exactly how wrong (or right) each probability was.
+          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:12px">
+            <div style="font-weight:700;color:var(--purple);margin-bottom:6px">④ Recalibrate</div>
+            Gradient descent adjusts: factors that backed wrong outcomes lose weight; factors that were correct gain weight. Auto-normalized so no factor dominates.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="engine-panel" style="margin-bottom:16px">
+      <div class="engine-panel-header">
+        <span style="font-size:1.2rem">📋</span>
+        <h3>Pending Predictions Queue</h3>
+        <span style="font-size:0.75rem;color:var(--muted)">${pending.length} matches tracked — auto-resolve fires when results arrive from API</span>
+      </div>
+      <div class="engine-panel-body">
+        ${pending.length === 0
+          ? '<div style="color:var(--muted);font-size:0.82rem">No pending predictions. Snapshot will populate when predictions are rendered.</div>'
+          : `<div style="overflow-x:auto"><table class="odds-table" style="min-width:580px">
+              <thead><tr><th>Comp</th><th style="text-align:left">Match</th><th>Date</th><th>Pred H%</th><th>D%</th><th>A%</th><th>Snapped</th></tr></thead>
+              <tbody>${pending.map(p => `<tr>
+                <td style="color:var(--muted);font-size:0.75rem">${p.source==='pl'?'⚽ PL':'🏆 WC'}</td>
+                <td><strong>${p.home}</strong> vs <strong>${p.away}</strong></td>
+                <td style="color:var(--muted);font-size:0.75rem">${p.date}</td>
+                <td style="color:var(--green);font-weight:700">${p.probs.h}%</td>
+                <td style="color:var(--muted)">${p.probs.d}%</td>
+                <td style="color:var(--red)">${p.probs.a}%</td>
+                <td style="color:var(--muted);font-size:0.72rem">${new Date(p.snappedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}</td>
+              </tr>`).join('')}
+              </tbody></table></div>`
+        }
+      </div>
+    </div>
+
+    ${autoHistory.length > 0 ? `
+    <div class="engine-panel">
+      <div class="engine-panel-header"><span style="font-size:1.2rem">⚡</span><h3>Auto-Resolve Log</h3>
+        <span style="font-size:0.75rem;color:var(--muted)">Weight changes triggered automatically by API results</span>
+      </div>
+      <div class="engine-panel-body">
+        ${autoHistory.map((h,i) => `
+        <div style="margin-bottom:10px;background:var(--card2);border-radius:8px;padding:10px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+            <span style="font-size:0.82rem;font-weight:700">${h.home} ${h.scoreStr||''} ${h.away}</span>
+            <span class="conf-badge ${h.correct?'conf-high':'conf-low'}" style="font-size:0.7rem">${h.correct?'✓ Correct':'✗ Wrong'} · BS ${h.brierScore}</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${FACTOR_KEYS.filter(k => Math.abs((h.weightsAfter[k]||0)-(h.weightsBefore[k]||0))>0.1).map(k => {
+              const d = (h.weightsAfter[k]||0)-(h.weightsBefore[k]||0);
+              return `<span style="font-size:0.7rem;padding:2px 7px;border-radius:8px;background:${d>0?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'};color:${d>0?'var(--green)':'var(--red)'};border:1px solid ${d>0?'rgba(34,197,94,0.3)':'rgba(239,68,68,0.3)'}">${FACTOR_LABELS[k]}: ${d>0?'+':''}${d.toFixed(1)}%</span>`;
+            }).join('')}
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
+}
+
 function renderIntelligence() {
   renderEngineStatus();
+  renderAutoLearning();
   renderResultEntry();
   renderWeightEvolution();
   renderAccuracy();
   renderRecalibrated();
   renderInsights();
+  updateIntelPendingBadge();
 }
 
 function renderEngineStatus() {
@@ -4091,11 +4367,14 @@ function renderEngineStatus() {
   const avgBS = n > 0 ? Math.round((engine.history.reduce((s,h)=>s+h.brierScore,0)/n)*1000)/1000 : '–';
   const wChanged = FACTOR_KEYS.filter(k => Math.abs(engine.weights[k]-BASELINE_WEIGHTS[k]) > 1).length;
 
+  const pending = (engine.pendingPredictions || []).length;
+  const autoRes = engine.autoResolved || 0;
   el.innerHTML = [
     { val: n, lbl: 'Results Logged', color: '#FFD700' },
     { val: acc + (n>0?'%':''), lbl: 'Prediction Accuracy', color: acc >= 60 ? '#22c55e' : acc >= 45 ? '#f59e0b' : '#ef4444' },
     { val: avgBS, lbl: 'Avg Brier Score', color: avgBS !== '–' ? (avgBS < 0.25 ? '#22c55e' : avgBS < 0.35 ? '#f59e0b' : '#ef4444') : '#8899aa' },
-    { val: wChanged, lbl: 'Weights Shifted', color: wChanged > 0 ? '#a855f7' : '#8899aa' },
+    { val: pending, lbl: 'Tracking (Pending)', color: pending > 0 ? '#3b82f6' : '#8899aa' },
+    { val: autoRes, lbl: 'Auto-Resolved', color: autoRes > 0 ? '#22c55e' : '#8899aa' },
     { val: engine.totalMatches === 0 ? 'Ready' : engine.correctPredictions >= engine.totalMatches*0.7 ? '🟢 Sharp' : engine.correctPredictions >= engine.totalMatches*0.5 ? '🟡 Learning' : '🔴 Calibrating', lbl: 'Engine Status', color: '#14b8a6' },
   ].map(m => `<div class="metric-pill"><div class="val" style="color:${m.color}">${m.val}</div><div class="lbl">${m.lbl}</div></div>`).join('');
 }
@@ -4117,7 +4396,7 @@ function renderResultEntry() {
       </div>
       <div>
         ${logged
-          ? `<div style="font-size:0.78rem;font-weight:700;color:var(--green)">✅ Logged: ${resultLabel}<br><span style="color:var(--muted);font-size:0.68rem">BS: ${loggedResult.brierScore} · ${loggedResult.correct?'✓ Correct':'✗ Wrong'}</span></div>`
+          ? `<div style="font-size:0.78rem;font-weight:700;color:var(--green)">✅ ${loggedResult?.autoResolved ? '<span style="font-size:0.65rem;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.4);color:#60a5fa;padding:1px 5px;border-radius:4px;margin-right:4px">🤖 Auto</span>' : '<span style="font-size:0.65rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);padding:1px 5px;border-radius:4px;margin-right:4px">👤 Manual</span>'}${resultLabel}<br><span style="color:var(--muted);font-size:0.68rem">BS: ${loggedResult.brierScore} · ${loggedResult.correct?'✓ Correct':'✗ Wrong'}</span></div>`
           : `<select class="result-select" id="sel_${i}">
               <option value="">— Select result —</option>
               <option value="H">${m.home.name} Win</option>
@@ -4320,7 +4599,7 @@ function renderInsights() {
 function showIntelView(view, btn) {
   document.querySelectorAll('#intelSubTabs .filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['results','weights','accuracy','recal','insights'].forEach(v=>{
+  ['autolearn','results','weights','accuracy','recal','insights'].forEach(v=>{
     document.getElementById(`view-${v}`).style.display = v===view ? 'block':'none';
   });
 }
@@ -4408,6 +4687,9 @@ renderPLGoldenBoot();
 renderPLStars();
 renderPLAssists();
 renderPLInjuries();
+
+// ── SNAPSHOT PREDICTIONS FOR AUTO-LEARNING ──
+snapshotMatchPredictions();
 
 // ── RESTORE COMPETITION (before tab restore so theme is set correctly) ──
 if (currentCompetition === 'pl') applyCompetitionUI('pl');
