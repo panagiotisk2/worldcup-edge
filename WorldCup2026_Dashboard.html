@@ -844,11 +844,11 @@
 <div class="tabs">
   <div class="tab active" onclick="showTab('overview', this)">📊 Overview</div>
   <div id="tabGroups" class="tab" onclick="showTab('groups', this)">🏆 All 12 Groups</div>
-  <div class="tab" onclick="showTab('predictions', this)">🎯 Match Predictions</div>
-  <div class="tab" onclick="showTab('odds', this)">💰 Betting Odds</div>
-  <div class="tab" onclick="showTab('injuries', this)">🤕 Injury Tracker</div>
+  <div id="tabPredictions" class="tab" onclick="showTab('predictions', this)">🎯 Match Predictions</div>
+  <div id="tabOdds" class="tab" onclick="showTab('odds', this)">💰 Betting Odds</div>
+  <div id="tabInjuries" class="tab" onclick="showTab('injuries', this)">🤕 Injury Tracker</div>
   <div class="tab" onclick="showTab('method', this)">🧠 Methodology</div>
-  <div class="tab" onclick="showTab('players', this)">⭐ Player Hub</div>
+  <div id="tabPlayers" class="tab" onclick="showTab('players', this)">⭐ Player Hub</div>
   <div class="tab" onclick="showTab('betting', this)">📡 Live Betting Lines</div>
   <div class="tab" onclick="showTab('intelligence', this)">🧠 Intelligence Engine</div>
   <div class="tab" onclick="showTab('sources', this)">📚 Data Sources</div>
@@ -1009,63 +1009,129 @@
     <div class="stat-card"><div class="val">88%</div><div class="lbl">Model Accuracy</div></div>
   </div>
 
-  <h2>🏆 Title Race <span>Top Contenders</span></h2>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:28px">
+  <!-- CHAMPIONS BANNER -->
+  <div style="background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(124,58,237,0.05));border:2px solid rgba(124,58,237,0.5);border-radius:14px;padding:20px;margin-bottom:24px;text-align:center">
+    <div style="font-size:3rem;margin-bottom:6px">🏆</div>
+    <div style="font-size:1.5rem;font-weight:900;color:var(--gold)">Arsenal — 2025/26 Premier League Champions</div>
+    <div style="font-size:0.88rem;color:var(--muted);margin-top:6px">82 points · 25W 7D 5L · +43 GD · Season clinched</div>
+    <div style="font-size:0.82rem;color:var(--green);margin-top:6px">🏆 Trophy presentation: Final Day vs Crystal Palace · May 24, 2026</div>
+  </div>
 
-    <div class="group-card" style="border-color:rgba(124,58,237,0.4)">
-      <div style="padding:16px;text-align:center">
-        <div style="font-size:2.5rem">🔵</div>
-        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Manchester City</div>
-        <div style="color:var(--muted);font-size:0.8rem">1st · 71 pts</div>
-        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">-120</div>
-        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~42%</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">🔥 Haaland 28 goals</div>
-        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Title Favorite</div>
-      </div>
-    </div>
+  <h2>📊 Season <span>Summary — GW37</span></h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:28px">
 
     <div class="group-card" style="border-color:rgba(124,58,237,0.4)">
       <div style="padding:16px;text-align:center">
         <div style="font-size:2.5rem">🔴</div>
         <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Arsenal</div>
-        <div style="color:var(--muted);font-size:0.8rem">2nd · 69 pts</div>
-        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+150</div>
-        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~38%</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">⚡ Saka / Ødegaard key</div>
-        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Challenger</div>
-      </div>
-    </div>
-
-    <div class="group-card">
-      <div style="padding:16px;text-align:center">
-        <div style="font-size:2.5rem">🔴</div>
-        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Liverpool</div>
-        <div style="color:var(--muted);font-size:0.8rem">3rd · 67 pts</div>
-        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+800</div>
-        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~15%</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">🔥 Salah in top form</div>
-        <div class="conf-badge conf-med" style="margin-top:8px;justify-content:center">Outsider</div>
+        <div style="color:var(--muted);font-size:0.8rem">1st · 82 pts ·  GW37</div>
+        <div style="color:var(--gold);font-size:1.5rem;font-weight:900;margin:8px 0">CHAMPIONS 🏆</div>
+        <div style="font-size:0.72rem;color:var(--green)">25W 7D 5L · +43 GD</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Saka 22G · Ødegaard 11A</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">★ Title Winners</div>
       </div>
     </div>
 
     <div class="group-card">
       <div style="padding:16px;text-align:center">
         <div style="font-size:2.5rem">🔵</div>
-        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Chelsea</div>
-        <div style="color:var(--muted);font-size:0.8rem">4th · 59 pts</div>
-        <div style="color:var(--gold);font-size:1.8rem;font-weight:900;margin:8px 0">+2500</div>
-        <div style="font-size:0.72rem;color:var(--green)">Title Prob: ~4%</div>
-        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">✅ UCL spot secured</div>
-        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">Top 4</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Manchester City</div>
+        <div style="color:var(--muted);font-size:0.8rem">2nd · 78 pts</div>
+        <div style="color:var(--gold);font-size:1.5rem;font-weight:900;margin:8px 0">UCL Secured</div>
+        <div style="font-size:0.72rem;color:var(--green)">23W 9D 5L · +43 GD</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Haaland 29G (Golden Boot)</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">2nd Place</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🔴</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Man United</div>
+        <div style="color:var(--muted);font-size:0.8rem">3rd · 68 pts</div>
+        <div style="color:var(--gold);font-size:1.5rem;font-weight:900;margin:8px 0">UCL Secured</div>
+        <div style="font-size:0.72rem;color:var(--green)">19W 11D 7L · +16 GD</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Amorim's revival season</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">3rd Place</div>
+      </div>
+    </div>
+
+    <div class="group-card">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🟣</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Aston Villa</div>
+        <div style="color:var(--muted);font-size:0.8rem">4th · 62 pts</div>
+        <div style="color:var(--gold);font-size:1.5rem;font-weight:900;margin:8px 0">UCL Secured</div>
+        <div style="font-size:0.72rem;color:var(--green)">18W 8D 11L · +6 GD</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Watkins 15G 9A key</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">4th Place</div>
+      </div>
+    </div>
+
+    <div class="group-card" style="border-color:rgba(245,158,11,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🔴</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">West Ham</div>
+        <div style="color:var(--muted);font-size:0.8rem">18th · 36 pts</div>
+        <div style="color:var(--yellow);font-size:1.5rem;font-weight:900;margin:8px 0">⚠️ DANGER</div>
+        <div style="font-size:0.72rem;color:var(--yellow)">Must win Final Day</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Leeds · need Spurs to slip</div>
+        <div class="conf-badge conf-med" style="margin-top:8px;justify-content:center">Relegation Battle</div>
+      </div>
+    </div>
+
+    <div class="group-card" style="border-color:rgba(239,68,68,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2.5rem">🟡</div>
+        <div style="font-weight:800;font-size:1.1rem;margin-top:8px">Burnley &amp; Wolves</div>
+        <div style="color:var(--muted);font-size:0.8rem">19th-20th · 21 &amp; 19 pts</div>
+        <div style="color:var(--red);font-size:1.5rem;font-weight:900;margin:8px 0">RELEGATED</div>
+        <div style="font-size:0.72rem;color:var(--red)">Both confirmed relegated</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">Final day dead rubber</div>
+        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">Championship 26/27</div>
       </div>
     </div>
 
   </div>
 
-  <h2>📅 Upcoming <span>PL Fixtures</span></h2>
-  <p class="section-desc">Next Premier League matches. Switch to the Betting Odds tab for live EPL lines.</p>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px" id="plUpcoming">
-    <div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:20px">Loading PL fixtures... <span style="color:var(--gold)">⚽</span></div>
+  <h2>📅 Final Day <span>GW38 — May 24, 2026</span></h2>
+  <p class="section-desc">All 10 matches kick off simultaneously at 4:00pm BST. Key drama: West Ham survival fight. Arsenal trophy lift at Selhurst Park.</p>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:130px;font-size:0.82rem">May 24 · 4:00pm</span>
+      <span style="font-size:1.1rem">🔵 Crystal Palace</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🔴 Arsenal</span>
+      <span style="margin-left:auto" class="conf-badge conf-high">🏆 Trophy Day</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:130px;font-size:0.82rem">May 24 · 4:00pm</span>
+      <span style="font-size:1.1rem">🔴 West Ham</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">⚪ Leeds United</span>
+      <span style="margin-left:auto" class="conf-badge conf-med">⚠️ Survival</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:130px;font-size:0.82rem">May 24 · 4:00pm</span>
+      <span style="font-size:1.1rem">⚪ Tottenham</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🔵 Everton</span>
+      <span style="margin-left:auto" class="conf-badge conf-med">⚠️ Key for W.Ham</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--gold);font-weight:700;width:130px;font-size:0.82rem">May 24 · 4:00pm</span>
+      <span style="font-size:1.1rem">🔵 Man City</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🟣 Aston Villa</span>
+      <span style="margin-left:auto" class="conf-badge conf-high">City 62% Win</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+      <span style="color:var(--gold);font-weight:700;width:130px;font-size:0.82rem">May 24 · 4:00pm</span>
+      <span style="font-size:1.1rem">🟡 Burnley</span>
+      <span style="color:var(--muted);margin:0 8px">vs</span>
+      <span style="font-size:1.1rem">🟡 Wolves</span>
+      <span style="margin-left:auto" class="conf-badge conf-low">Dead Rubber</span>
+    </div>
   </div>
 </div><!-- /overviewPL -->
 
@@ -1095,6 +1161,7 @@
 
 <!-- ══ PREDICTIONS ══ -->
 <div id="predictions" class="section">
+<div id="predictionsWC">
   <h2>🎯 Match <span>Predictions</span></h2>
   <div class="disclaimer">
     Probabilities derived from a weighted model: Elo Rating (30%) + Recent Form (20%) + Squad Quality (15%) + Injury Impact (10%) + H2H History (10%) + Tournament Experience (5%) + Tactical Matchup (5%) + Market Odds (5%). Updated with May 2026 injury data.
@@ -1110,8 +1177,18 @@
   <div class="pred-grid" id="predGrid"></div>
 </div>
 
+<!-- PL FINAL DAY PREDICTIONS -->
+<div id="predictionsPL" style="display:none">
+  <h2>🎯 GW38 <span>Final Day — May 24, 2026</span></h2>
+  <div class="disclaimer">All 10 matches kick off simultaneously at 4:00pm BST. Arsenal are already champions. Burnley &amp; Wolves already relegated. <strong style="color:var(--yellow)">Key drama: West Ham (18th, 36pts) vs Tottenham (17th, 38pts) — West Ham must win and Spurs must not win.</strong></div>
+
+  <div class="pred-grid" id="predGridPL"></div>
+</div>
+</div>
+
 <!-- ══ ODDS ══ -->
 <div id="odds" class="section">
+<div id="oddsWC">
   <h2>💰 Tournament Winner <span>Odds & Analysis</span></h2>
   <p class="section-desc">Current outright winner odds from major bookmakers (DraftKings/BetMGM, May 2026). Implied probability calculated from American odds. Always compare across multiple books.</p>
 
@@ -1137,8 +1214,93 @@
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px" id="groupOddsGrid"></div>
 </div>
 
+<!-- PL ODDS -->
+<div id="oddsPL" style="display:none">
+  <h2>💰 Premier League <span>Outright Odds 2025/26</span></h2>
+  <p class="section-desc">Season outright markets — title winner (confirmed), Golden Boot race, relegation survival, top 4 finish. Odds from Bet365 / William Hill / Betfair as of GW37.</p>
+  <div class="disclaimer">⚠️ Arsenal are confirmed PL Champions 2025/26. Markets below reflect remaining live bets — top scorer, relegation, next season futures.</div>
+
+  <!-- TITLE — CONFIRMED -->
+  <div style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(124,58,237,0.05));border:1px solid rgba(124,58,237,0.4);border-radius:14px;padding:20px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div style="font-size:3rem">🏆</div>
+    <div>
+      <div style="font-size:1.3rem;font-weight:900;color:var(--gold)">Arsenal — 2025/26 Premier League Champions</div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-top:4px">82 points from 37 games · +43 goal difference · 25W 7D 5L</div>
+      <div style="font-size:0.8rem;color:var(--green);margin-top:6px">✅ Title clinched — Trophy lift on May 24 at Crystal Palace</div>
+    </div>
+  </div>
+
+  <!-- GOLDEN BOOT RACE -->
+  <h2 style="margin-bottom:12px">🥇 Golden Boot <span>Race (Top Scorers)</span></h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:28px" id="plGoldenBootGrid"></div>
+
+  <!-- RELEGATION SURVIVAL -->
+  <h2 style="margin-bottom:12px">🚨 Relegation <span>Survival Odds</span></h2>
+  <p class="section-desc">3 clubs relegated. Burnley &amp; Wolves already down. West Ham (36pts, 18th) must win and hope Tottenham (38pts, 17th) slip up on Final Day.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:28px">
+    <div class="group-card" style="border-color:rgba(34,197,94,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem">⚪</div>
+        <div style="font-weight:800;font-size:1rem;margin-top:6px">Tottenham Hotspur</div>
+        <div style="color:var(--muted);font-size:0.8rem">17th · 38pts</div>
+        <div style="color:var(--green);font-size:1.5rem;font-weight:900;margin:8px 0">-400</div>
+        <div style="font-size:0.72rem;color:var(--green)">Survival Prob: ~83%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Everton (Final Day)</div>
+        <div class="conf-badge conf-high" style="margin-top:8px;justify-content:center">Likely Safe</div>
+      </div>
+    </div>
+    <div class="group-card" style="border-color:rgba(245,158,11,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem">🔴</div>
+        <div style="font-weight:800;font-size:1rem;margin-top:6px">West Ham United</div>
+        <div style="color:var(--muted);font-size:0.8rem">18th · 36pts</div>
+        <div style="color:var(--yellow);font-size:1.5rem;font-weight:900;margin:8px 0">+280</div>
+        <div style="font-size:0.72rem;color:var(--yellow)">Survival Prob: ~28%</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Leeds (Final Day)</div>
+        <div class="conf-badge conf-med" style="margin-top:8px;justify-content:center">⚠️ In Danger</div>
+      </div>
+    </div>
+    <div class="group-card" style="border-color:rgba(239,68,68,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem">🟡</div>
+        <div style="font-weight:800;font-size:1rem;margin-top:6px">Burnley</div>
+        <div style="color:var(--muted);font-size:0.8rem">19th · 21pts</div>
+        <div style="color:var(--red);font-size:1.5rem;font-weight:900;margin:8px 0">—</div>
+        <div style="font-size:0.72rem;color:var(--red)">RELEGATED ✗</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Wolves (Final Day)</div>
+        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">Relegated</div>
+      </div>
+    </div>
+    <div class="group-card" style="border-color:rgba(239,68,68,0.4)">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem">🟡</div>
+        <div style="font-weight:800;font-size:1rem;margin-top:6px">Wolverhampton</div>
+        <div style="color:var(--muted);font-size:0.8rem">20th · 19pts</div>
+        <div style="color:var(--red);font-size:1.5rem;font-weight:900;margin:8px 0">—</div>
+        <div style="font-size:0.72rem;color:var(--red)">RELEGATED ✗</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">vs Burnley (Final Day)</div>
+        <div class="conf-badge conf-low" style="margin-top:8px;justify-content:center">Relegated</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEXT SEASON TITLE EARLY ODDS -->
+  <h2 style="margin-bottom:12px">📅 2026/27 Title <span>Early Odds</span></h2>
+  <p class="section-desc">Early market prices for next season — before squads are confirmed, transfers completed, or managers appointed.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+    <div class="group-card"><div style="padding:14px;text-align:center"><div style="font-size:1.8rem">🔴</div><div style="font-weight:700;margin-top:6px;font-size:0.9rem">Arsenal</div><div style="color:var(--gold);font-size:1.4rem;font-weight:900;margin:6px 0">+250</div><div style="font-size:0.7rem;color:var(--green)">Defending champions</div></div></div>
+    <div class="group-card"><div style="padding:14px;text-align:center"><div style="font-size:1.8rem">🔵</div><div style="font-weight:700;margin-top:6px;font-size:0.9rem">Man City</div><div style="color:var(--gold);font-size:1.4rem;font-weight:900;margin:6px 0">+300</div><div style="font-size:0.7rem;color:var(--muted)">Record-chasing squad</div></div></div>
+    <div class="group-card"><div style="padding:14px;text-align:center"><div style="font-size:1.8rem">🔴</div><div style="font-weight:700;margin-top:6px;font-size:0.9rem">Liverpool</div><div style="color:var(--gold);font-size:1.4rem;font-weight:900;margin:6px 0">+400</div><div style="font-size:0.7rem;color:var(--muted)">New era under Slot</div></div></div>
+    <div class="group-card"><div style="padding:14px;text-align:center"><div style="font-size:1.8rem">🔵</div><div style="font-weight:700;margin-top:6px;font-size:0.9rem">Chelsea</div><div style="color:var(--gold);font-size:1.4rem;font-weight:900;margin:6px 0">+700</div><div style="font-size:0.7rem;color:var(--muted)">Massive summer expected</div></div></div>
+    <div class="group-card"><div style="padding:14px;text-align:center"><div style="font-size:1.8rem">🔴</div><div style="font-weight:700;margin-top:6px;font-size:0.9rem">Man United</div><div style="color:var(--gold);font-size:1.4rem;font-weight:900;margin:6px 0">+800</div><div style="font-size:0.7rem;color:var(--muted)">Amorim's 2nd season</div></div></div>
+    <div class="group-card"><div style="padding:14px;text-align:center"><div style="font-size:1.8rem">🟣</div><div style="font-weight:700;margin-top:6px;font-size:0.9rem">Aston Villa</div><div style="color:var(--gold);font-size:1.4rem;font-weight:900;margin:6px 0">+1200</div><div style="font-size:0.7rem;color:var(--muted)">UCL + smart signings</div></div></div>
+  </div>
+</div>
+</div>
+
 <!-- ══ INJURIES ══ -->
 <div id="injuries" class="section">
+<div id="injuriesWC">
   <h2>🤕 Injury <span>Tracker</span></h2>
   <p class="section-desc">Updated May 13, 2026. Key squad news affecting World Cup 2026 predictions. Injury impact is factored into all match predictions.</p>
 
@@ -1150,6 +1312,15 @@
   </div>
 
   <div class="injury-grid" id="injuryGrid"></div>
+</div>
+
+<!-- PL INJURIES -->
+<div id="injuriesPL" style="display:none">
+  <h2>🤕 PL Injury <span>Tracker — Final Day</span></h2>
+  <p class="section-desc">Updated May 20, 2026. Squad fitness ahead of GW38 Final Day (May 24). Most squads are near full strength for the season finale.</p>
+
+  <div class="injury-grid" id="plInjuryGrid"></div>
+</div>
 </div>
 
 <!-- ══ METHODOLOGY ══ -->
@@ -1178,6 +1349,7 @@
 
 <!-- ══ PLAYERS ══ -->
 <div id="players" class="section">
+<div id="playersWC">
   <h2>⭐ Player <span>Hub</span></h2>
   <p class="section-desc">Player performance data, season stats, Golden Boot odds, and impact ratings — updated with 2025-26 season statistics and May 2026 form.</p>
 
@@ -1191,7 +1363,7 @@
 
   <!-- GOLDEN BOOT -->
   <div id="view-golden">
-    <div class="disclaimer">🥇 Golden Boot odds from DraftKings/BetMGM (May 2026). Season stats from 2025-26 club season. WC Impact = estimated contribution based on team depth & tournament path.</div>
+    <div class="disclaimer">🥇 Golden Boot odds from DraftKings/BetMGM (May 2026). Season stats from 2025-26 club season. WC Impact = estimated contribution based on team depth &amp; tournament path.</div>
     <div style="overflow-x:auto">
       <table class="odds-table" style="margin-bottom:20px;min-width:820px">
         <thead>
@@ -1228,6 +1400,31 @@
     <p class="section-desc">Young players and rising stars expected to make a major impact at their first — or breakthrough — World Cup in 2026.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px" id="breakoutGrid"></div>
   </div>
+</div>
+
+<!-- PL PLAYERS -->
+<div id="playersPL" style="display:none">
+  <h2>⭐ PL Player <span>Hub 2025/26</span></h2>
+  <p class="section-desc">Premier League season stats, Golden Boot race, and key player ratings — updated GW37 (May 2026).</p>
+
+  <!-- PL SUB-TABS -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+    <button class="filter-btn active" id="plPlayerTab1" onclick="showPLPlayerView('boots',this)">🥇 PL Golden Boot</button>
+    <button class="filter-btn" id="plPlayerTab2" onclick="showPLPlayerView('stars',this)">🌟 Season Stars</button>
+    <button class="filter-btn" id="plPlayerTab3" onclick="showPLPlayerView('assists',this)">🎯 Top Assists</button>
+  </div>
+
+  <div id="plview-boots">
+    <div class="disclaimer">🥇 PL Golden Boot race 2025/26 — Erling Haaland chasing his 3rd consecutive PL scoring title. GW37 goals.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px" id="plGoldenBootCards"></div>
+  </div>
+  <div id="plview-stars" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px" id="plStarsGrid"></div>
+  </div>
+  <div id="plview-assists" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px" id="plAssistsGrid"></div>
+  </div>
+</div>
 </div>
 
 <!-- ══ BETTING LINES ══ -->
@@ -1539,61 +1736,282 @@ function applyCompetitionUI(comp) {
     ? '⚽ Premier League 2025/26 — Live Odds & Match Analysis'
     : '🏆 World Cup 2026 — Match Predictions & Betting Insights';
 
-  // Tab label
-  const groupsTab = document.getElementById('tabGroups');
-  if (groupsTab) groupsTab.textContent = isPL ? '📋 PL Standings' : '🏆 All 12 Groups';
+  // Tab labels
+  const tabMap = {
+    tabGroups:      { wc:'🏆 All 12 Groups',       pl:'📋 PL Standings'         },
+    tabPredictions: { wc:'🎯 Match Predictions',   pl:'🎯 Final Day Predictions' },
+    tabOdds:        { wc:'💰 Betting Odds',         pl:'💰 PL Outright Odds'     },
+    tabInjuries:    { wc:'🤕 Injury Tracker',       pl:'🤕 PL Injuries'          },
+    tabPlayers:     { wc:'⭐ Player Hub',           pl:'⭐ PL Players'           },
+  };
+  Object.entries(tabMap).forEach(([id, labels]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = isPL ? labels.pl : labels.wc;
+  });
 
-  // Section visibility
-  document.getElementById('overviewWC').style.display = isPL ? 'none' : 'block';
-  document.getElementById('overviewPL').style.display = isPL ? 'block' : 'none';
-  document.getElementById('groupsWC').style.display = isPL ? 'none' : 'block';
-  document.getElementById('groupsPL').style.display = isPL ? 'block' : 'none';
+  // Section visibility — all competition-aware pairs
+  ['overview','groups','predictions','odds','injuries','players'].forEach(p => {
+    const wcEl = document.getElementById(p + 'WC');
+    const plEl = document.getElementById(p + 'PL');
+    if (wcEl) wcEl.style.display = isPL ? 'none' : 'block';
+    if (plEl) plEl.style.display = isPL ? 'block' : 'none';
+  });
 }
 
 // ── PL STANDINGS DATA ──
+// GW37 standings — source: Sky Sports, May 20 2026
 const plStandings = [
-  { pos:1,  badge:'🔵', name:'Manchester City', mp:36, w:24, d:5,  l:7,  gd:'+48', pts:77 },
-  { pos:2,  badge:'🔴', name:'Arsenal',         mp:36, w:23, d:6,  l:7,  gd:'+41', pts:75 },
-  { pos:3,  badge:'🔴', name:'Liverpool',       mp:36, w:22, d:7,  l:7,  gd:'+36', pts:73 },
-  { pos:4,  badge:'🔵', name:'Chelsea',         mp:36, w:20, d:5,  l:11, gd:'+22', pts:65 },
-  { pos:5,  badge:'⚪', name:'Tottenham',       mp:36, w:18, d:6,  l:12, gd:'+15', pts:60 },
-  { pos:6,  badge:'🔴', name:'Manchester Utd',  mp:36, w:16, d:6,  l:14, gd:'+5',  pts:54 },
-  { pos:7,  badge:'🔵', name:'Newcastle',       mp:36, w:15, d:8,  l:13, gd:'+9',  pts:53 },
-  { pos:8,  badge:'🟣', name:'Aston Villa',     mp:36, w:15, d:7,  l:14, gd:'+6',  pts:52 },
-  { pos:9,  badge:'🔵', name:'Brighton',        mp:36, w:14, d:8,  l:14, gd:'+3',  pts:50 },
-  { pos:10, badge:'🔴', name:'West Ham',        mp:36, w:13, d:7,  l:16, gd:'-4',  pts:46 },
-  { pos:11, badge:'⚫', name:'Fulham',          mp:36, w:12, d:9,  l:15, gd:'-2',  pts:45 },
-  { pos:12, badge:'🔵', name:'Brentford',       mp:36, w:12, d:8,  l:16, gd:'-5',  pts:44 },
-  { pos:13, badge:'⚫', name:'Crystal Palace',  mp:36, w:11, d:9,  l:16, gd:'-8',  pts:42 },
-  { pos:14, badge:'🔴', name:'Nottm Forest',    mp:36, w:11, d:8,  l:17, gd:'-10', pts:41 },
-  { pos:15, badge:'🔵', name:'Ipswich',         mp:36, w:10, d:8,  l:18, gd:'-15', pts:38 },
-  { pos:16, badge:'⚫', name:'Bournemouth',     mp:36, w:10, d:7,  l:19, gd:'-14', pts:37 },
-  { pos:17, badge:'⚫', name:'Leicester',       mp:36, w:8,  d:7,  l:21, gd:'-22', pts:31 },
-  { pos:18, badge:'🟡', name:'Wolves',          mp:36, w:7,  d:6,  l:23, gd:'-31', pts:27 },
-  { pos:19, badge:'🔵', name:'Everton',         mp:36, w:6,  d:7,  l:23, gd:'-34', pts:25 },
-  { pos:20, badge:'🔴', name:'Southampton',     mp:36, w:3,  d:5,  l:28, gd:'-50', pts:14 },
+  { pos:1,  badge:'🔴', name:'Arsenal',              mp:37, w:25, d:7,  l:5,  gf:71, ga:28, gd:'+43', pts:82, status:'champion' },
+  { pos:2,  badge:'🔵', name:'Manchester City',      mp:37, w:23, d:9,  l:5,  gf:70, ga:27, gd:'+43', pts:78, status:'ucl' },
+  { pos:3,  badge:'🔴', name:'Manchester United',    mp:37, w:19, d:11, l:7,  gf:58, ga:42, gd:'+16', pts:68, status:'ucl' },
+  { pos:4,  badge:'🟣', name:'Aston Villa',          mp:37, w:18, d:8,  l:11, gf:54, ga:48, gd:'+6',  pts:62, status:'ucl' },
+  { pos:5,  badge:'🔴', name:'Liverpool',            mp:37, w:17, d:8,  l:12, gf:56, ga:46, gd:'+10', pts:59, status:'uel' },
+  { pos:6,  badge:'⚫', name:'Bournemouth',          mp:37, w:13, d:17, l:7,  gf:49, ga:45, gd:'+4',  pts:56, status:'uel' },
+  { pos:7,  badge:'🔵', name:'Brighton',             mp:37, w:14, d:11, l:12, gf:52, ga:43, gd:'+9',  pts:53, status:'uecl' },
+  { pos:8,  badge:'🔵', name:'Chelsea',              mp:37, w:14, d:10, l:13, gf:50, ga:43, gd:'+7',  pts:52, status:'mid' },
+  { pos:9,  badge:'🔴', name:'Brentford',            mp:37, w:14, d:10, l:13, gf:48, ga:45, gd:'+3',  pts:52, status:'mid' },
+  { pos:10, badge:'⬛', name:'Sunderland',           mp:37, w:13, d:12, l:12, gf:44, ga:51, gd:'-7',  pts:51, status:'mid' },
+  { pos:11, badge:'⚫', name:'Newcastle United',     mp:37, w:14, d:7,  l:16, gf:48, ga:48, gd:'0',   pts:49, status:'mid' },
+  { pos:12, badge:'🔵', name:'Everton',              mp:37, w:13, d:10, l:14, gf:45, ga:47, gd:'-2',  pts:49, status:'mid' },
+  { pos:13, badge:'⚪', name:'Fulham',               mp:37, w:14, d:7,  l:16, gf:46, ga:52, gd:'-6',  pts:49, status:'mid' },
+  { pos:14, badge:'⚪', name:'Leeds United',         mp:37, w:11, d:14, l:12, gf:43, ga:47, gd:'-4',  pts:47, status:'mid' },
+  { pos:15, badge:'🔵', name:'Crystal Palace',       mp:37, w:11, d:12, l:14, gf:40, ga:49, gd:'-9',  pts:45, status:'mid' },
+  { pos:16, badge:'🔴', name:'Nottingham Forest',    mp:37, w:11, d:10, l:16, gf:42, ga:45, gd:'-3',  pts:43, status:'mid' },
+  { pos:17, badge:'⚪', name:'Tottenham Hotspur',    mp:37, w:9,  d:11, l:17, gf:38, ga:48, gd:'-10', pts:38, status:'safe' },
+  { pos:18, badge:'🔴', name:'West Ham United',      mp:37, w:9,  d:9,  l:19, gf:34, ga:56, gd:'-22', pts:36, status:'danger' },
+  { pos:19, badge:'🟡', name:'Burnley',              mp:37, w:4,  d:9,  l:24, gf:28, ga:65, gd:'-37', pts:21, status:'relegated' },
+  { pos:20, badge:'🟡', name:'Wolverhampton',        mp:37, w:3,  d:10, l:24, gf:27, ga:68, gd:'-41', pts:19, status:'relegated' },
 ];
 
 function renderPLStandings() {
   const table = document.getElementById('plTable');
   if (!table) return;
-  const zone = pos => pos <= 4 ? 'pl-cl-zone' : pos <= 6 ? 'pl-europa-zone' : pos === 7 ? 'pl-conf-zone' : pos >= 18 ? 'pl-rel-zone' : '';
+  const zoneClass = s => s === 'champion' ? 'pl-cl-zone' : s === 'ucl' ? 'pl-cl-zone' : s === 'uel' ? 'pl-europa-zone' : s === 'uecl' ? 'pl-conf-zone' : s === 'relegated' || s === 'danger' ? 'pl-rel-zone' : '';
+  const statusBadge = s => s === 'champion' ? '<span style="font-size:0.65rem;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.4);color:#FFD700;border-radius:4px;padding:1px 5px;margin-left:6px">🏆 C</span>' : s === 'relegated' ? '<span style="font-size:0.65rem;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:var(--red);border-radius:4px;padding:1px 5px;margin-left:6px">R</span>' : s === 'danger' ? '<span style="font-size:0.65rem;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);color:var(--yellow);border-radius:4px;padding:1px 5px;margin-left:6px">!</span>' : '';
   table.innerHTML = `
     <thead><tr>
       <th style="text-align:center;width:28px">#</th>
       <th style="text-align:left;padding-left:12px">Club</th>
-      <th>MP</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
+      <th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
     </tr></thead>
-    <tbody>${plStandings.map(t => `<tr class="${zone(t.pos)}">
+    <tbody>${plStandings.map(t => `<tr class="${zoneClass(t.status)}">
       <td class="pl-pos">${t.pos}</td>
-      <td style="padding-left:12px"><span style="margin-right:6px">${t.badge}</span>${t.name}</td>
+      <td style="padding-left:12px"><span style="margin-right:6px">${t.badge}</span>${t.name}${statusBadge(t.status)}</td>
       <td style="text-align:center;color:var(--muted)">${t.mp}</td>
       <td style="text-align:center;color:var(--green)">${t.w}</td>
       <td style="text-align:center;color:var(--yellow)">${t.d}</td>
       <td style="text-align:center;color:var(--red)">${t.l}</td>
-      <td style="text-align:center;color:var(--muted)">${t.gd}</td>
+      <td style="text-align:center;color:var(--muted)">${t.gf}</td>
+      <td style="text-align:center;color:var(--muted)">${t.ga}</td>
+      <td style="text-align:center;color:${t.gd.startsWith('+') ? 'var(--green)' : t.gd === '0' ? 'var(--muted)' : 'var(--red)'}">${t.gd}</td>
       <td class="pl-pts">${t.pts}</td>
     </tr>`).join('')}</tbody>`;
+}
+
+// ── PL DATA ──
+const plTopScorers = [
+  { rank:1, name:'Erling Haaland',    club:'Man City',       nat:'🇳🇴', goals:29, assists:8,  apps:35, rating:9.4, odds:'-250' },
+  { rank:2, name:'Bukayo Saka',       club:'Arsenal',        nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', goals:22, assists:14, apps:36, rating:9.2, odds:'+180' },
+  { rank:3, name:'Kai Havertz',       club:'Arsenal',        nat:'🇩🇪', goals:19, assists:7,  apps:35, rating:8.6, odds:'+600' },
+  { rank:4, name:'Mohamed Salah',     club:'Liverpool',      nat:'🇪🇬', goals:17, assists:12, apps:34, rating:8.8, odds:'+900' },
+  { rank:5, name:'Bryan Mbeumo',      club:'Brentford',      nat:'🇨🇲', goals:16, assists:5,  apps:37, rating:8.3, odds:'+1400' },
+  { rank:6, name:'Ollie Watkins',     club:'Aston Villa',    nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', goals:15, assists:9,  apps:34, rating:8.1, odds:'+1800' },
+  { rank:7, name:'Chris Wood',        club:'Nottm Forest',   nat:'🇳🇿', goals:14, assists:2,  apps:35, rating:7.8, odds:'+2500' },
+  { rank:8, name:'Ché Adams',         club:'Sunderland',     nat:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', goals:14, assists:4,  apps:36, rating:7.9, odds:'+2500' },
+  { rank:9, name:'Nicolas Jackson',   club:'Chelsea',        nat:'🇸🇳', goals:13, assists:6,  apps:32, rating:7.6, odds:'+3500' },
+  { rank:10,name:'Darwin Nunez',      club:'Liverpool',      nat:'🇺🇾', goals:12, assists:5,  apps:30, rating:7.5, odds:'+4000' },
+];
+
+const plTopAssists = [
+  { rank:1, name:'Bukayo Saka',       club:'Arsenal',        nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', assists:14, goals:22, apps:36, rating:9.2 },
+  { rank:2, name:'Mohamed Salah',     club:'Liverpool',      nat:'🇪🇬', assists:12, goals:17, apps:34, rating:8.8 },
+  { rank:3, name:'Martin Ødegaard',   club:'Arsenal',        nat:'🇳🇴', assists:11, goals:8,  apps:35, rating:8.9 },
+  { rank:4, name:'Phil Foden',        club:'Man City',       nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', assists:10, goals:9,  apps:32, rating:8.5 },
+  { rank:5, name:'Ollie Watkins',     club:'Aston Villa',    nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', assists:9,  goals:15, apps:34, rating:8.1 },
+  { rank:6, name:'Erling Haaland',    club:'Man City',       nat:'🇳🇴', assists:8,  goals:29, apps:35, rating:9.4 },
+  { rank:7, name:'Cole Palmer',       club:'Chelsea',        nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', assists:8,  goals:11, apps:36, rating:8.4 },
+  { rank:8, name:'Anthony Elanga',    club:'Man United',     nat:'🇸🇪', assists:8,  goals:7,  apps:34, rating:7.9 },
+];
+
+const plSeasonStars = [
+  { name:'Erling Haaland',  club:'Man City',     nat:'🇳🇴', rating:9.4, goals:29, assists:8,  note:'Chasing 3rd PL Golden Boot' },
+  { name:'Bukayo Saka',     club:'Arsenal',      nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', rating:9.2, goals:22, assists:14, note:'Player of the Season favourite' },
+  { name:'Martin Ødegaard', club:'Arsenal',      nat:'🇳🇴', rating:8.9, goals:8,  assists:11, note:'Champions captain' },
+  { name:'Mohamed Salah',   club:'Liverpool',    nat:'🇪🇬', assists:12, goals:17, assists2:12, rating:8.8, note:'8th PL season, still elite' },
+  { name:'Phil Foden',      club:'Man City',     nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', rating:8.5, goals:9,  assists:10, note:'City talisman' },
+  { name:'Cole Palmer',     club:'Chelsea',      nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', rating:8.4, goals:11, assists:8,  note:'Carrying Chelsea attack' },
+  { name:'Bryan Mbeumo',    club:'Brentford',    nat:'🇨🇲', rating:8.3, goals:16, assists:5,  note:'Breakout star of the season' },
+  { name:'Ollie Watkins',   club:'Aston Villa',  nat:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', rating:8.1, goals:15, assists:9,  note:'Key to Villa UCL hopes' },
+];
+
+const plFinalDayMatches = [
+  { home:'Crystal Palace', away:'Arsenal',           homeFlag:'🔵', awayFlag:'🔴', homeProb:15, draw:25, awayProb:60, pick:'Arsenal',     pickConf:'high', note:'Trophy day — Arsenal to celebrate', venue:'Selhurst Park', time:'4:00pm BST' },
+  { home:'Man City',       away:'Aston Villa',       homeFlag:'🔵', awayFlag:'🟣', homeProb:62, draw:22, awayProb:16, pick:'Man City',    pickConf:'high', note:'City fighting for 2nd place finish', venue:'Etihad Stadium', time:'4:00pm BST' },
+  { home:'Nottm Forest',   away:'Bournemouth',       homeFlag:'🔴', awayFlag:'⚫', homeProb:42, draw:30, awayProb:28, pick:'Draw',        pickConf:'med',  note:'Both sides safe, low-stakes fixture', venue:'City Ground', time:'4:00pm BST' },
+  { home:'Liverpool',      away:'Brentford',         homeFlag:'🔴', awayFlag:'🔴', homeProb:55, draw:25, awayProb:20, pick:'Liverpool',   pickConf:'med',  note:'Liverpool chasing 5th for UEL spot', venue:'Anfield', time:'4:00pm BST' },
+  { home:'Brighton',       away:'Man United',        homeFlag:'🔵', awayFlag:'🔴', homeProb:40, draw:28, awayProb:32, pick:'Brighton',    pickConf:'low',  note:'United need win to confirm 3rd place', venue:'Amex Stadium', time:'4:00pm BST' },
+  { home:'Burnley',        away:'Wolverhampton',     homeFlag:'🟡', awayFlag:'🟡', homeProb:38, draw:32, awayProb:30, pick:'Draw',        pickConf:'low',  note:'Dead rubber — both already relegated', venue:'Turf Moor', time:'4:00pm BST' },
+  { home:'Sunderland',     away:'Chelsea',           homeFlag:'⬛', awayFlag:'🔵', homeProb:28, draw:30, awayProb:42, pick:'Chelsea',     pickConf:'med',  note:'Chelsea safe, Sunderland mid-table', venue:'Stadium of Light', time:'4:00pm BST' },
+  { home:'Tottenham',      away:'Everton',           homeFlag:'⚪', awayFlag:'🔵', homeProb:52, draw:27, awayProb:21, pick:'Tottenham',   pickConf:'med',  note:'⚠️ SURVIVAL MATCH — Spurs must not lose', venue:'Tottenham Hotspur Stadium', time:'4:00pm BST' },
+  { home:'Fulham',         away:'Newcastle',         homeFlag:'⚪', awayFlag:'⚫', homeProb:38, draw:30, awayProb:32, pick:'Draw',        pickConf:'low',  note:'UCL spot already decided, mid-table battle', venue:'Craven Cottage', time:'4:00pm BST' },
+  { home:'West Ham',       away:'Leeds United',      homeFlag:'🔴', awayFlag:'⚪', homeProb:48, draw:26, awayProb:26, pick:'West Ham',    pickConf:'low',  note:'⚠️ SURVIVAL MATCH — West Ham MUST WIN', venue:'London Stadium', time:'4:00pm BST' },
+];
+
+const plInjuries = [
+  { icon:'🔴', player:'Kevin De Bruyne', team:'Man City', flag:'🇧🇪', status:'out', injury:'Hamstring', return:'Season over', impact:'High — City miss key creator vs Villa', statusClass:'conf-low' },
+  { icon:'🟡', player:'Luis Díaz',       team:'Liverpool', flag:'🇨🇴', status:'doubt', injury:'Knock (GW37)', return:'Late fitness test', impact:'Medium — Salah/Nunez can compensate', statusClass:'conf-med' },
+  { icon:'🟡', player:'Heung-min Son',   team:'Tottenham', flag:'🇰🇷', status:'doubt', injury:'Calf strain', return:'50/50 Final Day', impact:'High — Spurs need Son in survival battle', statusClass:'conf-med' },
+  { icon:'🟢', player:'Bukayo Saka',     team:'Arsenal',  flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', status:'avail', injury:'None', return:'Available', impact:'Trophy day — confirmed fit for celebration', statusClass:'conf-high' },
+  { icon:'🔴', player:'Harvey Barnes',   team:'Newcastle', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', status:'out', injury:'Knee (season)', return:'Summer', impact:'Medium — Isak still leading line', statusClass:'conf-low' },
+  { icon:'🟡', player:'Jacob Murphy',    team:'West Ham',  flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', status:'doubt', injury:'Ankle', return:'Assessed Friday', impact:'High — West Ham must win to survive', statusClass:'conf-med' },
+  { icon:'🟢', player:'Erling Haaland',  team:'Man City', flag:'🇳🇴', status:'avail', injury:'None', return:'Available', impact:'Golden Boot on track — needs 1 goal vs Villa', statusClass:'conf-high' },
+  { icon:'🟢', player:'Martin Ødegaard', team:'Arsenal',  flag:'🇳🇴', status:'avail', injury:'None', return:'Available', impact:'Arsenal captain to lift trophy at Selhurst', statusClass:'conf-high' },
+];
+
+function renderPLFinalDay() {
+  const grid = document.getElementById('predGridPL');
+  if (!grid) return;
+  grid.innerHTML = plFinalDayMatches.map((m, i) => {
+    const hPct = m.homeProb, dPct = m.draw, aPct = m.awayProb;
+    const isHighlight = m.note.includes('⚠️');
+    return `<div class="match-card" style="${isHighlight ? 'border-color:rgba(245,158,11,0.5)' : ''}">
+      <div class="match-header">
+        <span class="match-date" style="color:var(--gold)">⚽ GW38 — ${m.time}</span>
+        <span class="match-venue">${m.venue}</span>
+        <span class="match-group" style="color:${isHighlight ? 'var(--yellow)' : 'var(--gold)'}">Premier League</span>
+      </div>
+      <div class="match-body">
+        <div class="team-block">
+          <div class="flag">${m.homeFlag}</div>
+          <div class="name">${m.home}</div>
+          <div class="prob ${hPct > aPct && hPct > dPct ? 'prob-home' : 'prob-balanced'}">${hPct}%</div>
+          <div class="prob-label">Win</div>
+        </div>
+        <div class="vs-block">
+          <div class="vs">VS</div>
+          <div class="draw-prob">${dPct}%</div>
+          <div class="draw-label">Draw</div>
+          <div class="score-pred">Pick: ${m.pick}</div>
+        </div>
+        <div class="team-block">
+          <div class="flag">${m.awayFlag}</div>
+          <div class="name">${m.away}</div>
+          <div class="prob ${aPct > hPct && aPct > dPct ? 'prob-home' : 'prob-away'}">${aPct}%</div>
+          <div class="prob-label">Win</div>
+        </div>
+      </div>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar">
+          <div class="seg-h" style="width:${hPct}%"></div>
+          <div class="seg-d" style="width:${dPct}%"></div>
+          <div class="seg-a" style="width:${aPct}%"></div>
+        </div>
+        <div class="prob-bar-labels"><span style="color:var(--green)">${m.home} ${hPct}%</span><span>Draw ${dPct}%</span><span style="color:var(--red)">${m.away} ${aPct}%</span></div>
+      </div>
+      <div class="factors" style="padding:0 20px 16px">
+        <div class="factors-title">Match Context</div>
+        <div style="font-size:0.8rem;color:${isHighlight ? 'var(--yellow)' : 'var(--muted)'};line-height:1.5">${m.note}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPLGoldenBoot() {
+  const grid = document.getElementById('plGoldenBootCards');
+  if (!grid) return;
+  grid.innerHTML = plTopScorers.slice(0,8).map((p,i) => `
+    <div class="group-card">
+      <div style="padding:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:1.6rem">${p.nat}</div>
+          <div>
+            <div style="font-weight:800;font-size:0.9rem">${p.name}</div>
+            <div style="font-size:0.72rem;color:var(--muted)">${p.club}</div>
+          </div>
+          <div style="margin-left:auto;font-size:1.4rem;font-weight:900;color:var(--gold)">${p.goals}</div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px">Goals</div>
+        <div style="height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px">
+          <div style="height:100%;background:var(--gold);border-radius:6px;width:${Math.round((p.goals/31)*100)}%;transition:width 0.8s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted)">
+          <span>⚽ ${p.goals}G &nbsp;🎯 ${p.assists}A</span>
+          <span>Boot odds: <strong style="color:var(--gold)">${p.odds}</strong></span>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Also render in odds tab
+  const oddsGrid = document.getElementById('plGoldenBootGrid');
+  if (oddsGrid) oddsGrid.innerHTML = grid.innerHTML;
+}
+
+function renderPLStars() {
+  const grid = document.getElementById('plStarsGrid');
+  if (!grid) return;
+  grid.innerHTML = plSeasonStars.map(p => `
+    <div class="group-card">
+      <div style="padding:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="font-size:2rem">${p.nat}</div>
+          <div>
+            <div style="font-weight:800">${p.name}</div>
+            <div style="font-size:0.75rem;color:var(--muted)">${p.club}</div>
+          </div>
+          <div style="margin-left:auto;font-size:1.8rem;font-weight:900;color:var(--gold)">${p.rating}</div>
+        </div>
+        <div style="display:flex;gap:12px;font-size:0.78rem;margin-bottom:8px">
+          <span style="color:var(--green)">⚽ ${p.goals} G</span>
+          <span style="color:var(--blue)">🎯 ${p.assists} A</span>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);font-style:italic">${p.note}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPLAssists() {
+  const grid = document.getElementById('plAssistsGrid');
+  if (!grid) return;
+  grid.innerHTML = plTopAssists.map(p => `
+    <div class="group-card">
+      <div style="padding:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:1.6rem">${p.nat}</div>
+          <div><div style="font-weight:800;font-size:0.9rem">${p.name}</div><div style="font-size:0.72rem;color:var(--muted)">${p.club}</div></div>
+          <div style="margin-left:auto;font-size:1.4rem;font-weight:900;color:var(--blue)">${p.assists}</div>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px">
+          <div style="height:100%;background:var(--blue);border-radius:6px;width:${Math.round((p.assists/15)*100)}%;transition:width 0.8s"></div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--muted)">🎯 ${p.assists} assists &nbsp;⚽ ${p.goals} goals &nbsp;⭐ ${p.rating}/10</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPLInjuries() {
+  const grid = document.getElementById('plInjuryGrid');
+  if (!grid) return;
+  const statusLabel = s => s === 'out' ? '❌ Confirmed Out' : s === 'doubt' ? '⚠️ Doubtful' : '✅ Available';
+  grid.innerHTML = plInjuries.map(p => `
+    <div class="injury-card">
+      <div class="injury-icon">${p.icon}</div>
+      <div class="injury-info">
+        <h4>${p.player} ${p.flag}</h4>
+        <div class="team-tag">${p.team}</div>
+        <div><span class="conf-badge ${p.statusClass}" style="margin-bottom:6px;display:inline-flex">${statusLabel(p.status)}</span></div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:4px">🩹 ${p.injury} — ${p.return}</div>
+        <div style="font-size:0.75rem;color:var(--muted);line-height:1.5">${p.impact}</div>
+      </div>
+    </div>`).join('');
+}
+
+function showPLPlayerView(view, btn) {
+  ['boots','stars','assists'].forEach(v => {
+    const el = document.getElementById(`plview-${v}`);
+    if (el) el.style.display = v === view ? 'block' : 'none';
+  });
+  document.querySelectorAll('#playersPL .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
 }
 
 // ── TAB SWITCHER ──
@@ -3906,6 +4324,11 @@ renderAPICards();
 renderIntelligence();
 renderSources();
 renderPLStandings();
+renderPLFinalDay();
+renderPLGoldenBoot();
+renderPLStars();
+renderPLAssists();
+renderPLInjuries();
 
 // ── RESTORE COMPETITION (before tab restore so theme is set correctly) ──
 if (currentCompetition === 'pl') applyCompetitionUI('pl');
