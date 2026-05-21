@@ -1867,16 +1867,26 @@ const plSeasonStars = [
 ];
 
 const plFinalDayMatches = [
-  { home:'Crystal Palace', away:'Arsenal',       homeFlag:'🔵', awayFlag:'🔴', homeProb:15, draw:25, awayProb:60, pick:'Arsenal',   pickConf:'high', note:'Trophy day — Arsenal to celebrate',          venue:'Selhurst Park',           time:'4:00pm BST', tip:'✅ Best Bet: Arsenal Win @ ~1.55 — trophy day, fully motivated',                      tipClass:'conf-high' },
-  { home:'Man City',       away:'Aston Villa',   homeFlag:'🔵', awayFlag:'🟣', homeProb:62, draw:22, awayProb:16, pick:'Man City',  pickConf:'high', note:'City fighting for 2nd place finish',         venue:'Etihad Stadium',          time:'4:00pm BST', tip:'✅ Best Bet: Man City Win @ ~1.50 — Haaland Golden Boot chase adds extra hunger',    tipClass:'conf-high' },
-  { home:'Nottm Forest',   away:'Bournemouth',   homeFlag:'🔴', awayFlag:'⚫', homeProb:42, draw:30, awayProb:28, pick:'Draw',      pickConf:'med',  note:'Both sides safe, low-stakes fixture',        venue:'City Ground',             time:'4:00pm BST', tip:'⚖️ Best Bet: Draw @ ~3.20 — low-stakes, cautious play from both sides',            tipClass:'conf-med'  },
-  { home:'Liverpool',      away:'Brentford',     homeFlag:'🔴', awayFlag:'🔴', homeProb:55, draw:25, awayProb:20, pick:'Liverpool', pickConf:'med',  note:'Liverpool chasing 5th for UEL spot',         venue:'Anfield',                 time:'4:00pm BST', tip:'✅ Best Bet: Liverpool Win or Draw (1X) @ ~1.35 — Anfield advantage',              tipClass:'conf-high' },
-  { home:'Brighton',       away:'Man United',    homeFlag:'🔵', awayFlag:'🔴', homeProb:40, draw:28, awayProb:32, pick:'Brighton',  pickConf:'low',  note:'United need win to confirm 3rd place',       venue:'Amex Stadium',            time:'4:00pm BST', tip:'⚖️ Best Bet: Both Teams to Score @ ~1.75 — both sides need goals',                tipClass:'conf-med'  },
-  { home:'Burnley',        away:'Wolverhampton', homeFlag:'🟡', awayFlag:'🟡', homeProb:38, draw:32, awayProb:30, pick:'Draw',      pickConf:'low',  note:'Dead rubber — both already relegated',       venue:'Turf Moor',               time:'4:00pm BST', tip:'⚠️ Avoid — dead rubber with both teams relegated. No value on either side',       tipClass:'conf-low'  },
-  { home:'Sunderland',     away:'Chelsea',       homeFlag:'⬛', awayFlag:'🔵', homeProb:28, draw:30, awayProb:42, pick:'Chelsea',   pickConf:'med',  note:'Chelsea safe, Sunderland mid-table',         venue:'Stadium of Light',        time:'4:00pm BST', tip:'✅ Best Bet: Chelsea Win @ ~2.10 — quality edge on the road',                     tipClass:'conf-med'  },
-  { home:'Tottenham',      away:'Everton',       homeFlag:'⚪', awayFlag:'🔵', homeProb:52, draw:27, awayProb:21, pick:'Tottenham', pickConf:'med',  note:'⚠️ SURVIVAL MATCH — Spurs must not lose',   venue:'Tottenham Hotspur Stadium',time:'4:00pm BST', tip:'⚠️ Best Bet: Tottenham Win or Draw (1X) @ ~1.40 — must-not-lose, home fortress',  tipClass:'conf-med'  },
-  { home:'Fulham',         away:'Newcastle',     homeFlag:'⚪', awayFlag:'⚫', homeProb:38, draw:30, awayProb:32, pick:'Draw',      pickConf:'low',  note:'UCL spot already decided, mid-table battle', venue:'Craven Cottage',          time:'4:00pm BST', tip:'⚖️ Best Bet: Draw @ ~3.40 — relaxed affair, no major incentive either way',      tipClass:'conf-med'  },
-  { home:'West Ham',       away:'Leeds United',  homeFlag:'🔴', awayFlag:'⚪', homeProb:48, draw:26, awayProb:26, pick:'West Ham',  pickConf:'low',  note:'⚠️ SURVIVAL MATCH — West Ham MUST WIN',      venue:'London Stadium',          time:'4:00pm BST', tip:'⚠️ Best Bet: West Ham Win @ ~2.00 — survival desperation, home crowd factor',     tipClass:'conf-med'  },
+  { home:'Crystal Palace', away:'Arsenal',       homeFlag:'🔵', awayFlag:'🔴', homeProb:15, draw:25, awayProb:60, pick:'Arsenal',   pickConf:'high', note:'Trophy day — Arsenal to celebrate',          venue:'Selhurst Park',           time:'4:00pm BST', tip:'✅ Best Bet: Arsenal Win @ ~1.55 — trophy day, fully motivated',                      tipClass:'conf-high',
+    factors:[ {name:'Table Standing',val:20,label:'CPA mid, ARS top'}, {name:'Recent Form',val:75,label:'ARS W5 run'}, {name:'Home Advantage',val:30,label:'CPA limited pull'}, {name:'Squad Quality',val:82,label:'ARS far superior'}, {name:'Injury Impact',val:85,label:'ARS fully fit'}, {name:'Motivation',val:90,label:'Trophy day lift'} ] },
+  { home:'Man City',       away:'Aston Villa',   homeFlag:'🔵', awayFlag:'🟣', homeProb:62, draw:22, awayProb:16, pick:'Man City',  pickConf:'high', note:'City fighting for 2nd place finish',         venue:'Etihad Stadium',          time:'4:00pm BST', tip:'✅ Best Bet: Man City Win @ ~1.50 — Haaland Golden Boot chase adds extra hunger',    tipClass:'conf-high',
+    factors:[ {name:'Table Standing',val:72,label:'City 2nd place'}, {name:'Recent Form',val:70,label:'City W4-D1'}, {name:'Home Advantage',val:82,label:'Etihad fortress'}, {name:'Squad Quality',val:78,label:'City depth'}, {name:'Injury Impact',val:45,label:'De Bruyne out'}, {name:'Motivation',val:80,label:'Haaland boot race'} ] },
+  { home:'Nottm Forest',   away:'Bournemouth',   homeFlag:'🔴', awayFlag:'⚫', homeProb:42, draw:30, awayProb:28, pick:'Draw',      pickConf:'med',  note:'Both sides safe, low-stakes fixture',        venue:'City Ground',             time:'4:00pm BST', tip:'⚖️ Best Bet: Draw @ ~3.20 — low-stakes, cautious play from both sides',            tipClass:'conf-med',
+    factors:[ {name:'Table Standing',val:55,label:'Both mid-table'}, {name:'Recent Form',val:50,label:'Forest W2-D2-L1'}, {name:'Home Advantage',val:60,label:'City Ground edge'}, {name:'Squad Quality',val:52,label:'Even matchup'}, {name:'Injury Impact',val:75,label:'Both squads fit'}, {name:'Motivation',val:22,label:'Dead rubber'} ] },
+  { home:'Liverpool',      away:'Brentford',     homeFlag:'🔴', awayFlag:'🔴', homeProb:55, draw:25, awayProb:20, pick:'Liverpool', pickConf:'med',  note:'Liverpool chasing 5th for UEL spot',         venue:'Anfield',                 time:'4:00pm BST', tip:'✅ Best Bet: Liverpool Win or Draw (1X) @ ~1.35 — Anfield advantage',              tipClass:'conf-high',
+    factors:[ {name:'Table Standing',val:65,label:'LIV 5th, BRE safe'}, {name:'Recent Form',val:68,label:'LIV W3-D1-L1'}, {name:'Home Advantage',val:85,label:'Anfield roar'}, {name:'Squad Quality',val:72,label:'LIV superior'}, {name:'Injury Impact',val:65,label:'Díaz 50/50'}, {name:'Motivation',val:75,label:'UEL spot chase'} ] },
+  { home:'Brighton',       away:'Man United',    homeFlag:'🔵', awayFlag:'🔴', homeProb:40, draw:28, awayProb:32, pick:'Brighton',  pickConf:'low',  note:'United need win to confirm 3rd place',       venue:'Amex Stadium',            time:'4:00pm BST', tip:'⚖️ Best Bet: Both Teams to Score @ ~1.75 — both sides need goals',                tipClass:'conf-med',
+    factors:[ {name:'Table Standing',val:48,label:'United 3rd, BHA 6th'}, {name:'Recent Form',val:52,label:'Balanced record'}, {name:'Home Advantage',val:60,label:'Amex advantage'}, {name:'Squad Quality',val:55,label:'United slight edge'}, {name:'Injury Impact',val:72,label:'Both squads fit'}, {name:'Motivation',val:70,label:'United need win'} ] },
+  { home:'Burnley',        away:'Wolverhampton', homeFlag:'🟡', awayFlag:'🟡', homeProb:38, draw:32, awayProb:30, pick:'Draw',      pickConf:'low',  note:'Dead rubber — both already relegated',       venue:'Turf Moor',               time:'4:00pm BST', tip:'⚠️ Avoid — dead rubber with both teams relegated. No value on either side',       tipClass:'conf-low',
+    factors:[ {name:'Table Standing',val:12,label:'Both relegated'}, {name:'Recent Form',val:38,label:'Poor both sides'}, {name:'Home Advantage',val:50,label:'Turf Moor'}, {name:'Squad Quality',val:32,label:'Both weakened'}, {name:'Injury Impact',val:58,label:'Rotated squads'}, {name:'Motivation',val:10,label:'Nothing to play for'} ] },
+  { home:'Sunderland',     away:'Chelsea',       homeFlag:'⬛', awayFlag:'🔵', homeProb:28, draw:30, awayProb:42, pick:'Chelsea',   pickConf:'med',  note:'Chelsea safe, Sunderland mid-table',         venue:'Stadium of Light',        time:'4:00pm BST', tip:'✅ Best Bet: Chelsea Win @ ~2.10 — quality edge on the road',                     tipClass:'conf-med',
+    factors:[ {name:'Table Standing',val:60,label:'Chelsea safe top 4'}, {name:'Recent Form',val:65,label:'Chelsea W3-D1-L1'}, {name:'Home Advantage',val:42,label:'Stadium of Light'}, {name:'Squad Quality',val:72,label:'Chelsea superior'}, {name:'Injury Impact',val:80,label:'Both squads fit'}, {name:'Motivation',val:55,label:'Chelsea UCL prep'} ] },
+  { home:'Tottenham',      away:'Everton',       homeFlag:'⚪', awayFlag:'🔵', homeProb:52, draw:27, awayProb:21, pick:'Tottenham', pickConf:'med',  note:'⚠️ SURVIVAL MATCH — Spurs must not lose',   venue:'Tottenham Hotspur Stadium',time:'4:00pm BST', tip:'⚠️ Best Bet: Tottenham Win or Draw (1X) @ ~1.40 — must-not-lose, home fortress',  tipClass:'conf-med',
+    factors:[ {name:'Table Standing',val:55,label:'Spurs 8th, EVE 18th'}, {name:'Recent Form',val:58,label:'Spurs W3-D0-L2'}, {name:'Home Advantage',val:78,label:'THS fortress'}, {name:'Squad Quality',val:65,label:'Spurs stronger'}, {name:'Injury Impact',val:48,label:'Son 50/50'}, {name:'Motivation',val:88,label:'Must not lose'} ] },
+  { home:'Fulham',         away:'Newcastle',     homeFlag:'⚪', awayFlag:'⚫', homeProb:38, draw:30, awayProb:32, pick:'Draw',      pickConf:'low',  note:'UCL spot already decided, mid-table battle', venue:'Craven Cottage',          time:'4:00pm BST', tip:'⚖️ Best Bet: Draw @ ~3.40 — relaxed affair, no major incentive either way',      tipClass:'conf-med',
+    factors:[ {name:'Table Standing',val:50,label:'Both mid-table'}, {name:'Recent Form',val:48,label:'Balanced recent'}, {name:'Home Advantage',val:58,label:'Craven Cottage'}, {name:'Squad Quality',val:55,label:'Newcastle slight edge'}, {name:'Injury Impact',val:62,label:'Barnes out (NCL)'}, {name:'Motivation',val:28,label:'Low stakes'} ] },
+  { home:'West Ham',       away:'Leeds United',  homeFlag:'🔴', awayFlag:'⚪', homeProb:48, draw:26, awayProb:26, pick:'West Ham',  pickConf:'low',  note:'⚠️ SURVIVAL MATCH — West Ham MUST WIN',      venue:'London Stadium',          time:'4:00pm BST', tip:'⚠️ Best Bet: West Ham Win @ ~2.00 — survival desperation, home crowd factor',     tipClass:'conf-med',
+    factors:[ {name:'Table Standing',val:52,label:'WHU 17th, LEE 19th'}, {name:'Recent Form',val:55,label:'West Ham W2-D1-L2'}, {name:'Home Advantage',val:72,label:'London Stadium'}, {name:'Squad Quality',val:60,label:'WHU advantage'}, {name:'Injury Impact',val:48,label:'Murphy 50/50'}, {name:'Motivation',val:92,label:'MUST WIN survival'} ] },
 ];
 
 const plInjuries = [
@@ -1968,12 +1978,22 @@ function renderPLFinalDay() {
         </div>
         <div class="prob-bar-labels"><span style="color:var(--green)">${m.home} ${hPct}%</span><span>Draw ${dPct}%</span><span style="color:var(--red)">${m.away} ${aPct}%</span></div>
       </div>
-      <div class="factors" style="padding:0 20px 0">
-        <div class="factors-title">Match Context</div>
-        <div style="font-size:0.8rem;color:${isHighlight ? 'var(--yellow)' : 'var(--muted)'};line-height:1.5">${m.note}</div>
-      </div>
-      <div style="margin:10px 20px 16px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:10px 12px;font-size:0.8rem">
-        ${m.tip}
+      <div class="factors">
+        <div class="factors-title">🔎 Prediction Factors</div>
+        <div class="factor-grid">
+          ${m.factors.map(f => {
+            const fc = f.val>=70?'#22c55e':f.val>=45?'#f59e0b':'#ef4444';
+            return `<div class="factor-item">
+              <div class="factor-name">${f.name}</div>
+              <div class="factor-bar"><div class="factor-fill" style="width:${f.val}%;background:${fc}"></div></div>
+              <div class="factor-val" style="color:${fc}">${f.label}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="margin-top:8px;font-size:0.78rem;color:${isHighlight?'var(--yellow)':'var(--muted)'};padding:0 2px 4px">${m.note}</div>
+        <div style="margin-top:10px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:10px 12px;font-size:0.8rem">
+          ${m.tip}
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -3845,9 +3865,26 @@ function updatePLMatchCardsFromOdds(data) {
         </div>
         <div class="prob-bar-labels"><span style="color:var(--green)">${home} ${hPct}%</span><span>Draw ${dPct}%</span><span style="color:var(--red)">${away} ${aPct}%</span></div>
       </div>
-      <div class="factors" style="padding:0 20px 0">
-        <div class="factors-title">Best available odds (${books} books)</div>
-        <div style="font-size:0.8rem;color:var(--muted);line-height:1.5">${home} ${fmt(hML)} &nbsp;·&nbsp; Draw ${fmt(dML)} &nbsp;·&nbsp; ${away} ${fmt(aML)}</div>
+      <div class="factors">
+        <div class="factors-title">🔎 Prediction Factors</div>
+        <div class="factor-grid">
+          ${[
+            {name:'Home Win Prob',  val:hPct,                                label:`${hPct}% implied`},
+            {name:'Away Win Prob',  val:aPct,                                label:`${aPct}% implied`},
+            {name:'Draw Likelihood',val:dPct,                                label:`${dPct}% implied`},
+            {name:'Market Consensus',val:Math.min(100,books*10),             label:`${books} bookmakers`},
+            {name:'Odds Value (H)', val:Math.round(Math.min(100,(bH-1)*40)), label:`${bH.toFixed(2)} decimal`},
+            {name:'Odds Value (A)', val:Math.round(Math.min(100,(bA-1)*40)), label:`${bA.toFixed(2)} decimal`},
+          ].map(f => {
+            const fc = f.val>=70?'#22c55e':f.val>=45?'#f59e0b':'#ef4444';
+            return `<div class="factor-item">
+              <div class="factor-name">${f.name}</div>
+              <div class="factor-bar"><div class="factor-fill" style="width:${f.val}%;background:${fc}"></div></div>
+              <div class="factor-val" style="color:${fc}">${f.label}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div style="margin-top:8px;font-size:0.75rem;color:var(--muted);padding:0 2px 4px">${home} ${fmt(hML)} &nbsp;·&nbsp; Draw ${fmt(dML)} &nbsp;·&nbsp; ${away} ${fmt(aML)}</div>
       </div>
       <div style="margin:10px 20px 16px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:10px 12px;font-size:0.8rem">
         ${hPct>=58 ? `✅ Best Bet: ${home} Win @ ~${bH.toFixed(2)} — strong market favorite` :
