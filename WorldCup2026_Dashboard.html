@@ -1880,6 +1880,41 @@ const plInjuries = [
   { icon:'🟢', player:'Martin Ødegaard', team:'Arsenal',  flag:'🇳🇴', status:'avail', injury:'None', return:'Available', impact:'Arsenal captain to lift trophy at Selhurst', statusClass:'conf-high' },
 ];
 
+const PL_BADGES = {
+  'Arsenal':           { bg:'#EF0107', fg:'#fff',    abbr:'ARS' },
+  'Man City':          { bg:'#6CABDD', fg:'#fff',    abbr:'MCI' },
+  'Aston Villa':       { bg:'#670E36', fg:'#CEF26D', abbr:'AVL' },
+  'Liverpool':         { bg:'#C8102E', fg:'#F6EB61', abbr:'LIV' },
+  'Bournemouth':       { bg:'#DA291C', fg:'#000',    abbr:'BOU' },
+  'Brighton':          { bg:'#0057B8', fg:'#FFCD00', abbr:'BHA' },
+  'Chelsea':           { bg:'#034694', fg:'#fff',    abbr:'CHE' },
+  'Brentford':         { bg:'#E30613', fg:'#fff',    abbr:'BRE' },
+  'Sunderland':        { bg:'#EB172B', fg:'#fff',    abbr:'SUN' },
+  'Newcastle':         { bg:'#241F20', fg:'#fff',    abbr:'NEW' },
+  'Everton':           { bg:'#003399', fg:'#fff',    abbr:'EVE' },
+  'Fulham':            { bg:'#000000', fg:'#fff',    abbr:'FUL' },
+  'Leeds United':      { bg:'#1D428A', fg:'#FFCD00', abbr:'LEE' },
+  'Crystal Palace':    { bg:'#1B458F', fg:'#EB302E', abbr:'CRY' },
+  'Nottm Forest':      { bg:'#DD0000', fg:'#fff',    abbr:'NFO' },
+  'Tottenham':         { bg:'#132257', fg:'#fff',    abbr:'TOT' },
+  'Burnley':           { bg:'#6C1D45', fg:'#99D6EA', abbr:'BUR' },
+  'Wolverhampton':     { bg:'#FDB913', fg:'#231F20', abbr:'WOL' },
+  'West Ham':          { bg:'#7A263A', fg:'#1BB1E7', abbr:'WHU' },
+  'Man United':        { bg:'#DA291C', fg:'#FFE000', abbr:'MUN' },
+  'Nottingham Forest': { bg:'#DD0000', fg:'#fff',    abbr:'NFO' },
+  'Manchester City':   { bg:'#6CABDD', fg:'#fff',    abbr:'MCI' },
+  'Manchester United': { bg:'#DA291C', fg:'#FFE000', abbr:'MUN' },
+  'Tottenham Hotspur': { bg:'#132257', fg:'#fff',    abbr:'TOT' },
+  'West Ham United':   { bg:'#7A263A', fg:'#1BB1E7', abbr:'WHU' },
+  'Leeds':             { bg:'#1D428A', fg:'#FFCD00', abbr:'LEE' },
+  'Newcastle United':  { bg:'#241F20', fg:'#fff',    abbr:'NEW' },
+};
+
+function plClubBadge(name) {
+  const b = PL_BADGES[name] || { bg:'#334155', fg:'#fff', abbr:(name||'?').slice(0,3).toUpperCase() };
+  return `<div style="width:46px;height:46px;background:${b.bg};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:900;color:${b.fg};font-family:sans-serif;letter-spacing:0.3px;border:2px solid rgba(255,255,255,0.15);flex-shrink:0">${b.abbr}</div>`;
+}
+
 function renderPLFinalDay() {
   const grid = document.getElementById('predGridPL');
   if (!grid) return;
@@ -1894,7 +1929,7 @@ function renderPLFinalDay() {
       </div>
       <div class="match-body">
         <div class="team-block">
-          <div class="flag">${m.homeFlag}</div>
+          <div class="flag">${plClubBadge(m.home)}</div>
           <div class="name">${m.home}</div>
           <div class="prob ${hPct > aPct && hPct > dPct ? 'prob-home' : 'prob-balanced'}">${hPct}%</div>
           <div class="prob-label">Win</div>
@@ -1906,7 +1941,7 @@ function renderPLFinalDay() {
           <div class="score-pred">Pick: ${m.pick}</div>
         </div>
         <div class="team-block">
-          <div class="flag">${m.awayFlag}</div>
+          <div class="flag">${plClubBadge(m.away)}</div>
           <div class="name">${m.away}</div>
           <div class="prob ${aPct > hPct && aPct > dPct ? 'prob-home' : 'prob-away'}">${aPct}%</div>
           <div class="prob-label">Win</div>
@@ -3771,7 +3806,7 @@ function updatePLMatchCardsFromOdds(data) {
       </div>
       <div class="match-body">
         <div class="team-block">
-          <div class="flag">${getFlag(home)}</div>
+          <div class="flag">${plClubBadge(home)}</div>
           <div class="name">${home}</div>
           <div class="prob ${hPct>aPct&&hPct>dPct?'prob-home':'prob-balanced'}">${hPct}%</div>
           <div class="prob-label">Win</div>
@@ -3783,7 +3818,7 @@ function updatePLMatchCardsFromOdds(data) {
           <div class="score-pred">Pick: ${pick}</div>
         </div>
         <div class="team-block">
-          <div class="flag">${getFlag(away)}</div>
+          <div class="flag">${plClubBadge(away)}</div>
           <div class="name">${away}</div>
           <div class="prob ${aPct>hPct&&aPct>dPct?'prob-home':'prob-away'}">${aPct}%</div>
           <div class="prob-label">Win</div>
