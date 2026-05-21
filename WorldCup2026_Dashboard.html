@@ -753,21 +753,31 @@
   }
 
   /* ── PL THEME ── */
-  body.pl-theme { --gold: #7c3aed; --gold-dark: #6d28d9; }
+  body.pl-theme { --gold: #101585; --gold-dark: #0a0f6b; }
   body.pl-theme .hero {
-    background: linear-gradient(135deg, #0a0e1a 0%, #1a0d3e 50%, #0d1a3e 100%);
+    background: linear-gradient(135deg, #05071a 0%, #101585 50%, #0a0f6b 100%);
   }
   body.pl-theme .hero::before {
-    background: radial-gradient(ellipse at 50% -20%, rgba(124,58,237,0.12) 0%, transparent 70%);
+    background: radial-gradient(ellipse at 50% -20%, rgba(226,114,91,0.18) 0%, transparent 70%);
   }
   body.pl-theme .hero h1 {
-    background: linear-gradient(90deg, #a78bfa, #ede9fe, #a78bfa);
+    background: linear-gradient(90deg, #E2725B, #ffffff, #E2725B);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   body.pl-theme .comp-btn.comp-active {
-    box-shadow: 0 2px 14px rgba(124,58,237,0.45);
+    background: #101585 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 14px rgba(16,21,133,0.55);
   }
+  body.pl-theme .comp-context-bar {
+    background: rgba(226,114,91,0.08);
+    border-bottom-color: rgba(226,114,91,0.25);
+    color: #E2725B;
+  }
+  body.pl-theme .pl-pts { color: #E2725B; }
+  body.pl-theme .pl-cl-zone td:first-child { border-left-color: #101585; }
+  body.pl-theme .pl-europa-zone td:first-child { border-left-color: #E2725B; }
 
   /* ── CONTEXT STRIP ── */
   .comp-context-bar {
