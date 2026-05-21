@@ -3835,9 +3835,16 @@ function updatePLMatchCardsFromOdds(data) {
         </div>
         <div class="prob-bar-labels"><span style="color:var(--green)">${home} ${hPct}%</span><span>Draw ${dPct}%</span><span style="color:var(--red)">${away} ${aPct}%</span></div>
       </div>
-      <div class="factors" style="padding:0 20px 16px">
+      <div class="factors" style="padding:0 20px 0">
         <div class="factors-title">Best available odds (${books} books)</div>
         <div style="font-size:0.8rem;color:var(--muted);line-height:1.5">${home} ${fmt(hML)} &nbsp;·&nbsp; Draw ${fmt(dML)} &nbsp;·&nbsp; ${away} ${fmt(aML)}</div>
+      </div>
+      <div style="margin:10px 20px 16px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:10px 12px;font-size:0.8rem">
+        ${hPct>=58 ? `✅ Best Bet: ${home} Win @ ~${bH.toFixed(2)} — strong market favorite` :
+          aPct>=58 ? `✅ Best Bet: ${away} Win @ ~${bA.toFixed(2)} — strong market favorite` :
+          hPct>=46&&hPct>aPct ? `⚖️ Best Bet: ${home} Win or Draw (1X) — home slight edge @ ~${bH.toFixed(2)}` :
+          aPct>=46&&aPct>hPct ? `⚖️ Best Bet: ${away} Win or Draw (2X) — away slight edge @ ~${bA.toFixed(2)}` :
+          `⚖️ Very open match — no strong value pick (Draw @ ~${bD.toFixed(2)})`}
       </div>
     </div>`;
   }).filter(Boolean);
