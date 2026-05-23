@@ -753,7 +753,7 @@
   }
 
   /* ── PL THEME ── */
-  body.pl-theme { --gold: #101585; --gold-dark: #0a0f6b; }
+  body.pl-theme { --gold: #7eb3f5; --gold-dark: #4b8de8; }
   body.pl-theme .hero {
     background: linear-gradient(135deg, #05071a 0%, #101585 50%, #0a0f6b 100%);
   }
@@ -1593,7 +1593,7 @@
 <!-- ══ INTELLIGENCE ENGINE ══ -->
 <div id="intelligence" class="section">
   <h2>🧠 Intelligence <span>Engine</span></h2>
-  <p class="section-desc">A self-learning prediction system. Every time you log a real match result, the engine computes a Brier Score, runs a gradient descent step to recalibrate factor weights, and automatically updates all future match predictions. The algorithm gets smarter with every game.</p>
+  <p class="section-desc">A self-learning prediction system. When a match finishes, the engine automatically resolves the result, computes a Brier Score, and — if the prediction was wrong — runs a gradient descent step to recalibrate factor weights. Weights only shift when the model is wrong, keeping the algorithm honest and preventing overfitting correct guesses.</p>
 
   <!-- STATUS ROW -->
   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px" id="engineStatusRow"></div>
@@ -1601,7 +1601,6 @@
   <!-- TABS -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="intelSubTabs">
     <button class="filter-btn active" onclick="showIntelView('autolearn',this)">🤖 Auto-Learning</button>
-    <button class="filter-btn" onclick="showIntelView('results',this)">📋 Results Log</button>
     <button class="filter-btn" onclick="showIntelView('weights',this)">⚖️ Weight Evolution</button>
     <button class="filter-btn" onclick="showIntelView('accuracy',this)">📈 Accuracy & Brier</button>
     <button class="filter-btn" onclick="showIntelView('recal',this)">🔄 Recalibrated Predictions</button>
@@ -1610,22 +1609,6 @@
 
   <!-- AUTO-LEARNING (default view) -->
   <div id="view-autolearn"></div>
-
-  <!-- LOG RESULTS -->
-  <div id="view-results" style="display:none">
-    <div class="engine-panel">
-      <div class="engine-panel-header">
-        <span style="font-size:1.2rem">📋</span>
-        <h3>Enter Match Results — Triggers Model Update</h3>
-        <span style="font-size:0.75rem;color:var(--muted)">Each result updates factor weights via gradient descent</span>
-      </div>
-      <div class="engine-panel-body" id="resultEntryList"></div>
-    </div>
-    <div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 16px;font-size:0.78rem;color:var(--muted)">
-      ✅ Results are <strong style="color:var(--text)">saved locally</strong> in your browser (localStorage). They persist across sessions and accumulate over the tournament. Reset anytime with the button below.
-      <button onclick="resetEngine()" style="margin-left:12px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:var(--red);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.75rem">🗑 Reset Engine</button>
-    </div>
-  </div>
 
   <!-- WEIGHT EVOLUTION -->
   <div id="view-weights" style="display:none">
@@ -4068,22 +4051,20 @@ function updateWeights(match, actualResult) {
   const predicted = predictedWinner(match.homeProb, match.drawProb, match.awayProb);
   const correct = predicted === actualResult;
 
-  // Gradient step for each factor
-  match.factors.forEach(f => {
-    const key = FACTOR_NAME_MAP[f.name] || null;
-    if (!key || engine.weights[key] === undefined) return;
-    const contribution = factorContribution(f.val, actualResult);
-    // If contribution > 0 → factor backed correct outcome → increase weight
-    // If contribution < 0 → factor backed wrong outcome → decrease weight
-    engine.weights[key] += LEARNING_RATE * contribution * 10;
-    engine.weights[key] = Math.max(0.5, engine.weights[key]); // floor at 0.5%
-  });
+  // Only recalibrate weights when the prediction was wrong
+  if (!correct) {
+    match.factors.forEach(f => {
+      const key = FACTOR_NAME_MAP[f.name] || null;
+      if (!key || engine.weights[key] === undefined) return;
+      const contribution = factorContribution(f.val, actualResult);
+      engine.weights[key] += LEARNING_RATE * contribution * 10;
+      engine.weights[key] = Math.max(0.5, engine.weights[key]);
+    });
+    const total = Object.values(engine.weights).reduce((s,v) => s+v, 0);
+    FACTOR_KEYS.forEach(k => { engine.weights[k] = Math.round((engine.weights[k]/total)*100 * 10)/10; });
+  }
 
-  // Normalize to sum to 100
-  const total = Object.values(engine.weights).reduce((s,v) => s+v, 0);
-  FACTOR_KEYS.forEach(k => { engine.weights[k] = Math.round((engine.weights[k]/total)*100 * 10)/10; });
-
-  // Record
+  // Record result regardless of outcome (for accuracy and Brier tracking)
   engine.history.push({
     matchId: match.date + match.home.name + match.away.name,
     date: match.date,
@@ -4103,7 +4084,7 @@ function updateWeights(match, actualResult) {
   renderIntelligence();
   // Show flash notification
   showToast(correct
-    ? `✅ Correct! Brier Score: ${bs.toFixed(3)} — Weights updated`
+    ? `✅ Correct! Brier Score: ${bs.toFixed(3)} — No weight adjustment needed`
     : `❌ Wrong prediction. Brier Score: ${bs.toFixed(3)} — Weights recalibrated`
   , correct ? 'green' : 'red');
 }
@@ -4280,18 +4261,18 @@ function autoResolveMatch(pending, actualResult, scoreStr) {
   const predicted = predictedWinner(pending.probs.h, pending.probs.d, pending.probs.a);
   const correct = predicted === actualResult;
 
-  // Gradient descent using saved factor scores
-  pending.factors.forEach(f => {
-    const key = FACTOR_NAME_MAP[f.name] || null;
-    if (!key || engine.weights[key] === undefined) return;
-    const contribution = factorContribution(f.val, actualResult);
-    engine.weights[key] += LEARNING_RATE * contribution * 10;
-    engine.weights[key] = Math.max(0.5, engine.weights[key]);
-  });
-
-  // Normalize weights to 100%
-  const total = Object.values(engine.weights).reduce((s,v) => s+v, 0);
-  FACTOR_KEYS.forEach(k => { engine.weights[k] = Math.round((engine.weights[k]/total)*100*10)/10; });
+  // Only recalibrate weights when the prediction was wrong
+  if (!correct) {
+    pending.factors.forEach(f => {
+      const key = FACTOR_NAME_MAP[f.name] || null;
+      if (!key || engine.weights[key] === undefined) return;
+      const contribution = factorContribution(f.val, actualResult);
+      engine.weights[key] += LEARNING_RATE * contribution * 10;
+      engine.weights[key] = Math.max(0.5, engine.weights[key]);
+    });
+    const total = Object.values(engine.weights).reduce((s,v) => s+v, 0);
+    FACTOR_KEYS.forEach(k => { engine.weights[k] = Math.round((engine.weights[k]/total)*100*10)/10; });
+  }
 
   const resultLabel = actualResult === 'H' ? pending.home : actualResult === 'D' ? 'Draw' : pending.away;
   engine.history.push({
@@ -4447,7 +4428,6 @@ function renderAutoLearning() {
 function renderIntelligence() {
   renderEngineStatus();
   renderAutoLearning();
-  renderResultEntry();
   renderWeightEvolution();
   renderAccuracy();
   renderRecalibrated();
@@ -4694,7 +4674,7 @@ function renderInsights() {
 function showIntelView(view, btn) {
   document.querySelectorAll('#intelSubTabs .filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  ['autolearn','results','weights','accuracy','recal','insights'].forEach(v=>{
+  ['autolearn','weights','accuracy','recal','insights'].forEach(v=>{
     document.getElementById(`view-${v}`).style.display = v===view ? 'block':'none';
   });
 }
