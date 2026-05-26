@@ -3717,8 +3717,9 @@ function renderBookComp() {
   const bestAway = Math.max(...books.map(b=>b.away));
 
   const tbl = document.getElementById('bookCompTable');
+  const isUpset = isPL && data.match && data.match.includes('UPSET');
   const resultBadge = isPL && data.result
-    ? `<span style="margin-left:10px;font-size:0.82rem;padding:3px 8px;border-radius:6px;background:${data.result.includes('UPSET')?'rgba(239,68,68,0.12)':'rgba(34,197,94,0.1)'};color:${data.result.includes('UPSET')?'var(--red)':'var(--green)'};font-weight:700">FT: ${data.result}</span>`
+    ? `<span style="margin-left:10px;font-size:0.82rem;padding:3px 8px;border-radius:6px;background:${isUpset?'rgba(239,68,68,0.12)':'rgba(34,197,94,0.1)'};color:${isUpset?'var(--red)':'var(--green)'};font-weight:700">FT: ${data.result}</span>`
     : '';
   tbl.innerHTML = `
     <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:var(--gold)">${data.match}${resultBadge}</div>
