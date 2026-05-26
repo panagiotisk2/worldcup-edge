@@ -1745,6 +1745,7 @@ function switchCompetition(comp) {
   renderMatchLines();
   renderValueBets();
   renderBookComp();
+  renderIntelligence();
   fetchLiveOdds();
   fetchFootballData();
 }
@@ -4660,7 +4661,8 @@ function snapshotMatchPredictions() {
 function updateIntelPendingBadge() {
   const badge = document.getElementById('intelPendingBadge');
   if (!badge) return;
-  const count = (engine.pendingPredictions || []).length;
+  const isPL = currentCompetition === 'pl';
+  const count = (engine.pendingPredictions || []).filter(p => isPL ? p.source === 'pl' : p.source !== 'pl').length;
   badge.style.display = count > 0 ? 'inline' : 'none';
   badge.textContent = count;
 }
@@ -4860,13 +4862,20 @@ function autoResolveFromEvents(events) {
 function renderAutoLearning() {
   const el = document.getElementById('view-autolearn');
   if (!el) return;
-  const pending = engine.pendingPredictions || [];
+  const isPL = currentCompetition === 'pl';
+
+  // Filter pending and history to current competition only
+  const allPending = engine.pendingPredictions || [];
+  const pending = allPending.filter(p => isPL ? p.source === 'pl' : p.source !== 'pl');
   const autoCount = engine.autoResolved || 0;
   const lastTime = engine.lastAutoResolve
     ? new Date(engine.lastAutoResolve).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
     : 'Never';
 
-  const autoHistory = engine.history.filter(h => h.autoResolved);
+  // Source identification from matchId for history entries
+  const isPlEntry = h => h.matchId && h.matchId.startsWith('PL_GW38_');
+  const isWcEntry = h => !isPlEntry(h);
+  const autoHistory = engine.history.filter(h => h.autoResolved && (isPL ? isPlEntry(h) : isWcEntry(h)));
 
   el.innerHTML = `
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
