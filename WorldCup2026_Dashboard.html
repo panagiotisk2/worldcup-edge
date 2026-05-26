@@ -1619,7 +1619,7 @@
 <!-- ══ INTELLIGENCE ENGINE ══ -->
 <div id="intelligence" class="section">
   <h2>🧠 Intelligence <span>Engine</span></h2>
-  <p class="section-desc">A self-learning prediction system. When a match finishes, the engine automatically resolves the result, computes a Brier Score, and — if the prediction was wrong — runs a gradient descent step to recalibrate factor weights. Weights only shift when the model is wrong, keeping the algorithm honest and preventing overfitting correct guesses.</p>
+  <p class="section-desc">A self-learning prediction system pre-trained on 30 WC2018/WC2022 results. When a match finishes, the engine computes a Brier Score and — if the prediction was wrong — runs a gradient descent step to recalibrate factor weights. Live bookmaker odds (when available) automatically boost the Market Odds factor weight ~4× for higher accuracy. Weights only shift on wrong predictions, preventing overfitting.</p>
 
   <!-- STATUS ROW -->
   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px" id="engineStatusRow"></div>
@@ -4047,6 +4047,34 @@ async function fetchLiveOdds() {
       if (label) label.style.color = '#22c55e', label.textContent = '🔴 LIVE odds — updated ' + new Date().toLocaleTimeString();
       logLive(`✅ Updated ${liveLines.length} match lines with live odds from ${data[0].bookmakers?.length || 0} bookmakers!`);
 
+      // Push live market signal into pending WC predictions and activate boost
+      let marketUpdated = 0;
+      data.forEach(match => {
+        let homeOdds = [], drawOdds = [], awayOdds = [];
+        (match.bookmakers || []).forEach(bk => {
+          (bk.markets || []).forEach(mkt => {
+            if (mkt.key === 'h2h') (mkt.outcomes || []).forEach(o => {
+              if (o.name === match.home_team) homeOdds.push(o.price);
+              else if (o.name === match.away_team) awayOdds.push(o.price);
+              else drawOdds.push(o.price);
+            });
+          });
+        });
+        if (!homeOdds.length || !awayOdds.length) return;
+        const bH = Math.max(...homeOdds), bD = drawOdds.length ? Math.max(...drawOdds) : 3.4, bA = Math.max(...awayOdds);
+        const tot = 1/bH + 1/bD + 1/bA;
+        const marketVal = Math.round((1/bH / tot) * 100);
+        const pending = (engine.pendingPredictions || []).find(p => p.source === 'wc' && teamsMatch(p.home, match.home_team));
+        if (pending) {
+          const mf = pending.factors.find(f => f.name === 'Market Odds');
+          if (mf) mf.val = marketVal; else pending.factors.push({ name: 'Market Odds', val: marketVal });
+          marketUpdated++;
+        }
+      });
+      engine.liveOddsActive = true;
+      saveEngine();
+      if (marketUpdated > 0) logLive(`🔄 Live market signal injected into ${marketUpdated} pending predictions — weight boosted to ~20%`);
+
       // Update bookComp data
       updateLiveBookComp(data);
 
@@ -4281,6 +4309,77 @@ const FACTOR_LABELS = {
   injury:'Injury Impact', h2h:'H2H History', experience:'Tournament Exp.',
   tactical:'Tactical Style', market:'Market Odds'
 };
+// ── Pre-training data: WC2022 + WC2018 group/knockout results ──
+// factor val > 50 = home advantage, < 50 = away advantage, ~50 = balanced
+const historicalWCData = [
+  // ── WC 2022 — Upsets (most valuable for gradient descent) ──
+  { home:'Argentina',   away:'Saudi Arabia', result:'A', score:'1-2',  date:'Nov 22, 2022',
+    factors:[{name:'Elo Rating',val:82},{name:'Recent Form',val:78},{name:'Squad Quality',val:80},{name:'Injury Impact',val:75},{name:'H2H History',val:72},{name:'Tournament Exp.',val:74}] },
+  { home:'Germany',     away:'Japan',        result:'A', score:'1-2',  date:'Nov 23, 2022',
+    factors:[{name:'Elo Rating',val:78},{name:'Recent Form',val:72},{name:'Squad Quality',val:76},{name:'Injury Impact',val:65},{name:'H2H History',val:68},{name:'Tournament Exp.',val:72}] },
+  { home:'Spain',       away:'Japan',        result:'A', score:'1-2',  date:'Dec 1, 2022',
+    factors:[{name:'Elo Rating',val:76},{name:'Recent Form',val:70},{name:'Squad Quality',val:74},{name:'Injury Impact',val:68},{name:'H2H History',val:65},{name:'Tournament Exp.',val:72}] },
+  { home:'Belgium',     away:'Morocco',      result:'A', score:'0-2',  date:'Nov 27, 2022',
+    factors:[{name:'Elo Rating',val:72},{name:'Recent Form',val:68},{name:'Squad Quality',val:70},{name:'Injury Impact',val:55},{name:'H2H History',val:62},{name:'Tournament Exp.',val:68}] },
+  { home:'Portugal',    away:'South Korea',  result:'A', score:'1-2',  date:'Dec 2, 2022',
+    factors:[{name:'Elo Rating',val:75},{name:'Recent Form',val:68},{name:'Squad Quality',val:74},{name:'Injury Impact',val:62},{name:'H2H History',val:64},{name:'Tournament Exp.',val:70}] },
+  { home:'Brazil',      away:'Cameroon',     result:'A', score:'0-1',  date:'Dec 2, 2022',
+    factors:[{name:'Elo Rating',val:75},{name:'Recent Form',val:65},{name:'Squad Quality',val:68},{name:'Injury Impact',val:55},{name:'H2H History',val:66},{name:'Tournament Exp.',val:70}] },
+  // ── WC 2018 — Upsets ──
+  { home:'Germany',     away:'Mexico',       result:'A', score:'0-1',  date:'Jun 17, 2018',
+    factors:[{name:'Elo Rating',val:80},{name:'Recent Form',val:76},{name:'Squad Quality',val:78},{name:'Injury Impact',val:72},{name:'H2H History',val:70},{name:'Tournament Exp.',val:75}] },
+  { home:'Colombia',    away:'Japan',        result:'A', score:'1-2',  date:'Jun 19, 2018',
+    factors:[{name:'Elo Rating',val:68},{name:'Recent Form',val:64},{name:'Squad Quality',val:66},{name:'Injury Impact',val:58},{name:'H2H History',val:60},{name:'Tournament Exp.',val:65}] },
+  // ── WC 2022 — Expected home wins ──
+  { home:'Spain',       away:'Costa Rica',   result:'H', score:'7-0',  date:'Nov 23, 2022',
+    factors:[{name:'Elo Rating',val:82},{name:'Recent Form',val:78},{name:'Squad Quality',val:80},{name:'Injury Impact',val:75},{name:'H2H History',val:70},{name:'Tournament Exp.',val:75}] },
+  { home:'France',      away:'Australia',    result:'H', score:'4-1',  date:'Nov 22, 2022',
+    factors:[{name:'Elo Rating',val:80},{name:'Recent Form',val:75},{name:'Squad Quality',val:78},{name:'Injury Impact',val:72},{name:'H2H History',val:68},{name:'Tournament Exp.',val:74}] },
+  { home:'England',     away:'Iran',         result:'H', score:'6-2',  date:'Nov 21, 2022',
+    factors:[{name:'Elo Rating',val:75},{name:'Recent Form',val:70},{name:'Squad Quality',val:72},{name:'Injury Impact',val:68},{name:'H2H History',val:65},{name:'Tournament Exp.',val:70}] },
+  { home:'Brazil',      away:'Serbia',       result:'H', score:'2-0',  date:'Nov 24, 2022',
+    factors:[{name:'Elo Rating',val:84},{name:'Recent Form',val:78},{name:'Squad Quality',val:82},{name:'Injury Impact',val:75},{name:'H2H History',val:68},{name:'Tournament Exp.',val:76}] },
+  { home:'Netherlands', away:'Senegal',      result:'H', score:'2-0',  date:'Nov 21, 2022',
+    factors:[{name:'Elo Rating',val:72},{name:'Recent Form',val:68},{name:'Squad Quality',val:70},{name:'Injury Impact',val:65},{name:'H2H History',val:60},{name:'Tournament Exp.',val:68}] },
+  { home:'France',      away:'Denmark',      result:'H', score:'2-1',  date:'Nov 26, 2022',
+    factors:[{name:'Elo Rating',val:80},{name:'Recent Form',val:74},{name:'Squad Quality',val:78},{name:'Injury Impact',val:70},{name:'H2H History',val:62},{name:'Tournament Exp.',val:74}] },
+  { home:'Argentina',   away:'Mexico',       result:'H', score:'2-0',  date:'Nov 26, 2022',
+    factors:[{name:'Elo Rating',val:78},{name:'Recent Form',val:75},{name:'Squad Quality',val:76},{name:'Injury Impact',val:70},{name:'H2H History',val:68},{name:'Tournament Exp.',val:74}] },
+  { home:'Brazil',      away:'Switzerland',  result:'H', score:'1-0',  date:'Nov 28, 2022',
+    factors:[{name:'Elo Rating',val:84},{name:'Recent Form',val:76},{name:'Squad Quality',val:80},{name:'Injury Impact',val:72},{name:'H2H History',val:65},{name:'Tournament Exp.',val:76}] },
+  { home:'Portugal',    away:'Ghana',        result:'H', score:'3-2',  date:'Nov 24, 2022',
+    factors:[{name:'Elo Rating',val:76},{name:'Recent Form',val:72},{name:'Squad Quality',val:75},{name:'Injury Impact',val:68},{name:'H2H History',val:62},{name:'Tournament Exp.',val:70}] },
+  { home:'France',      away:'Poland',       result:'H', score:'3-1',  date:'Dec 4, 2022',
+    factors:[{name:'Elo Rating',val:82},{name:'Recent Form',val:78},{name:'Squad Quality',val:80},{name:'Injury Impact',val:74},{name:'H2H History',val:65},{name:'Tournament Exp.',val:76}] },
+  { home:'England',     away:'Senegal',      result:'H', score:'3-0',  date:'Dec 4, 2022',
+    factors:[{name:'Elo Rating',val:75},{name:'Recent Form',val:70},{name:'Squad Quality',val:72},{name:'Injury Impact',val:68},{name:'H2H History',val:60},{name:'Tournament Exp.',val:70}] },
+  { home:'Germany',     away:'Costa Rica',   result:'H', score:'4-2',  date:'Dec 1, 2022',
+    factors:[{name:'Elo Rating',val:76},{name:'Recent Form',val:68},{name:'Squad Quality',val:74},{name:'Injury Impact',val:62},{name:'H2H History',val:65},{name:'Tournament Exp.',val:72}] },
+  // ── WC 2018 — Expected home wins ──
+  { home:'Russia',      away:'Saudi Arabia', result:'H', score:'5-0',  date:'Jun 14, 2018',
+    factors:[{name:'Elo Rating',val:58},{name:'Recent Form',val:60},{name:'Squad Quality',val:55},{name:'Injury Impact',val:72},{name:'H2H History',val:55},{name:'Tournament Exp.',val:65}] },
+  { home:'England',     away:'Panama',       result:'H', score:'6-1',  date:'Jun 24, 2018',
+    factors:[{name:'Elo Rating',val:74},{name:'Recent Form',val:70},{name:'Squad Quality',val:72},{name:'Injury Impact',val:68},{name:'H2H History',val:65},{name:'Tournament Exp.',val:70}] },
+  // ── WC 2022 — Draws ──
+  { home:'Morocco',     away:'Croatia',      result:'D', score:'0-0',  date:'Nov 23, 2022',
+    factors:[{name:'Elo Rating',val:50},{name:'Recent Form',val:52},{name:'Squad Quality',val:48},{name:'Injury Impact',val:60},{name:'H2H History',val:50},{name:'Tournament Exp.',val:52}] },
+  { home:'South Korea', away:'Uruguay',      result:'D', score:'0-0',  date:'Nov 24, 2022',
+    factors:[{name:'Elo Rating',val:48},{name:'Recent Form',val:50},{name:'Squad Quality',val:46},{name:'Injury Impact',val:58},{name:'H2H History',val:48},{name:'Tournament Exp.',val:50}] },
+  { home:'England',     away:'USA',          result:'D', score:'0-0',  date:'Nov 25, 2022',
+    factors:[{name:'Elo Rating',val:62},{name:'Recent Form',val:60},{name:'Squad Quality',val:62},{name:'Injury Impact',val:68},{name:'H2H History',val:55},{name:'Tournament Exp.',val:62}] },
+  { home:'Netherlands', away:'Ecuador',      result:'D', score:'1-1',  date:'Nov 25, 2022',
+    factors:[{name:'Elo Rating',val:64},{name:'Recent Form',val:62},{name:'Squad Quality',val:62},{name:'Injury Impact',val:65},{name:'H2H History',val:55},{name:'Tournament Exp.',val:62}] },
+  // ── WC 2018 — Draws (favourites failing to win) ──
+  { home:'Argentina',   away:'Iceland',      result:'D', score:'1-1',  date:'Jun 16, 2018',
+    factors:[{name:'Elo Rating',val:78},{name:'Recent Form',val:72},{name:'Squad Quality',val:76},{name:'Injury Impact',val:70},{name:'H2H History',val:65},{name:'Tournament Exp.',val:74}] },
+  { home:'Brazil',      away:'Switzerland',  result:'D', score:'1-1',  date:'Jun 17, 2018',
+    factors:[{name:'Elo Rating',val:82},{name:'Recent Form',val:75},{name:'Squad Quality',val:80},{name:'Injury Impact',val:72},{name:'H2H History',val:62},{name:'Tournament Exp.',val:76}] },
+  { home:'Spain',       away:'Portugal',     result:'D', score:'3-3',  date:'Jun 15, 2018',
+    factors:[{name:'Elo Rating',val:62},{name:'Recent Form',val:60},{name:'Squad Quality',val:64},{name:'Injury Impact',val:65},{name:'H2H History',val:52},{name:'Tournament Exp.',val:62}] },
+  { home:'Japan',       away:'Senegal',      result:'D', score:'2-2',  date:'Jun 24, 2018',
+    factors:[{name:'Elo Rating',val:50},{name:'Recent Form',val:52},{name:'Squad Quality',val:48},{name:'Injury Impact',val:62},{name:'H2H History',val:50},{name:'Tournament Exp.',val:52}] },
+];
+
 const BASELINE_WEIGHTS = { elo:30, form:20, squad:15, injury:10, h2h:10, experience:5, tactical:5, market:5 };
 const LEARNING_RATE = 0.05;
 
@@ -4289,7 +4388,7 @@ const FACTOR_NAME_MAP = {
   'Elo Rating':'elo', 'Recent Form':'form', 'Squad Quality':'squad',
   'Injury Impact':'injury', 'H2H History':'h2h', 'Tournament Exp.':'experience',
   'Tactical Style':'tactical', 'Home Advantage':'elo', 'Tournament Experience':'experience',
-  'Tactical Matchup':'tactical'
+  'Tactical Matchup':'tactical', 'Market Odds':'market'
 };
 
 // ── Engine State (persisted to localStorage) ──
@@ -4308,6 +4407,7 @@ function loadEngine() {
     pendingPredictions: [],  // snapshots awaiting API result
     autoResolved: 0,
     lastAutoResolve: null,
+    liveOddsActive: false,   // true once real API odds have been fetched
   };
 }
 
@@ -4412,7 +4512,9 @@ function calibrateProbs(match) {
   match.factors.forEach(f => {
     const key = FACTOR_NAME_MAP[f.name] || null;
     if (!key) return;
-    const w = engine.weights[key] || BASELINE_WEIGHTS[key];
+    let w = engine.weights[key] || BASELINE_WEIGHTS[key];
+    // Live bookmaker odds are highly informative — boost market weight ~4x when active
+    if (key === 'market' && engine.liveOddsActive) w *= 4;
     const adv = (f.val - 50) / 50; // -1 to +1
     homeAdv += w * adv;
     totalW += w;
@@ -4508,13 +4610,16 @@ function snapshotMatchPredictions() {
   matches.forEach(m => {
     const id = m.date + m.home.name + m.away.name;
     if (!loggedIds.has(id) && !pendingIds.has(id)) {
+      // Inject market factor from matchLines (hardcoded or live odds)
+      const ml = matchLines.find(l => teamsMatch(l.home, m.home.name));
+      const marketVal = ml ? Math.round(parseFloat(mlToImplied(ml.homeML))) : 50;
       engine.pendingPredictions.push({
         id, source: 'wc',
         home: m.home.name, away: m.away.name,
         homeFlag: m.home.flag, awayFlag: m.away.flag,
         group: m.group, date: m.date,
         probs: { h: m.homeProb, d: m.drawProb, a: m.awayProb },
-        factors: m.factors.map(f => ({ name: f.name, val: f.val })),
+        factors: [...m.factors.map(f => ({ name: f.name, val: f.val })), { name: 'Market Odds', val: marketVal }],
         weightsAtSnapshot: { ...engine.weights },
         snappedAt: Date.now()
       });
@@ -4618,6 +4723,58 @@ function seedKnownPLResults() {
     saveEngine();
     renderIntelligence();
     showToast(`🧠 ${seeded} GW38 results seeded — weights recalibrated for World Cup`, 'green');
+  }
+}
+
+// ── Pre-train engine on WC2018/2022 historical results ──
+function seedHistoricalWCData() {
+  const loggedIds = new Set(engine.history.map(h => h.matchId));
+  let seeded = 0;
+
+  historicalWCData.forEach(m => {
+    const id = 'HIST_' + m.home + '_' + m.away + '_' + m.date;
+    if (loggedIds.has(id)) return;
+
+    // Derive synthetic probabilities from factor averages
+    const avgAdv = m.factors.reduce((s, f) => s + (f.val - 50), 0) / m.factors.length;
+    const homeProb = Math.max(8, Math.min(88, Math.round(50 + avgAdv * 0.75)));
+    const awayProb = Math.max(8, Math.min(88, Math.round(50 - avgAdv * 0.55)));
+    const drawProb = Math.max(5, 100 - homeProb - awayProb);
+    const probs = { h: homeProb, d: drawProb, a: awayProb };
+
+    const before = { ...engine.weights };
+    const bs = brierScore(probs, m.result);
+    const predicted = predictedWinner(probs.h, probs.d, probs.a);
+    const correct = predicted === m.result;
+
+    if (!correct) {
+      m.factors.forEach(f => {
+        const key = FACTOR_NAME_MAP[f.name] || null;
+        if (!key || engine.weights[key] === undefined) return;
+        engine.weights[key] += LEARNING_RATE * factorContribution(f.val, m.result) * 10;
+        engine.weights[key] = Math.max(0.5, engine.weights[key]);
+      });
+      const total = Object.values(engine.weights).reduce((s, v) => s + v, 0);
+      FACTOR_KEYS.forEach(k => { engine.weights[k] = Math.round((engine.weights[k] / total) * 100 * 10) / 10; });
+    }
+
+    engine.history.push({
+      matchId: id, date: m.date, home: m.home, away: m.away,
+      predictedH: probs.h, predictedD: probs.d, predictedA: probs.a,
+      predictedWinner: predicted, actualResult: m.result, scoreStr: m.score,
+      brierScore: Math.round(bs * 1000) / 1000,
+      correct, autoResolved: true, historical: true,
+      weightsBefore: before, weightsAfter: { ...engine.weights },
+    });
+    engine.totalMatches++;
+    if (correct) engine.correctPredictions++;
+    seeded++;
+  });
+
+  if (seeded > 0) {
+    saveEngine();
+    renderIntelligence();
+    showToast(`📚 ${seeded} historical WC results loaded — model pre-trained on WC2018/2022`, 'green');
   }
 }
 
@@ -5129,10 +5286,12 @@ renderPLStars();
 renderPLAssists();
 renderPLInjuries();
 
-// ── SNAPSHOT PREDICTIONS FOR AUTO-LEARNING ──
-snapshotMatchPredictions();
-// ── SEED CONFIRMED GW38 PL RESULTS INTO ENGINE ──
+// ── PRE-TRAIN ON WC2018/2022 HISTORICAL DATA (runs once, stored in localStorage) ──
+seedHistoricalWCData();
+// ── SEED CONFIRMED GW38 PL RESULTS ──
 seedKnownPLResults();
+// ── SNAPSHOT FUTURE WC PREDICTIONS FOR AUTO-LEARNING ──
+snapshotMatchPredictions();
 
 // ── RESTORE COMPETITION (before tab restore so theme is set correctly) ──
 if (currentCompetition === 'pl') applyCompetitionUI('pl');
