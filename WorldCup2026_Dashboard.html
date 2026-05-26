@@ -1510,8 +1510,8 @@
     </div>
 
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px">
-      <h3 style="font-size:0.95rem;margin-bottom:14px">📈 Implied Probability vs Our Model — Gap Analysis</h3>
-      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px">When our model probability diverges >8% from the bookmaker implied probability, a value bet may exist. Green = model sees more value than market. Red = market overrates this outcome.</p>
+      <h3 id="gapChartTitle" style="font-size:0.95rem;margin-bottom:14px">📈 Implied Probability vs Our Model — Gap Analysis</h3>
+      <p id="gapChartDesc" style="font-size:0.78rem;color:var(--muted);margin-bottom:14px">When our model probability diverges >8% from the bookmaker implied probability, a value bet may exist. Green = model sees more value than market. Red = market overrates this outcome.</p>
       <div id="gapChart"></div>
     </div>
   </div>
@@ -3524,23 +3524,66 @@ function renderMatchLines() {
     </tr>`;
   }).join('');
 
-  // Gap chart
+  // Gap chart — competition-aware
   const gc = document.getElementById('gapChart');
-  gc.innerHTML = matchLines.slice(0,8).map(m => {
-    const homeImpl = parseFloat(mlToImplied(m.homeML));
-    const gap = m.modelHome - homeImpl;
-    const gapColor = gap > 5 ? '#22c55e' : gap < -5 ? '#ef4444' : '#f59e0b';
-    const barW = Math.abs(gap) * 3;
-    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-      <div style="width:200px;font-size:0.78rem;flex-shrink:0">${m.home.split(' ')[0]} ${m.home.split(' ')[1]} Win</div>
-      <div style="flex:1;height:16px;background:var(--border);border-radius:4px;overflow:hidden;position:relative">
-        <div style="height:100%;width:${Math.min(barW,100)}%;background:${gapColor};border-radius:4px;display:flex;align-items:center;padding-left:6px">
-          <span style="font-size:0.68rem;font-weight:700;color:#000">${gap>0?'+':''}${gap.toFixed(1)}%</span>
+  const gcTitle = document.getElementById('gapChartTitle');
+  const gcDesc  = document.getElementById('gapChartDesc');
+
+  if (currentCompetition === 'pl') {
+    // PL mode: post-match accuracy chart — model prob vs actual outcome
+    if (gcTitle) gcTitle.textContent = '🎯 GW38 Model Accuracy — Prediction vs Actual Outcome';
+    if (gcDesc)  gcDesc.textContent  = 'How far each prediction was from the actual result. Green = correct pick, Red = wrong pick, size = confidence of the error.';
+
+    const confirmedPL = plMatchLines.filter(m => m.result && m.result !== '—');
+    gc.innerHTML = confirmedPL.map(m => {
+      const homeImpl = parseFloat(mlToImplied(m.homeML));
+      const awayImpl = parseFloat(mlToImplied(m.awayML));
+      // Determine actual winner from result string
+      const scoreMatch = m.result.replace(' UPSET','').replace(' ✅','').replace(' ❌','').match(/^(\d+)-(\d+)$/);
+      let correct = false;
+      if (scoreMatch) {
+        const [, h, a] = scoreMatch.map(Number);
+        const actualCode = h > a ? 'H' : a > h ? 'A' : 'D';
+        const predCode = m.modelHome >= m.modelDraw && m.modelHome >= m.modelAway ? 'H'
+                       : m.modelDraw >= m.modelHome && m.modelDraw >= m.modelAway ? 'D' : 'A';
+        correct = actualCode === predCode;
+      }
+      const isUpset = m.result.includes('UPSET');
+      const barColor = correct ? '#22c55e' : '#ef4444';
+      const gap = m.modelHome - homeImpl;
+      const barW = Math.min(Math.abs(gap) * 3, 100);
+      const matchLabel = m.home.replace('Crystal Palace','C.Palace').replace('Man United','Man Utd').replace('Nottm Forest','Nottm F.') + ' Win';
+      return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="width:190px;font-size:0.78rem;flex-shrink:0;color:${correct?'var(--text)':'var(--muted)'}">${matchLabel}</div>
+        <div style="flex:1;height:16px;background:var(--border);border-radius:4px;overflow:hidden;position:relative">
+          <div style="height:100%;width:${barW}%;background:${barColor};border-radius:4px;display:flex;align-items:center;padding-left:6px">
+            <span style="font-size:0.68rem;font-weight:700;color:#fff">${m.result.replace(' UPSET','')}</span>
+          </div>
         </div>
-      </div>
-      <div style="width:120px;font-size:0.72rem;color:${gapColor};font-weight:700">${gap>5?'✅ Value':gap<-5?'⛔ Avoid':'⚖️ Fair'}</div>
-    </div>`;
-  }).join('');
+        <div style="width:130px;font-size:0.72rem;color:${barColor};font-weight:700">${correct ? '✅ Correct' : isUpset ? '❌ Upset' : '❌ Wrong'}</div>
+      </div>`;
+    }).join('');
+  } else {
+    // WC mode: original model vs bookmaker gap analysis
+    if (gcTitle) gcTitle.textContent = '📈 Implied Probability vs Our Model — Gap Analysis';
+    if (gcDesc)  gcDesc.textContent  = 'When our model probability diverges >8% from the bookmaker implied probability, a value bet may exist. Green = model sees more value than market. Red = market overrates this outcome.';
+
+    gc.innerHTML = matchLines.slice(0,8).map(m => {
+      const homeImpl = parseFloat(mlToImplied(m.homeML));
+      const gap = m.modelHome - homeImpl;
+      const gapColor = gap > 5 ? '#22c55e' : gap < -5 ? '#ef4444' : '#f59e0b';
+      const barW = Math.abs(gap) * 3;
+      return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="width:200px;font-size:0.78rem;flex-shrink:0">${m.home.split(' ')[0]} ${m.home.split(' ')[1]} Win</div>
+        <div style="flex:1;height:16px;background:var(--border);border-radius:4px;overflow:hidden;position:relative">
+          <div style="height:100%;width:${Math.min(barW,100)}%;background:${gapColor};border-radius:4px;display:flex;align-items:center;padding-left:6px">
+            <span style="font-size:0.68rem;font-weight:700;color:#000">${gap>0?'+':''}${gap.toFixed(1)}%</span>
+          </div>
+        </div>
+        <div style="width:120px;font-size:0.72rem;color:${gapColor};font-weight:700">${gap>5?'✅ Value':gap<-5?'⛔ Avoid':'⚖️ Fair'}</div>
+      </div>`;
+    }).join('');
+  }
 }
 
 function renderBookComp() {
