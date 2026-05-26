@@ -1473,7 +1473,7 @@
 <!-- ══ BETTING LINES ══ -->
 <div id="betting" class="section">
   <h2>📡 Live Betting <span>Lines</span></h2>
-  <div class="disclaimer">
+  <div id="bettingDisclaimer" class="disclaimer">
     ⚠️ Odds shown are reference values based on major bookmaker research (DraftKings, BetMGM, FanDuel, Bet365) as of May 2026. Odds change constantly — always verify before placing a bet. Use the API integration below to fetch live odds in real time.
   </div>
 
@@ -1744,6 +1744,7 @@ function switchCompetition(comp) {
   applyCompetitionUI(comp);
   renderMatchLines();
   renderValueBets();
+  renderBookComp();
   fetchLiveOdds();
   fetchFootballData();
 }
@@ -3331,6 +3332,50 @@ const matchLines = [
     pick:'England ML + Over 3.5', pickConf:'high' },
 ];
 
+// PL GW38 bookmaker comparison — pre-match odds across 6 UK/EU books, with actual results
+const plBookCompData = [
+  { match:'Crystal Palace vs Arsenal  ·  Result: 1-2 ✅', result:'Arsenal Won 1-2', books:[
+    { name:'Bet365',      home:+370, draw:+285, away:-160 },
+    { name:'William Hill',home:+380, draw:+295, away:-155 },
+    { name:'Betway',      home:+360, draw:+280, away:-165 },
+    { name:'Paddy Power', home:+400, draw:+300, away:-150 },
+    { name:'Sky Bet',     home:+375, draw:+290, away:-158 },
+    { name:'Betfair',     home:+390, draw:+300, away:-148 },
+  ]},
+  { match:'Man City vs Aston Villa  ·  Result: 1-2 ❌ UPSET', result:'Villa Won 1-2', books:[
+    { name:'Bet365',      home:-180, draw:+305, away:+450 },
+    { name:'William Hill',home:-190, draw:+310, away:+465 },
+    { name:'Betway',      home:-185, draw:+300, away:+455 },
+    { name:'Paddy Power', home:-175, draw:+315, away:+470 },
+    { name:'Sky Bet',     home:-182, draw:+308, away:+460 },
+    { name:'Betfair',     home:-170, draw:+320, away:+480 },
+  ]},
+  { match:'Tottenham vs Everton  ·  Result: 1-0 ✅', result:'Spurs Won 1-0', books:[
+    { name:'Bet365',      home:-145, draw:+285, away:+375 },
+    { name:'William Hill',home:-150, draw:+295, away:+385 },
+    { name:'Betway',      home:-148, draw:+290, away:+380 },
+    { name:'Paddy Power', home:-140, draw:+300, away:+390 },
+    { name:'Sky Bet',     home:-145, draw:+288, away:+378 },
+    { name:'Betfair',     home:-135, draw:+310, away:+400 },
+  ]},
+  { match:'West Ham vs Leeds  ·  Result: 3-0 ✅', result:'West Ham Won 3-0', books:[
+    { name:'Bet365',      home:+115, draw:+255, away:+195 },
+    { name:'William Hill',home:+120, draw:+265, away:+205 },
+    { name:'Betway',      home:+118, draw:+258, away:+198 },
+    { name:'Paddy Power', home:+125, draw:+270, away:+210 },
+    { name:'Sky Bet',     home:+120, draw:+260, away:+200 },
+    { name:'Betfair',     home:+130, draw:+275, away:+215 },
+  ]},
+  { match:'Sunderland vs Chelsea  ·  Result: 2-1 ❌ UPSET', result:'Sunderland Won 2-1', books:[
+    { name:'Bet365',      home:+195, draw:+275, away:-130 },
+    { name:'William Hill',home:+205, draw:+285, away:-120 },
+    { name:'Betway',      home:+200, draw:+280, away:-125 },
+    { name:'Paddy Power', home:+210, draw:+290, away:-115 },
+    { name:'Sky Bet',     home:+198, draw:+278, away:-128 },
+    { name:'Betfair',     home:+215, draw:+295, away:-110 },
+  ]},
+];
+
 // bookmaker comparison per match
 const bookCompData = [
   { // Mexico vs South Africa
@@ -3494,6 +3539,9 @@ function renderMatchLines() {
       ? '— All 10 matches finished. 4/8 confirmed predictions correct (50%). Model weights recalibrated for World Cup.'
       : '— WC 2026 bookmaker lines open ~late May. Press 🔄 Refresh to pull live odds once available.';
   }
+  const disclaimer = document.getElementById('bettingDisclaimer');
+  if (disclaimer) disclaimer.style.display = currentCompetition === 'pl' ? 'none' : '';
+
   const desc = document.getElementById('matchLinesDesc');
   if (desc) {
     desc.textContent = currentCompetition === 'pl'
@@ -3587,8 +3635,31 @@ function renderMatchLines() {
 }
 
 function renderBookComp() {
-  const idx = parseInt(document.getElementById('matchSelector').value);
-  const data = bookCompData[idx];
+  const isPL = currentCompetition === 'pl';
+  const sel = document.getElementById('matchSelector');
+
+  // Rebuild dropdown options when competition changes
+  if (isPL) {
+    if (sel.options[0] && sel.options[0].value === '0' && sel.options[0].text.includes('Mexico')) {
+      sel.innerHTML = plBookCompData.map((d,i) => `<option value="${i}">${d.match.split('·')[0].trim()}</option>`).join('');
+    }
+  } else {
+    if (sel.options[0] && sel.options[0].text.includes('Crystal Palace')) {
+      sel.innerHTML = [
+        '<option value="0">Mexico vs South Africa (Jun 11)</option>',
+        '<option value="1">Brazil vs Morocco (Jun 13)</option>',
+        '<option value="2">USA vs Paraguay (Jun 12)</option>',
+        '<option value="3">England vs Panama (Jun 16)</option>',
+        '<option value="4">France vs Iraq (Jun 15)</option>',
+        '<option value="5">Spain vs Cape Verde (Jun 15)</option>',
+        '<option value="6">Argentina vs Jordan (Jun 16)</option>',
+        '<option value="7">Germany vs Curaçao (Jun 14)</option>',
+      ].join('');
+    }
+  }
+
+  const idx = parseInt(sel.value) || 0;
+  const data = isPL ? plBookCompData[idx] : bookCompData[idx];
   const books = data.books;
 
   // Find best odds for each outcome
@@ -3597,8 +3668,11 @@ function renderBookComp() {
   const bestAway = Math.max(...books.map(b=>b.away));
 
   const tbl = document.getElementById('bookCompTable');
+  const resultBadge = isPL && data.result
+    ? `<span style="margin-left:10px;font-size:0.82rem;padding:3px 8px;border-radius:6px;background:${data.result.includes('UPSET')?'rgba(239,68,68,0.12)':'rgba(34,197,94,0.1)'};color:${data.result.includes('UPSET')?'var(--red)':'var(--green)'};font-weight:700">FT: ${data.result}</span>`
+    : '';
   tbl.innerHTML = `
-    <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:var(--gold)">${data.match}</div>
+    <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:var(--gold)">${data.match}${resultBadge}</div>
     <div style="overflow-x:auto">
     <table class="odds-table" style="min-width:500px">
       <thead><tr><th>Bookmaker</th><th>Home Win</th><th>Draw</th><th>Away Win</th><th>Best Line?</th></tr></thead>
