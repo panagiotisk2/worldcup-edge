@@ -6923,6 +6923,75 @@ restoreTabFromHash();
     if (fbOk) logLive('✅ Fixture data loaded from API-Football.');
   }, 1000);
 })();
+
+// ══════════════════════════════════════════
+// LIVE TICKER
+// ══════════════════════════════════════════
+function renderLiveTicker() {
+  const ticker = document.getElementById('liveTicker');
+  if (!ticker) return;
+
+  // ── State 1: live matches in progress ──
+  if (liveEventCache.length > 0) {
+    ticker.style.display = '';
+    ticker.className = 'ticker-wrap-live';
+    const rows = liveEventCache.map(ev => {
+      const home   = ev.homeTeam?.name || ev.teams?.home?.name || '?';
+      const away   = ev.awayTeam?.name || ev.teams?.away?.name || '?';
+      const scoreH = ev.homeScore?.current ?? ev.goals?.home ?? '–';
+      const scoreA = ev.awayScore?.current ?? ev.goals?.away ?? '–';
+      const min    = ev.time?.played ?? ev.status?.elapsed ?? '';
+      const homeWin = typeof scoreH === 'number' && typeof scoreA === 'number' && scoreH > scoreA;
+      const awayWin = typeof scoreH === 'number' && typeof scoreA === 'number' && scoreA > scoreH;
+      return `<div class="ticker-row">
+        <span class="ticker-team${homeWin ? ' ticker-winning' : ''}">${getFlag(home)} ${home}</span>
+        <span class="ticker-score">${scoreH} – ${scoreA}</span>
+        <span class="ticker-team${awayWin ? ' ticker-winning' : ''}">${away} ${getFlag(away)}</span>
+        <span class="ticker-minute">${min ? min + "'" : '–'}</span>
+      </div>`;
+    }).join('');
+    ticker.innerHTML = `
+      <div class="ticker-header">
+        <span class="ticker-dot"></span>
+        <span class="ticker-label">LIVE</span>
+        <span class="ticker-updated" id="tickerUpdated">· updated just now</span>
+        <span class="ticker-count">${liveEventCache.length} match${liveEventCache.length > 1 ? 'es' : ''}</span>
+      </div>
+      <div class="ticker-matches">${rows}</div>`;
+    return;
+  }
+
+  // ── State 2: no live match — find next scheduled match today ──
+  const todayStr = new Date().toDateString();
+  const nextMatch = allEventsCache.find(ev => {
+    if (!ev.startTimestamp) return false;
+    const evDate = new Date(ev.startTimestamp * 1000);
+    if (evDate.toDateString() !== todayStr) return false;
+    const s = (ev.status?.type || '').toLowerCase();
+    return s === 'notstarted' || s === 'scheduled' || s === '';
+  });
+
+  if (nextMatch) {
+    ticker.style.display = '';
+    ticker.className = 'ticker-wrap-idle';
+    const home    = nextMatch.homeTeam?.name || nextMatch.teams?.home?.name || '?';
+    const away    = nextMatch.awayTeam?.name || nextMatch.teams?.away?.name || '?';
+    const kickoff = new Date(nextMatch.startTimestamp * 1000);
+    const diff    = kickoff - Date.now();
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    const countdownStr = diff > 0 ? `kicks off in ${h}h ${m}m` : 'starting soon';
+    ticker.innerHTML = `<div class="ticker-row ticker-upcoming">
+      <span>⏱ Next match</span>
+      <span class="ticker-teams">${getFlag(home)} ${home} vs ${away} ${getFlag(away)}</span>
+      <span class="ticker-countdown">· ${countdownStr}</span>
+    </div>`;
+    return;
+  }
+
+  // ── State 3: nothing today — hide ──
+  ticker.style.display = 'none';
+}
 </script>
 </body>
 </html>
