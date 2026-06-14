@@ -1826,8 +1826,13 @@ function switchCompetition(comp) {
   renderValueBets();
   renderBookComp();
   renderIntelligence();
-  fetchLiveOdds();
-  fetchFootballData();
+  if (comp === 'wc') {
+    startPolling();                // restarts full polling engine for WC
+  } else {
+    stopPolling();                 // no live polling in PL mode
+    fetchLiveOdds();               // one-shot PL odds fetch
+    fetchFootballData();           // one-shot for context
+  }
 }
 
 function applyCompetitionUI(comp) {
@@ -6907,20 +6912,10 @@ restoreTabFromHash();
     if (timeEl) timeEl.textContent = `Last updated: ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
   }
 
-  // Auto-activate on every page load — keys are pre-loaded
-  setTimeout(async () => {
-    logLive('🔄 WorldCup Edge — connecting live data sources...');
-    const oddsOk = await fetchLiveOdds();
-    if (oddsOk) {
-      setLiveBadge(true);
-      const now = new Date();
-      const timeEl = document.getElementById('lastRefreshTime');
-      if (timeEl) timeEl.textContent = `Last updated: ${now.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
-      localStorage.setItem('wce_last_refresh', now.toISOString());
-      logLive('✅ Live Mode active. Odds data refreshed.');
-    }
-    const fbOk = await fetchFootballData();
-    if (fbOk) logLive('✅ Fixture data loaded from API-Football.');
+  // Auto-activate on every page load — polling engine handles all fetches
+  setTimeout(() => {
+    logLive('🔄 WorldCup Edge — live data engine starting...');
+    startPolling();
   }, 1000);
 })();
 
@@ -7092,6 +7087,19 @@ async function pollTick() {
     pollInFlight = false;
   }
 }
+
+// ── Pause polling when browser tab is hidden; resume on focus ──
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopPolling();
+    logLive('⏸ Polling paused — tab hidden.');
+  } else {
+    if (currentCompetition === 'wc') {
+      logLive('▶️ Polling resumed — tab visible.');
+      startPolling();
+    }
+  }
+});
 </script>
 </body>
 </html>
