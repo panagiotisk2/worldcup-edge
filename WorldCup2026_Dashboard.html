@@ -7050,6 +7050,48 @@ function startPolling() {
   setPollingMode('idle');   // start on idle cadence; upgrades to live if match found
   startUpdatedCounter();
 }
+
+async function pollTick() {
+  if (pollInFlight) return;   // guard: skip if previous fetch still running
+  pollInFlight = true;
+  try {
+    // 1. Fetch fixtures — populates liveEventCache + allEventsCache as side-effect
+    await fetchFootballData();
+
+    // 2. Switch polling cadence based on live events
+    setPollingMode(liveEventCache.length > 0 ? 'live' : 'idle');
+
+    // 3. Render live ticker
+    renderLiveTicker();
+
+    // 4. Rebuild standings if Score Table is in live mode
+    if (scoreTableMode === 'live' && apiStandingsCache && apiStandingsCache.length > 0) {
+      renderScoreTable();
+    }
+
+    // 5. Refresh odds (Option A: same cadence as fixtures)
+    await fetchLiveOdds();
+
+    // 6. Update live badge + last-refresh timestamp
+    setLiveBadge(true);
+    lastPollTime = Date.now();
+    const now = new Date();
+    const timeEl = document.getElementById('lastRefreshTime');
+    if (timeEl) {
+      timeEl.textContent = `Last updated: ${now.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})}`;
+    }
+    localStorage.setItem('wce_last_refresh', now.toISOString());
+
+    // 7. Reset "updated X ago" counter
+    resetUpdatedCounter();
+
+  } catch (err) {
+    logLive(`⚠️ Poll tick error: ${err.message}`);
+    // Don't change pollingMode on error — keep current cadence
+  } finally {
+    pollInFlight = false;
+  }
+}
 </script>
 </body>
 </html>
