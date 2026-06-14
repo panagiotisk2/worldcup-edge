@@ -17,17 +17,13 @@ exports.handler = async (event) => {
     'X-RapidAPI-Host': 'sportapi7.p.rapidapi.com',
   };
 
-  // Returns { events, _status, _error } — status/error fields are for debug only
   const fetchJson = async (url) => {
     try {
       const res = await fetch(url, { headers });
-      if (!res.ok) {
-        const body = await res.text().catch(() => '');
-        return { events: [], _status: res.status, _error: body.slice(0, 200) };
-      }
+      if (!res.ok) return { events: [] };
       return await res.json();
-    } catch (e) {
-      return { events: [], _status: 0, _error: e.message };
+    } catch {
+      return { events: [] };
     }
   };
 
@@ -45,13 +41,6 @@ exports.handler = async (event) => {
       fetchJson('https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live'),
       ...dates.map(d => fetchJson(`https://sportapi7.p.rapidapi.com/api/v1/sport/football/scheduled-events/${d}`)),
     ]);
-
-    // Collect any API errors for debug
-    const apiErrors = [];
-    if (liveData._status) apiErrors.push({ url: 'live', status: liveData._status, error: liveData._error });
-    schedResults.forEach((r, i) => {
-      if (r._status) apiErrors.push({ url: dates[i], status: r._status, error: r._error });
-    });
 
     const liveEvents = liveData.events || [];
     const scheduledEvents = schedResults.flatMap(r => r.events || []);
@@ -79,9 +68,6 @@ exports.handler = async (event) => {
         all: allEvents,
         date: today.toISOString().split('T')[0],
         datesChecked: dates.length,
-        // debug fields — remove once fixed
-        _apiErrors: apiErrors,
-        _keyPrefix: process.env.RAPIDAPI_KEY ? process.env.RAPIDAPI_KEY.slice(0, 8) + '...' : 'MISSING',
       }),
     };
   } catch (err) {
