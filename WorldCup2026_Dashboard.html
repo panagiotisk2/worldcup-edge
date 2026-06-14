@@ -230,6 +230,7 @@
   }
   .match-date { font-size: 0.78rem; color: var(--gold); font-weight: 700; }
   .match-venue { font-size: 0.73rem; color: var(--muted); }
+  .tz-ref { color: var(--muted); font-size: 0.82em; font-weight: 400; }
   .match-group { font-size: 0.73rem; color: var(--blue); background: rgba(59,130,246,0.1); padding: 2px 8px; border-radius: 10px; }
 
   .match-body {
@@ -3511,6 +3512,138 @@ function isMatchCompleted(m) {
   }
 }
 
+// ══════════════════════════════════════════
+// KICKOFF TIMES (Eastern Time = EDT, UTC−4)
+// Used by formatMatchDateTime() for local-timezone conversion.
+// ══════════════════════════════════════════
+const MATCH_TIMES = {
+  // ── MD1 ──
+  'Mexico|South Africa':     '3:00 PM ET',
+  'S. Korea|Czechia':        '10:00 PM ET',
+  'Canada|Bosnia':           '3:00 PM ET',
+  'USA|Paraguay':            '9:00 PM ET',
+  'Australia|Türkiye':       '12:00 AM ET',
+  'Qatar|Switzerland':       '3:00 PM ET',
+  'Brazil|Morocco':          '6:00 PM ET',
+  'Haiti|Scotland':          '9:00 PM ET',
+  'Germany|Curaçao':         '1:00 PM ET',
+  'Netherlands|Japan':       '4:00 PM ET',
+  'Ivory Coast|Ecuador':     '7:00 PM ET',
+  'Sweden|Tunisia':          '10:00 PM ET',
+  'Spain|Cape Verde':        '12:00 PM ET',
+  'Belgium|Egypt':           '3:00 PM ET',
+  'France|Iraq':             '6:00 PM ET',
+  'Iran|New Zealand':        '9:00 PM ET',
+  'Uruguay|Saudi Arabia':    '6:00 PM ET',
+  'Senegal|Norway':          '3:00 PM ET',
+  'Austria|Algeria':         '6:00 PM ET',
+  'Portugal|DR Congo':       '1:00 PM ET',
+  'Argentina|Jordan':        '9:00 PM ET',
+  'England|Panama':          '6:00 PM ET',
+  'Croatia|Ghana':           '7:00 PM ET',
+  'Colombia|Uzbekistan':     '10:00 PM ET',
+  // ── MD2 ──
+  'Mexico|S. Korea':         '9:00 PM ET',
+  'South Africa|Czechia':    '12:00 PM ET',
+  'Canada|Qatar':            '6:00 PM ET',
+  'Bosnia|Switzerland':      '3:00 PM ET',
+  'Brazil|Haiti':            '8:30 PM ET',
+  'Morocco|Scotland':        '6:00 PM ET',
+  'USA|Australia':           '3:00 PM ET',
+  'Paraguay|Türkiye':        '11:00 PM ET',
+  'Germany|Ivory Coast':     '4:00 PM ET',
+  'Curaçao|Ecuador':         '8:00 PM ET',
+  'Netherlands|Sweden':      '1:00 PM ET',
+  'Japan|Tunisia':           '6:00 PM ET',
+  'Belgium|Iran':            '3:00 PM ET',
+  'Egypt|New Zealand':       '9:00 PM ET',
+  'Spain|Uruguay':           '12:00 PM ET',
+  'Saudi Arabia|Cape Verde': '6:00 PM ET',
+  'France|Senegal':          '3:00 PM ET',
+  'Norway|Iraq':             '6:00 PM ET',
+  'Argentina|Austria':       '1:00 PM ET',
+  'Algeria|Jordan':          '11:00 PM ET',
+  'Portugal|Colombia':       '1:00 PM ET',
+  'Uzbekistan|DR Congo':     '9:00 PM ET',
+  'England|Croatia':         '4:00 PM ET',
+  'Ghana|Panama':            '8:00 PM ET',
+  // ── MD3 ──
+  'South Africa|S. Korea':   '9:00 PM ET',
+  'Mexico|Czechia':          '9:00 PM ET',
+  'Bosnia|Qatar':            '3:00 PM ET',
+  'Switzerland|Canada':      '3:00 PM ET',
+  'Morocco|Haiti':           '6:00 PM ET',
+  'Scotland|Brazil':         '6:00 PM ET',
+  'Paraguay|Australia':      '9:00 PM ET',
+  'Türkiye|USA':             '9:00 PM ET',
+  'Curaçao|Ivory Coast':     '4:00 PM ET',
+  'Ecuador|Germany':         '4:00 PM ET',
+  'Tunisia|Netherlands':     '7:00 PM ET',
+  'Japan|Sweden':            '7:00 PM ET',
+  'New Zealand|Belgium':     '4:00 PM ET',
+  'Egypt|Iran':              '8:00 PM ET',
+  'Saudi Arabia|Spain':      '8:00 PM ET',
+  'Cape Verde|Uruguay':      '8:00 PM ET',
+  'Norway|France':           '3:00 PM ET',
+  'Iraq|Senegal':            '3:00 PM ET',
+  'Algeria|Argentina':       '10:00 PM ET',
+  'Jordan|Austria':          '10:00 PM ET',
+  'Uzbekistan|Portugal':     '7:30 PM ET',
+  'DR Congo|Colombia':       '7:30 PM ET',
+  'Ghana|England':           '5:00 PM ET',
+  'Panama|Croatia':          '5:00 PM ET',
+};
+
+// Convert ET kickoff to visitor's local timezone.
+// m — match object (needs m.date, m.home.name, m.away.name)
+function formatMatchDateTime(m) {
+  const raw = m.date || '';
+  const parts = raw.split('·').map(s => s.trim());
+  const datePart = parts[0] || raw;
+
+  // Prefer time embedded in the date string; fall back to lookup table
+  let etTime = null;
+  if (parts.length > 1 && parts[1] && parts[1] !== 'Various') {
+    etTime = parts[1]; // e.g. "3:00 PM ET"
+  } else {
+    etTime = MATCH_TIMES[m.home.name + '|' + m.away.name] || null;
+  }
+  if (!etTime) return datePart;
+
+  // Parse ET time — WC 2026 summer = EDT (UTC−4)
+  const tmMatch = etTime.replace(/\s*ET$/i, '').match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!tmMatch) return `${datePart} · ${etTime}`;
+  let h = parseInt(tmMatch[1]);
+  const min = parseInt(tmMatch[2]);
+  if (tmMatch[3].toUpperCase() === 'PM' && h !== 12) h += 12;
+  if (tmMatch[3].toUpperCase() === 'AM' && h === 12) h = 0;
+
+  // Parse date string  e.g. "Jun 14, 2026"
+  const dtMatch = datePart.match(/([A-Za-z]+)\s+(\d+),?\s*(\d{4})/);
+  if (!dtMatch) return `${datePart} · ${etTime}`;
+  const MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const utcDate = new Date(Date.UTC(
+    parseInt(dtMatch[3]),
+    MONTHS[dtMatch[1].toLowerCase().slice(0,3)],
+    parseInt(dtMatch[2]),
+    h + 4, min   // EDT = UTC−4, so UTC = ET + 4 h
+  ));
+
+  // getTimezoneOffset() → (UTC − local) in minutes, positive = west of UTC
+  // EDT = UTC−4 → offset = 240 min
+  const localOffset = new Date(utcDate).getTimezoneOffset();
+  if (localOffset === 240 || localOffset === 300) {
+    // User is already on Eastern Time — show the ET label as-is
+    return `${datePart} · ${etTime}`;
+  }
+
+  // Render in visitor's local timezone
+  const localStr = utcDate.toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+  });
+  return `${datePart} · ${localStr} <span class="tz-ref">(${etTime})</span>`;
+}
+
 const oddsData = [
   { flag:'🇫🇷', name:'France', group:'I', odds:'+450', impliedPct:18.2, modelPct:18, note:'Market Favorite', assessment:'NEUTRAL — fair price', color:'#f59e0b' },
   { flag:'🇪🇸', name:'Spain', group:'H', odds:'+500', impliedPct:16.7, modelPct:17, note:'Co-Favorite', assessment:'BUY — slight value', color:'#22c55e' },
@@ -3935,7 +4068,7 @@ function renderPredictions(filter='all') {
     html += `<div class="match-card">
       <div class="match-header">
         <div>
-          <div class="match-date">📅 ${m.date}</div>
+          <div class="match-date">📅 ${formatMatchDateTime(m)}</div>
           <div class="match-venue">📍 ${m.venue}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
