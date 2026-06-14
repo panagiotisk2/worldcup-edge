@@ -2210,7 +2210,7 @@ function restoreTabFromHash() {
 const groups = [
   { letter: 'A', city: 'Mexico / Guadalajara', teams: [
     { flag:'🇲🇽', name:'Mexico', rank:'#15', odds:'host' },
-    { flag:'🇰🇷', name:'South Korea', rank:'#20', odds:'+3500' },
+    { flag:'🇰🇷', name:'S. Korea', rank:'#20', odds:'+3500' },
     { flag:'🇿🇦', name:'South Africa', rank:'#57', odds:'+12000' },
     { flag:'🇨🇿', name:'Czechia', rank:'#34', odds:'+8000' },
   ]},
@@ -2227,7 +2227,7 @@ const groups = [
     { flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', name:'Scotland', rank:'#27', odds:'+12000' },
   ]},
   { letter: 'D', city: 'Los Angeles / Various', teams: [
-    { flag:'🇺🇸', name:'United States', rank:'#13', odds:'host' },
+    { flag:'🇺🇸', name:'USA', rank:'#13', odds:'host' },
     { flag:'🇵🇾', name:'Paraguay', rank:'#64', odds:'+15000' },
     { flag:'🇦🇺', name:'Australia', rank:'#23', odds:'+9000' },
     { flag:'🇹🇷', name:'Türkiye', rank:'#28', odds:'+7000' },
@@ -4745,46 +4745,48 @@ const plMatchLines = [
 ];
 
 const matchLines = [
-  { date:'Jun 11', home:'🇲🇽 Mexico', away:'🇿🇦 S. Africa', group:'A',
+  // ── COMPLETED ──
+  { date:'Jun 11 FT', home:'🇲🇽 Mexico', away:'🇿🇦 S. Africa', group:'A',
     homeML:-220, draw:+320, awayML:+580,
     ou:2.5, ouDir:'Over -110', btts:'No -140',
     modelHome:62, modelDraw:22, modelAway:16,
-    pick:'Mexico ML', pickConf:'high' },
-  { date:'Jun 11', home:'🇰🇷 S. Korea', away:'🇨🇿 Czechia', group:'A',
+    pick:'Mexico ML ✅', pickConf:'high', result:'2-0' },
+  { date:'Jun 11 FT', home:'🇰🇷 S. Korea', away:'🇨🇿 Czechia', group:'A',
     homeML:+130, draw:+230, awayML:+200,
     ou:2.5, ouDir:'Under -115', btts:'Yes +110',
     modelHome:36, modelDraw:32, modelAway:32,
-    pick:'Draw', pickConf:'med' },
-  { date:'Jun 12', home:'🇨🇦 Canada', away:'🇧🇦 Bosnia', group:'B',
+    pick:'Draw ❌', pickConf:'med', result:'2-1' },
+  { date:'Jun 12 FT', home:'🇨🇦 Canada', away:'🇧🇦 Bosnia', group:'B',
     homeML:+115, draw:+240, awayML:+230,
     ou:2.5, ouDir:'Under -120', btts:'No -130',
     modelHome:42, modelDraw:28, modelAway:30,
-    pick:'Canada ML (if Davies fit)', pickConf:'low' },
-  { date:'Jun 12', home:'🇺🇸 USA', away:'🇵🇾 Paraguay', group:'D',
+    pick:'Canada ML ❌', pickConf:'low', result:'1-1' },
+  { date:'Jun 12 FT', home:'🇺🇸 USA', away:'🇵🇾 Paraguay', group:'D',
     homeML:-175, draw:+290, awayML:+450,
     ou:2.5, ouDir:'Over -105', btts:'No -125',
     modelHome:52, modelDraw:24, modelAway:24,
-    pick:'USA ML', pickConf:'med' },
-  { date:'Jun 13', home:'🇶🇦 Qatar', away:'🇨🇭 Switzerland', group:'B',
+    pick:'USA ML ✅', pickConf:'med', result:'4-1' },
+  { date:'Jun 13 FT', home:'🇶🇦 Qatar', away:'🇨🇭 Switzerland', group:'B',
     homeML:+380, draw:+280, awayML:-155,
     ou:2.5, ouDir:'Over -115', btts:'No -140',
     modelHome:18, modelDraw:28, modelAway:54,
-    pick:'Switzerland ML', pickConf:'high' },
-  { date:'Jun 13', home:'🇧🇷 Brazil', away:'🇲🇦 Morocco', group:'C',
+    pick:'Switzerland ML ❌', pickConf:'high', result:'1-1' },
+  { date:'Jun 13 FT', home:'🇧🇷 Brazil', away:'🇲🇦 Morocco', group:'C',
     homeML:-280, draw:+360, awayML:+750,
     ou:2.5, ouDir:'Over -130', btts:'No -150',
     modelHome:68, modelDraw:18, modelAway:14,
-    pick:'Brazil ML', pickConf:'high' },
-  { date:'Jun 13', home:'🇭🇹 Haiti', away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland', group:'C',
+    pick:'Brazil ML ❌', pickConf:'high', result:'1-1' },
+  { date:'Jun 13 FT', home:'🇭🇹 Haiti', away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland', group:'C',
     homeML:+650, draw:+350, awayML:-140,
     ou:2.5, ouDir:'Over -125', btts:'No -160',
     modelHome:14, modelDraw:22, modelAway:64,
-    pick:'Scotland ML', pickConf:'high' },
-  { date:'Jun 14', home:'🇩🇪 Germany', away:'🇨🇼 Curaçao', group:'E',
+    pick:'Scotland ML ✅', pickConf:'high', result:'0-1' },
+  { date:'Jun 14 FT', home:'🇩🇪 Germany', away:'🇨🇼 Curaçao', group:'E',
     homeML:-900, draw:+1200, awayML:+2200,
     ou:3.5, ouDir:'Over -140', btts:'No -200',
     modelHome:88, modelDraw:8, modelAway:4,
-    pick:'Germany -2.5 handicap', pickConf:'high' },
+    pick:'Germany -2.5 ✅', pickConf:'high', result:'4-0' },
+  // ── UPCOMING ──
   { date:'Jun 15', home:'🇪🇸 Spain', away:'🇨🇻 Cape Verde', group:'H',
     homeML:-1000, draw:+1400, awayML:+2500,
     ou:3.5, ouDir:'Over -145', btts:'No -210',
@@ -5061,7 +5063,7 @@ function renderMatchLines() {
   if (sourceNote) {
     sourceNote.textContent = currentCompetition === 'pl'
       ? '— All 10 matches finished. 4/8 confirmed predictions correct (50%). Model weights recalibrated for World Cup.'
-      : '— WC 2026 bookmaker lines open ~late May. Press 🔄 Refresh to pull live odds once available.';
+      : '— 8 of 12 MD1 matches complete. 4/8 picks correct (50%). Live odds active — press 🔄 Refresh to update.';
   }
   const disclaimer = document.getElementById('bettingDisclaimer');
   if (disclaimer) disclaimer.style.display = currentCompetition === 'pl' ? 'none' : '';
@@ -5076,12 +5078,15 @@ function renderMatchLines() {
   if (head) {
     head.innerHTML = currentCompetition === 'pl'
       ? '<th>Date</th><th>Match</th><th>Round</th><th>Home ML</th><th>Draw</th><th>Away ML</th><th>O/U Goals</th><th>BTTS</th><th>Model Pick</th><th>Result</th>'
-      : '<th>Date</th><th>Match</th><th>Group</th><th>Home ML</th><th>Draw</th><th>Away ML</th><th>O/U Goals</th><th>BTTS</th><th>Model Pick</th>';
+      : '<th>Date</th><th>Match</th><th>Group</th><th>Home ML</th><th>Draw</th><th>Away ML</th><th>O/U Goals</th><th>BTTS</th><th>Model Pick</th><th>Result</th>';
   }
 
   tbody.innerHTML = lines.map(m => {
     const cc = m.pickConf==='high'?'conf-high':m.pickConf==='med'?'conf-med':'conf-low';
-    const resultCell = m.result ? `<td style="font-size:0.82rem;font-weight:700;color:${m.result.includes('UPSET')?'var(--red)':m.result==='—'?'var(--muted)':'var(--green)'}">${m.result}</td>` : '';
+    const pickCorrect = m.pick && m.pick.includes('✅');
+    const pickWrong   = m.pick && m.pick.includes('❌');
+    const resultColor = m.result === '—' ? 'var(--muted)' : m.result && m.result.includes('UPSET') ? 'var(--red)' : pickCorrect ? 'var(--green)' : pickWrong ? 'var(--red)' : 'var(--muted)';
+    const resultCell = m.result ? `<td style="font-size:0.82rem;font-weight:700;color:${resultColor}">${m.result}</td>` : '<td style="color:var(--muted);font-size:0.8rem">—</td>';
     return `<tr>
       <td style="color:var(--gold);font-size:0.8rem;font-weight:700">${m.date}</td>
       <td><strong>${m.home}</strong> <span style="color:var(--muted)">vs</span> <strong>${m.away}</strong></td>
