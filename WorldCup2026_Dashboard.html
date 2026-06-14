@@ -5774,6 +5774,15 @@ async function fetchFootballData() {
     // 'all' is the deduplicated union including last 4 days of finished results
     const allEvents     = json.all || [...liveEvents, ...schedEvents, ...apiFootball];
 
+    // Update module-level caches for polling engine
+    allEventsCache = allEvents;
+    liveEventCache = allEvents.filter(e => {
+      const s = (e.status?.type || e.status?.description || '').toLowerCase();
+      return s === 'inprogress' || s.includes('in progress') ||
+             s.includes('1st half') || s.includes('2nd half') ||
+             s.includes('halftime') || s === 'live';
+    });
+
     const remaining = res.headers.get('x-ratelimit-requests-remaining');
     const quotaEl = document.getElementById('footballApiQuota');
     if (quotaEl && remaining !== null) {
