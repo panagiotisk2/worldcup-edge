@@ -7011,6 +7011,18 @@ function resetUpdatedCounter() {
   const el = document.getElementById('tickerUpdated');
   if (el) el.textContent = '· updated just now';
 }
+
+function updatePollingIndicator() {
+  const el = document.getElementById('pollingStatus');
+  if (!el) return;
+  if (pollingMode === 'live') {
+    el.innerHTML = ' &nbsp;<span style="color:#22c55e;animation:tickerPulse 1.5s infinite;display:inline-block">⬤</span> Auto-refresh: <strong style="color:#22c55e">LIVE 30s</strong>';
+  } else if (pollingMode === 'idle') {
+    el.innerHTML = ' &nbsp;<span style="color:#f59e0b">⬤</span> Auto-refresh: idle (5min)';
+  } else {
+    el.innerHTML = ' &nbsp;<span style="color:#6b7280">⬤</span> Auto-refresh: off';
+  }
+}
 </script>
 </body>
 </html>
