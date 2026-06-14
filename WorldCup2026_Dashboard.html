@@ -898,6 +898,7 @@
       <span id="refreshIcon">🔄</span> Refresh Live Data
     </button>
     <span id="lastRefreshTime" style="font-size:0.75rem;color:rgba(255,255,255,0.4)">Last updated: —</span>
+    <span id="pollingStatus"></span>
   </div>
 </div>
 
@@ -1280,6 +1281,9 @@
   <div class="disclaimer">
     Probabilities derived from a weighted model: Elo Rating (30%) + Recent Form (20%) + Squad Quality (15%) + Injury Impact (10%) + H2H History (10%) + Tournament Experience (5%) + Tactical Matchup (5%) + Market Odds (5%). Updated with May 2026 injury data.
   </div>
+
+  <!-- Live score ticker — rendered by renderLiveTicker() -->
+  <div id="liveTicker"></div>
 
   <div class="filter-bar">
     <button class="filter-btn active" onclick="filterMatches('all', this)">All Matches</button>
