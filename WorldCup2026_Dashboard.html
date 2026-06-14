@@ -6992,6 +6992,25 @@ function renderLiveTicker() {
   // ── State 3: nothing today — hide ──
   ticker.style.display = 'none';
 }
+
+function startUpdatedCounter() {
+  if (updatedCounterInterval) clearInterval(updatedCounterInterval);
+  secondsSinceUpdate = 0;
+  updatedCounterInterval = setInterval(() => {
+    secondsSinceUpdate++;
+    const el = document.getElementById('tickerUpdated');
+    if (!el) return;
+    el.textContent = secondsSinceUpdate < 10
+      ? '· updated just now'
+      : `· updated ${secondsSinceUpdate}s ago`;
+  }, 1000);
+}
+
+function resetUpdatedCounter() {
+  secondsSinceUpdate = 0;
+  const el = document.getElementById('tickerUpdated');
+  if (el) el.textContent = '· updated just now';
+}
 </script>
 </body>
 </html>
