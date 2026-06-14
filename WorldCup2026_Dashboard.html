@@ -806,6 +806,41 @@
   .pl-legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.72rem; color: var(--muted); padding: 10px 14px; }
   .pl-legend span { display: flex; align-items: center; gap: 6px; }
   .pl-legend .dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ── SCORE TABLE ── */
+  .group-standing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .standing-table { width: 100%; border-collapse: collapse; }
+  .standing-table th {
+    background: var(--card2);
+    padding: 8px 10px;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    text-align: center;
+  }
+  .standing-table th:first-child, .standing-table th:nth-child(3) { text-align: left; }
+  .standing-table td {
+    padding: 9px 10px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.84rem;
+    text-align: center;
+  }
+  .standing-table td:first-child { width: 24px; color: var(--muted); font-size: 0.78rem; }
+  .standing-table td:nth-child(3) { text-align: left; font-weight: 600; }
+  .standing-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .standing-table tr.qualify-auto td { border-left: 3px solid var(--green); }
+  .standing-table tr.qualify-maybe td { border-left: 3px solid var(--yellow); }
+  .standing-table tr.eliminated td { border-left: 3px solid var(--red); opacity: 0.7; }
+  .pts-cell { font-weight: 900 !important; color: var(--gold) !important; }
+  .qualify-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.72rem; margin-bottom: 14px; }
+  .qualify-legend .leg-item { display: flex; align-items: center; gap: 5px; }
+  .qualify-legend .leg-dot { width: 10px; height: 10px; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -854,6 +889,7 @@
 <div class="tabs">
   <div class="tab active" onclick="showTab('overview', this)">📊 Overview</div>
   <div id="tabGroups" class="tab" onclick="showTab('groups', this)">🏆 All 12 Groups</div>
+  <div id="tabScoreTable" class="tab" onclick="showTab('scoretable', this)">📋 Score Table</div>
   <div id="tabPredictions" class="tab" onclick="showTab('predictions', this)">🎯 Match Predictions</div>
   <div id="tabOdds" class="tab" onclick="showTab('odds', this)">💰 Betting Odds</div>
   <div id="tabInjuries" class="tab" onclick="showTab('injuries', this)">🤕 Injury Tracker</div>
@@ -1194,6 +1230,20 @@
     <span><span class="dot" style="background:var(--teal)"></span>Conference League</span>
     <span><span class="dot" style="background:var(--red)"></span>Relegation Zone</span>
   </div>
+</div>
+</div>
+
+<!-- ══ SCORE TABLE ══ -->
+<div id="scoretable" class="section">
+<div id="scoretableWC">
+  <h2>📋 Group Stage <span>Score Table</span></h2>
+  <p class="section-desc">Predicted final group standings based on our model's match predictions. Top 2 from each group + 8 best 3rd-place teams advance to the Round of 32. Standings computed from all 72 predicted group stage results.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:20px" id="scoreTableGrid"></div>
+</div>
+<div id="scoretablePL" style="display:none">
+  <h2>📋 Premier League <span>Final Standings 2025/26</span></h2>
+  <p class="section-desc">Season complete. Final table after GW38. Arsenal are confirmed champions.</p>
+  <div style="overflow-x:auto"><table class="pl-table" id="plStandingsTable2"></table></div>
 </div>
 </div>
 
@@ -1774,6 +1824,7 @@ function applyCompetitionUI(comp) {
   // Tab labels
   const tabMap = {
     tabGroups:      { wc:'🏆 All 12 Groups',       pl:'📋 PL Standings'         },
+    tabScoreTable:  { wc:'📋 Score Table',          pl:'📋 PL Table'             },
     tabPredictions: { wc:'🎯 Match Predictions',   pl:'🎯 Final Day Predictions' },
     tabOdds:        { wc:'💰 Betting Odds',         pl:'💰 PL Outright Odds'     },
     tabInjuries:    { wc:'🤕 Injury Tracker',       pl:'🤕 PL Injuries'          },
@@ -1785,7 +1836,7 @@ function applyCompetitionUI(comp) {
   });
 
   // Section visibility — all competition-aware pairs
-  ['overview','groups','predictions','odds','injuries','players'].forEach(p => {
+  ['overview','groups','scoretable','predictions','odds','injuries','players'].forEach(p => {
     const wcEl = document.getElementById(p + 'WC');
     const plEl = document.getElementById(p + 'PL');
     if (wcEl) wcEl.style.display = isPL ? 'none' : 'block';
@@ -2132,12 +2183,13 @@ function showTab(id, el) {
   if (el) el.classList.add('active');
   // Persist active tab in URL hash so Cmd+R restores it
   history.replaceState(null, '', '#' + id);
+  if (id === 'scoretable') renderScoreTable();
 }
 
 // ── RESTORE TAB FROM URL HASH ──
 function restoreTabFromHash() {
   const hash = window.location.hash.replace('#', '');
-  const validTabs = ['overview','groups','predictions','odds','injuries','method','players','betting','intelligence','sources'];
+  const validTabs = ['overview','groups','scoretable','predictions','odds','injuries','method','players','betting','intelligence','sources'];
   if (hash && validTabs.includes(hash)) {
     // Find the matching tab button and activate it
     const tabEl = document.querySelector(`.tab[onclick*="'${hash}'"]`);
@@ -2228,6 +2280,7 @@ const matches = [
   // MATCHDAY 1
   {
     date: 'Jun 11, 2026 · 3:00 PM ET', venue: 'Estadio Azteca, Mexico City', group: 'Group A',
+    matchday: 1,
     home: { flag:'🇲🇽', name:'Mexico' }, away: { flag:'🇿🇦', name:'South Africa' },
     homeProb: 62, drawProb: 22, awayProb: 16, scorePred: '2-0',
     confidence: 'high', tags: ['high'],
@@ -2243,6 +2296,7 @@ const matches = [
   },
   {
     date: 'Jun 11, 2026 · 10:00 PM ET', venue: 'Estadio Akron, Guadalajara', group: 'Group A',
+    matchday: 1,
     home: { flag:'🇰🇷', name:'S. Korea' }, away: { flag:'🇨🇿', name:'Czechia' },
     homeProb: 36, drawProb: 32, awayProb: 32, scorePred: '1-1',
     confidence: 'low', tags: ['upset'],
@@ -2258,6 +2312,7 @@ const matches = [
   },
   {
     date: 'Jun 12, 2026 · 3:00 PM ET', venue: 'BMO Field, Toronto', group: 'Group B',
+    matchday: 1,
     home: { flag:'🇨🇦', name:'Canada' }, away: { flag:'🇧🇦', name:'Bosnia' },
     homeProb: 42, drawProb: 28, awayProb: 30, scorePred: '1-1',
     confidence: 'low', tags: ['upset', 'value'],
@@ -2273,6 +2328,7 @@ const matches = [
   },
   {
     date: 'Jun 12, 2026 · 6:00 PM ET', venue: 'SoFi Stadium, Los Angeles', group: 'Group D',
+    matchday: 1,
     home: { flag:'🇺🇸', name:'USA' }, away: { flag:'🇵🇾', name:'Paraguay' },
     homeProb: 52, drawProb: 24, awayProb: 24, scorePred: '2-1',
     confidence: 'med', tags: ['high', 'value'],
@@ -2288,6 +2344,7 @@ const matches = [
   },
   {
     date: 'Jun 13, 2026 · 3:00 PM ET', venue: "Levi's Stadium, Santa Clara", group: 'Group B',
+    matchday: 1,
     home: { flag:'🇶🇦', name:'Qatar' }, away: { flag:'🇨🇭', name:'Switzerland' },
     homeProb: 18, drawProb: 28, awayProb: 54, scorePred: '0-2',
     confidence: 'high', tags: ['high'],
@@ -2303,6 +2360,7 @@ const matches = [
   },
   {
     date: 'Jun 13, 2026 · 6:00 PM ET', venue: 'MetLife Stadium, New Jersey', group: 'Group C',
+    matchday: 1,
     home: { flag:'🇧🇷', name:'Brazil' }, away: { flag:'🇲🇦', name:'Morocco' },
     homeProb: 68, drawProb: 18, awayProb: 14, scorePred: '2-1',
     confidence: 'high', tags: ['high', 'value'],
@@ -2318,6 +2376,7 @@ const matches = [
   },
   {
     date: 'Jun 13, 2026 · 9:00 PM ET', venue: 'Gillette Stadium, Massachusetts', group: 'Group C',
+    matchday: 1,
     home: { flag:'🇭🇹', name:'Haiti' }, away: { flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', name:'Scotland' },
     homeProb: 14, drawProb: 22, awayProb: 64, scorePred: '0-2',
     confidence: 'high', tags: ['high'],
@@ -2333,6 +2392,7 @@ const matches = [
   },
   {
     date: 'Jun 14, 2026 · Various', venue: 'Various Stadiums', group: 'Group E',
+    matchday: 1,
     home: { flag:'🇩🇪', name:'Germany' }, away: { flag:'🇨🇼', name:'Curaçao' },
     homeProb: 88, drawProb: 8, awayProb: 4, scorePred: '4-0',
     confidence: 'high', tags: ['high'],
@@ -2348,6 +2408,7 @@ const matches = [
   },
   {
     date: 'Jun 15, 2026 · Various', venue: 'Various Stadiums', group: 'Group H',
+    matchday: 1,
     home: { flag:'🇪🇸', name:'Spain' }, away: { flag:'🇨🇻', name:'Cape Verde' },
     homeProb: 91, drawProb: 6, awayProb: 3, scorePred: '3-0',
     confidence: 'high', tags: ['high'],
@@ -2363,6 +2424,7 @@ const matches = [
   },
   {
     date: 'Jun 15, 2026 · Various', venue: 'Various Stadiums', group: 'Group I',
+    matchday: 1,
     home: { flag:'🇫🇷', name:'France' }, away: { flag:'🇮🇶', name:'Iraq' },
     homeProb: 89, drawProb: 7, awayProb: 4, scorePred: '3-0',
     confidence: 'high', tags: ['high'],
@@ -2378,6 +2440,7 @@ const matches = [
   },
   {
     date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group J',
+    matchday: 1,
     home: { flag:'🇦🇷', name:'Argentina' }, away: { flag:'🇯🇴', name:'Jordan' },
     homeProb: 87, drawProb: 9, awayProb: 4, scorePred: '3-0',
     confidence: 'high', tags: ['high'],
@@ -2393,6 +2456,7 @@ const matches = [
   },
   {
     date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group L',
+    matchday: 1,
     home: { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England' }, away: { flag:'🇵🇦', name:'Panama' },
     homeProb: 90, drawProb: 7, awayProb: 3, scorePred: '4-0',
     confidence: 'high', tags: ['high'],
@@ -2405,6 +2469,1004 @@ const matches = [
       { name:'Tournament Exp.', val: 80, label:'EN consistent contender' },
     ],
     tip: '✅ Best Bet: England Win + Over 3.5 Goals @ ~2.10', tipClass: 'conf-high'
+  },
+
+  // ── GROUP D MD1 ──
+  {
+    date: 'Jun 12, 2026 · Various', venue: 'AT&T Stadium, Dallas', group: 'Group D',
+    matchday: 1,
+    home: { flag:'🇦🇺', name:'Australia' }, away: { flag:'🇹🇷', name:'Türkiye' },
+    homeProb: 35, drawProb: 30, awayProb: 35, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Even matchup' },
+      { name:'Recent Form', val: 50, label:'Both decent' },
+      { name:'Squad Quality', val: 52, label:'TR slight edge' },
+      { name:'Injury Impact', val: 75, label:'Both fit' },
+      { name:'H2H History', val: 55, label:'AU 1W-2D-1L' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.2 — Very even match, expect goals', tipClass: 'conf-low'
+  },
+
+  // ── GROUP E MD1 ──
+  {
+    date: 'Jun 14, 2026 · Various', venue: 'Arrowhead Stadium, Kansas City', group: 'Group E',
+    matchday: 1,
+    home: { flag:'🇨🇮', name:'Ivory Coast' }, away: { flag:'🇪🇨', name:'Ecuador' },
+    homeProb: 38, drawProb: 30, awayProb: 32, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Close matchup' },
+      { name:'Recent Form', val: 52, label:'Both decent form' },
+      { name:'Squad Quality', val: 50, label:'Even squads' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'Tactical Style', val: 50, label:'Physical battle' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.1 — Very open match', tipClass: 'conf-low'
+  },
+
+  // ── GROUP F MD1 ──
+  {
+    date: 'Jun 15, 2026 · Various', venue: 'Lincoln Financial Field, Philadelphia', group: 'Group F',
+    matchday: 1,
+    home: { flag:'🇳🇱', name:'Netherlands' }, away: { flag:'🇯🇵', name:'Japan' },
+    homeProb: 55, drawProb: 26, awayProb: 19, scorePred: '2-1',
+    confidence: 'med', tags: ['value'],
+    factors: [
+      { name:'Elo Rating', val: 68, label:'NL +160' },
+      { name:'Recent Form', val: 62, label:'NL strong' },
+      { name:'Squad Quality', val: 60, label:'NL superior (no Simons)' },
+      { name:'Injury Impact', val: 45, label:'Simons OUT — big loss' },
+      { name:'H2H History', val: 65, label:'NL 3W-1D-1L' },
+      { name:'Tactical Style', val: 55, label:'JP disciplined but NL quality wins' },
+    ],
+    tip: '⚖️ Best Bet: Netherlands Win @ ~1.90 — Watch for Japan upset potential', tipClass: 'conf-med'
+  },
+  {
+    date: 'Jun 15, 2026 · Various', venue: 'Bank of America Stadium, Charlotte', group: 'Group F',
+    matchday: 1,
+    home: { flag:'🇸🇪', name:'Sweden' }, away: { flag:'🇹🇳', name:'Tunisia' },
+    homeProb: 55, drawProb: 28, awayProb: 17, scorePred: '2-0',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 65, label:'SE ahead' },
+      { name:'Recent Form', val: 60, label:'SE W3-D1-L1' },
+      { name:'Squad Quality', val: 65, label:'SE stronger' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 60, label:'SE 2W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Sweden Win @ ~1.85 — Clear favorites', tipClass: 'conf-med'
+  },
+
+  // ── GROUP G MD1 ──
+  {
+    date: 'Jun 15, 2026 · Various', venue: 'NRG Stadium, Houston', group: 'Group G',
+    matchday: 1,
+    home: { flag:'🇧🇪', name:'Belgium' }, away: { flag:'🇪🇬', name:'Egypt' },
+    homeProb: 68, drawProb: 18, awayProb: 14, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 80, label:'BE +300' },
+      { name:'Recent Form', val: 72, label:'BE strong' },
+      { name:'Squad Quality', val: 78, label:'BE golden gen' },
+      { name:'Injury Impact', val: 75, label:'Both fit' },
+      { name:'H2H History', val: 70, label:'BE 2W-0D-0L' },
+      { name:'Tournament Exp.', val: 80, label:'BE much superior' },
+    ],
+    tip: '✅ Best Bet: Belgium Win @ ~1.55 — Clear favorites, great value', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 15, 2026 · Various', venue: 'Camping World Stadium, Orlando', group: 'Group G',
+    matchday: 1,
+    home: { flag:'🇮🇷', name:'Iran' }, away: { flag:'🇳🇿', name:'New Zealand' },
+    homeProb: 58, drawProb: 24, awayProb: 18, scorePred: '2-0',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 68, label:'IR +200' },
+      { name:'Recent Form', val: 62, label:'IR W3-D1-L1' },
+      { name:'Squad Quality', val: 65, label:'IR superior' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 60, label:'IR 1W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Iran Win @ ~1.75 — Comfortable favorites', tipClass: 'conf-med'
+  },
+
+  // ── GROUP H MD1 ──
+  {
+    date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group H',
+    matchday: 1,
+    home: { flag:'🇺🇾', name:'Uruguay' }, away: { flag:'🇸🇦', name:'Saudi Arabia' },
+    homeProb: 65, drawProb: 20, awayProb: 15, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 78, label:'UR +220' },
+      { name:'Recent Form', val: 70, label:'UR strong' },
+      { name:'Squad Quality', val: 75, label:'UR superior' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 72, label:'UR 2W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Uruguay Win @ ~1.55 — Strong favorites', tipClass: 'conf-high'
+  },
+
+  // ── GROUP I MD1 ──
+  {
+    date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group I',
+    matchday: 1,
+    home: { flag:'🇸🇳', name:'Senegal' }, away: { flag:'🇳🇴', name:'Norway' },
+    homeProb: 40, drawProb: 28, awayProb: 32, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Very close' },
+      { name:'Recent Form', val: 52, label:'NO Haaland factor' },
+      { name:'Squad Quality', val: 50, label:'Even squads' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 50, label:'No H2H history' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.2 — Haaland vs Mané showdown, uncertain outcome', tipClass: 'conf-low'
+  },
+
+  // ── GROUP J MD1 ──
+  {
+    date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group J',
+    matchday: 1,
+    home: { flag:'🇦🇹', name:'Austria' }, away: { flag:'🇩🇿', name:'Algeria' },
+    homeProb: 45, drawProb: 28, awayProb: 27, scorePred: '1-0',
+    confidence: 'low', tags: ['value'],
+    factors: [
+      { name:'Elo Rating', val: 55, label:'AT slight edge' },
+      { name:'Recent Form', val: 52, label:'AT W2-D2-L1' },
+      { name:'Squad Quality', val: 55, label:'AT marginally better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 50, label:'First meeting' },
+    ],
+    tip: '⚖️ Best Bet: Austria Win @ ~2.40 — Slight edge, value pick', tipClass: 'conf-low'
+  },
+
+  // ── GROUP K MD1 ──
+  {
+    date: 'Jun 16, 2026 · Various', venue: 'Various Stadiums', group: 'Group K',
+    matchday: 1,
+    home: { flag:'🇵🇹', name:'Portugal' }, away: { flag:'🇨🇩', name:'DR Congo' },
+    homeProb: 84, drawProb: 10, awayProb: 6, scorePred: '3-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 92, label:'PT dominant' },
+      { name:'Recent Form', val: 82, label:'PT W4-D1-L0' },
+      { name:'Squad Quality', val: 90, label:'PT vastly superior' },
+      { name:'Injury Impact', val: 80, label:'Ronaldo included' },
+      { name:'H2H History', val: 85, label:'PT never lost to DRC' },
+      { name:'Tournament Exp.', val: 90, label:'PT far ahead' },
+    ],
+    tip: '✅ Best Bet: Portugal Win + Over 2.5 Goals @ ~1.40', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 17, 2026 · Various', venue: 'Various Stadiums', group: 'Group K',
+    matchday: 1,
+    home: { flag:'🇨🇴', name:'Colombia' }, away: { flag:'🇺🇿', name:'Uzbekistan' },
+    homeProb: 65, drawProb: 22, awayProb: 13, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 78, label:'CO +220' },
+      { name:'Recent Form', val: 70, label:'CO W3-D1-L1' },
+      { name:'Squad Quality', val: 75, label:'CO superior' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 70, label:'No prior H2H' },
+    ],
+    tip: '✅ Best Bet: Colombia Win @ ~1.60 — Comfortable favorites', tipClass: 'conf-high'
+  },
+
+  // ── GROUP L MD1 ──
+  {
+    date: 'Jun 17, 2026 · Various', venue: 'Various Stadiums', group: 'Group L',
+    matchday: 1,
+    home: { flag:'🇭🇷', name:'Croatia' }, away: { flag:'🇬🇭', name:'Ghana' },
+    homeProb: 65, drawProb: 20, awayProb: 15, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 78, label:'CR +220' },
+      { name:'Recent Form', val: 68, label:'CR W3-D2-L0' },
+      { name:'Squad Quality', val: 75, label:'CR superior' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'Tournament Exp.', val: 82, label:'CR WC finalists 2018' },
+      { name:'H2H History', val: 70, label:'CR 1W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Croatia Win @ ~1.60 — Strong favorites', tipClass: 'conf-high'
+  },
+
+  // ══════════════════════════════════
+  // MATCHDAY 2
+  // ══════════════════════════════════
+
+  // ── GROUP A MD2 ──
+  {
+    date: 'Jun 17, 2026 · Various', venue: 'Estadio Akron, Guadalajara', group: 'Group A',
+    matchday: 2,
+    home: { flag:'🇲🇽', name:'Mexico' }, away: { flag:'🇰🇷', name:'S. Korea' },
+    homeProb: 45, drawProb: 30, awayProb: 25, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 55, label:'Close match' },
+      { name:'Recent Form', val: 50, label:'Both decent' },
+      { name:'Home Advantage', val: 60, label:'Neutral venue' },
+      { name:'Squad Quality', val: 55, label:'Slight MX edge' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 60, label:'MX 3W-2D-1L' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.1 — Even matchup', tipClass: 'conf-med'
+  },
+  {
+    date: 'Jun 17, 2026 · Various', venue: 'BMO Field, Toronto', group: 'Group A',
+    matchday: 2,
+    home: { flag:'🇿🇦', name:'South Africa' }, away: { flag:'🇨🇿', name:'Czechia' },
+    homeProb: 22, drawProb: 28, awayProb: 50, scorePred: '0-1',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 28, label:'CZ +280' },
+      { name:'Recent Form', val: 30, label:'SA struggling' },
+      { name:'Squad Quality', val: 25, label:'CZ much better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 40, label:'CZ 2W-0D-0L' },
+    ],
+    tip: '✅ Best Bet: Czechia Win @ ~1.85 — Clear quality gap', tipClass: 'conf-med'
+  },
+
+  // ── GROUP B MD2 ──
+  {
+    date: 'Jun 18, 2026 · Various', venue: 'BMO Field, Toronto', group: 'Group B',
+    matchday: 2,
+    home: { flag:'🇨🇦', name:'Canada' }, away: { flag:'🇶🇦', name:'Qatar' },
+    homeProb: 78, drawProb: 14, awayProb: 8, scorePred: '3-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 85, label:'CA +320' },
+      { name:'Recent Form', val: 78, label:'CA strong' },
+      { name:'Home Advantage', val: 82, label:'Toronto crowd' },
+      { name:'Squad Quality', val: 75, label:'CA vastly superior' },
+      { name:'Injury Impact', val: 65, label:'Davies status key' },
+      { name:'H2H History', val: 80, label:'First meeting — CA expected to dominate' },
+    ],
+    tip: '✅ Best Bet: Canada Win + Over 2.5 Goals @ ~1.45', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 18, 2026 · Various', venue: "Levi's Stadium, Santa Clara", group: 'Group B',
+    matchday: 2,
+    home: { flag:'🇧🇦', name:'Bosnia' }, away: { flag:'🇨🇭', name:'Switzerland' },
+    homeProb: 22, drawProb: 28, awayProb: 50, scorePred: '0-2',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 28, label:'CH +260' },
+      { name:'Recent Form', val: 32, label:'CH stronger' },
+      { name:'Squad Quality', val: 25, label:'CH much better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 42, label:'CH 1W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Switzerland Win @ ~1.80 — Clear favorites', tipClass: 'conf-med'
+  },
+
+  // ── GROUP C MD2 ──
+  {
+    date: 'Jun 18, 2026 · Various', venue: 'MetLife Stadium, New Jersey', group: 'Group C',
+    matchday: 2,
+    home: { flag:'🇧🇷', name:'Brazil' }, away: { flag:'🇭🇹', name:'Haiti' },
+    homeProb: 95, drawProb: 4, awayProb: 1, scorePred: '4-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 98, label:'BR dominant' },
+      { name:'Recent Form', val: 88, label:'BR W4-D1-L0' },
+      { name:'Squad Quality', val: 96, label:'Massive gap' },
+      { name:'Injury Impact', val: 65, label:'Rodrygo OUT — still strong' },
+      { name:'H2H History', val: 95, label:'BR never lost to HT' },
+      { name:'Tournament Exp.', val: 98, label:'BR 5x World Champions' },
+    ],
+    tip: '✅ Best Bet: Brazil -3 handicap @ ~1.80 — Expect big win', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 18, 2026 · Various', venue: 'Gillette Stadium, Massachusetts', group: 'Group C',
+    matchday: 2,
+    home: { flag:'🇲🇦', name:'Morocco' }, away: { flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', name:'Scotland' },
+    homeProb: 42, drawProb: 30, awayProb: 28, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 52, label:'Close matchup' },
+      { name:'Recent Form', val: 55, label:'MA solid' },
+      { name:'Squad Quality', val: 55, label:'MA slight edge' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'Tactical Style', val: 50, label:'MA defensive vs SC attack' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.0 — Very even contest', tipClass: 'conf-low'
+  },
+
+  // ── GROUP D MD2 ──
+  {
+    date: 'Jun 18, 2026 · Various', venue: 'SoFi Stadium, Los Angeles', group: 'Group D',
+    matchday: 2,
+    home: { flag:'🇺🇸', name:'USA' }, away: { flag:'🇦🇺', name:'Australia' },
+    homeProb: 62, drawProb: 22, awayProb: 16, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 72, label:'USA +210' },
+      { name:'Recent Form', val: 65, label:'USA W3-D0-L2' },
+      { name:'Home Advantage', val: 82, label:'SoFi boost' },
+      { name:'Squad Quality', val: 70, label:'USA stronger' },
+      { name:'Injury Impact', val: 82, label:'Both fit' },
+      { name:'H2H History', val: 65, label:'USA 3W-1D-1L' },
+    ],
+    tip: '✅ Best Bet: USA Win @ ~1.65 — Home advantage decisive', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 18, 2026 · Various', venue: 'AT&T Stadium, Dallas', group: 'Group D',
+    matchday: 2,
+    home: { flag:'🇵🇾', name:'Paraguay' }, away: { flag:'🇹🇷', name:'Türkiye' },
+    homeProb: 35, drawProb: 32, awayProb: 33, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Very close' },
+      { name:'Recent Form', val: 50, label:'Both average' },
+      { name:'Squad Quality', val: 52, label:'TR slight edge' },
+      { name:'Injury Impact', val: 75, label:'Both fit' },
+      { name:'H2H History', val: 50, label:'No H2H history' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.1 — Neither team has much edge', tipClass: 'conf-low'
+  },
+
+  // ── GROUP E MD2 ──
+  {
+    date: 'Jun 19, 2026 · Various', venue: 'Allegiant Stadium, Las Vegas', group: 'Group E',
+    matchday: 2,
+    home: { flag:'🇩🇪', name:'Germany' }, away: { flag:'🇨🇮', name:'Ivory Coast' },
+    homeProb: 80, drawProb: 12, awayProb: 8, scorePred: '3-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 90, label:'GE dominant' },
+      { name:'Recent Form', val: 80, label:'GE strong' },
+      { name:'Squad Quality', val: 88, label:'GE vastly superior' },
+      { name:'Injury Impact', val: 68, label:'Gnabry OUT — still strong' },
+      { name:'H2H History', val: 85, label:'GE 3W-0D-0L' },
+      { name:'Tournament Exp.', val: 92, label:'GE 4x World Champs' },
+    ],
+    tip: '✅ Best Bet: Germany Win + Over 2.5 Goals @ ~1.35', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 19, 2026 · Various', venue: 'Arrowhead Stadium, Kansas City', group: 'Group E',
+    matchday: 2,
+    home: { flag:'🇨🇼', name:'Curaçao' }, away: { flag:'🇪🇨', name:'Ecuador' },
+    homeProb: 10, drawProb: 20, awayProb: 70, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 12, label:'EC +380' },
+      { name:'Recent Form', val: 15, label:'CW outclassed' },
+      { name:'Squad Quality', val: 10, label:'EC vastly superior' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 20, label:'No H2H — massive gap' },
+    ],
+    tip: '✅ Best Bet: Ecuador Win @ ~1.30 — Massive quality difference', tipClass: 'conf-high'
+  },
+
+  // ── GROUP F MD2 ──
+  {
+    date: 'Jun 20, 2026 · Various', venue: 'Lincoln Financial Field, Philadelphia', group: 'Group F',
+    matchday: 2,
+    home: { flag:'🇳🇱', name:'Netherlands' }, away: { flag:'🇸🇪', name:'Sweden' },
+    homeProb: 58, drawProb: 24, awayProb: 18, scorePred: '2-1',
+    confidence: 'med', tags: ['value'],
+    factors: [
+      { name:'Elo Rating', val: 68, label:'NL +180' },
+      { name:'Recent Form', val: 62, label:'NL strong' },
+      { name:'Squad Quality', val: 65, label:'NL superior (Simons OUT)' },
+      { name:'Injury Impact', val: 45, label:'Simons OUT' },
+      { name:'H2H History', val: 62, label:'NL 3W-2D-2L' },
+      { name:'Tactical Style', val: 60, label:'NL style suits this matchup' },
+    ],
+    tip: '⚖️ Best Bet: Netherlands Win @ ~1.80 — Favored but Sweden always competitive', tipClass: 'conf-med'
+  },
+  {
+    date: 'Jun 20, 2026 · Various', venue: 'Bank of America Stadium, Charlotte', group: 'Group F',
+    matchday: 2,
+    home: { flag:'🇯🇵', name:'Japan' }, away: { flag:'🇹🇳', name:'Tunisia' },
+    homeProb: 55, drawProb: 28, awayProb: 17, scorePred: '2-0',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 65, label:'JP +190' },
+      { name:'Recent Form', val: 62, label:'JP consistent' },
+      { name:'Squad Quality', val: 65, label:'JP superior' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 65, label:'JP 1W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Japan Win @ ~1.85 — Consistent upsetters', tipClass: 'conf-med'
+  },
+
+  // ── GROUP G MD2 ──
+  {
+    date: 'Jun 20, 2026 · Various', venue: 'NRG Stadium, Houston', group: 'Group G',
+    matchday: 2,
+    home: { flag:'🇧🇪', name:'Belgium' }, away: { flag:'🇮🇷', name:'Iran' },
+    homeProb: 72, drawProb: 18, awayProb: 10, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 82, label:'BE dominant' },
+      { name:'Recent Form', val: 75, label:'BE W3-D1-L1' },
+      { name:'Squad Quality', val: 80, label:'BE golden gen' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 75, label:'BE 2W-0D-0L' },
+      { name:'Tournament Exp.', val: 82, label:'BE far superior' },
+    ],
+    tip: '✅ Best Bet: Belgium Win @ ~1.50 — Dominant favorites', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 20, 2026 · Various', venue: 'Camping World Stadium, Orlando', group: 'Group G',
+    matchday: 2,
+    home: { flag:'🇪🇬', name:'Egypt' }, away: { flag:'🇳🇿', name:'New Zealand' },
+    homeProb: 62, drawProb: 22, awayProb: 16, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 72, label:'EG +210' },
+      { name:'Recent Form', val: 65, label:'EG decent' },
+      { name:'Squad Quality', val: 68, label:'EG stronger' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 65, label:'EG dominant' },
+    ],
+    tip: '✅ Best Bet: Egypt Win @ ~1.65 — Strong favorites vs minnows', tipClass: 'conf-high'
+  },
+
+  // ── GROUP H MD2 ──
+  {
+    date: 'Jun 20, 2026 · Various', venue: 'Various Stadiums', group: 'Group H',
+    matchday: 2,
+    home: { flag:'🇪🇸', name:'Spain' }, away: { flag:'🇺🇾', name:'Uruguay' },
+    homeProb: 68, drawProb: 18, awayProb: 14, scorePred: '2-1',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 80, label:'SP world #1' },
+      { name:'Recent Form', val: 82, label:'SP dominant' },
+      { name:'Squad Quality', val: 88, label:'SP elite squad' },
+      { name:'Injury Impact', val: 75, label:'Yamal monitored' },
+      { name:'H2H History', val: 65, label:'SP 3W-2D-2L — UR tough opponent' },
+      { name:'Tactical Style', val: 70, label:'SP tiki-taka should dominate' },
+    ],
+    tip: '✅ Best Bet: Spain Win @ ~1.55 — World class vs strong South Americans', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 20, 2026 · Various', venue: 'Various Stadiums', group: 'Group H',
+    matchday: 2,
+    home: { flag:'🇸🇦', name:'Saudi Arabia' }, away: { flag:'🇨🇻', name:'Cape Verde' },
+    homeProb: 58, drawProb: 24, awayProb: 18, scorePred: '2-0',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 65, label:'SA ahead' },
+      { name:'Recent Form', val: 62, label:'SA decent form' },
+      { name:'Squad Quality', val: 62, label:'SA stronger squad' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 60, label:'No prior H2H' },
+    ],
+    tip: '✅ Best Bet: Saudi Arabia Win @ ~1.75 — Should handle Cape Verde', tipClass: 'conf-med'
+  },
+
+  // ── GROUP I MD2 ──
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group I',
+    matchday: 2,
+    home: { flag:'🇫🇷', name:'France' }, away: { flag:'🇸🇳', name:'Senegal' },
+    homeProb: 72, drawProb: 18, awayProb: 10, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 84, label:'FR world #2' },
+      { name:'Recent Form', val: 78, label:'FR strong' },
+      { name:'Squad Quality', val: 86, label:'FR elite' },
+      { name:'Injury Impact', val: 72, label:'Mbappe monitored' },
+      { name:'H2H History', val: 72, label:'FR 3W-0D-0L' },
+      { name:'Tournament Exp.', val: 90, label:'FR far superior' },
+    ],
+    tip: '✅ Best Bet: France Win @ ~1.48 — Too strong for Senegal', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group I',
+    matchday: 2,
+    home: { flag:'🇳🇴', name:'Norway' }, away: { flag:'🇮🇶', name:'Iraq' },
+    homeProb: 75, drawProb: 16, awayProb: 9, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 84, label:'NO +240' },
+      { name:'Recent Form', val: 78, label:'NO Haaland on fire' },
+      { name:'Squad Quality', val: 80, label:'NO much better' },
+      { name:'Injury Impact', val: 85, label:'Both fit' },
+      { name:'H2H History', val: 78, label:'NO dominant' },
+    ],
+    tip: '✅ Best Bet: Norway Win + Haaland to score @ ~1.35 combined', tipClass: 'conf-high'
+  },
+
+  // ── GROUP J MD2 ──
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group J',
+    matchday: 2,
+    home: { flag:'🇦🇷', name:'Argentina' }, away: { flag:'🇦🇹', name:'Austria' },
+    homeProb: 78, drawProb: 14, awayProb: 8, scorePred: '3-1',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 88, label:'AR dominant' },
+      { name:'Recent Form', val: 85, label:'AR W5-D0-L0' },
+      { name:'Squad Quality', val: 90, label:'AR elite — Messi leads' },
+      { name:'Injury Impact', val: 88, label:'AR full squad' },
+      { name:'H2H History', val: 80, label:'AR strong vs European sides' },
+      { name:'Tournament Exp.', val: 92, label:'AR reigning champions' },
+    ],
+    tip: '✅ Best Bet: Argentina Win @ ~1.35 — But Austria can score', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group J',
+    matchday: 2,
+    home: { flag:'🇩🇿', name:'Algeria' }, away: { flag:'🇯🇴', name:'Jordan' },
+    homeProb: 60, drawProb: 22, awayProb: 18, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 70, label:'DZ ahead' },
+      { name:'Recent Form', val: 65, label:'DZ W3-D1-L1' },
+      { name:'Squad Quality', val: 68, label:'DZ stronger' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 65, label:'DZ 2W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Algeria Win @ ~1.70 — Should comfortably beat Jordan', tipClass: 'conf-high'
+  },
+
+  // ── GROUP K MD2 ──
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group K',
+    matchday: 2,
+    home: { flag:'🇵🇹', name:'Portugal' }, away: { flag:'🇨🇴', name:'Colombia' },
+    homeProb: 58, drawProb: 24, awayProb: 18, scorePred: '2-1',
+    confidence: 'med', tags: ['value'],
+    factors: [
+      { name:'Elo Rating', val: 68, label:'PT +180' },
+      { name:'Recent Form', val: 65, label:'PT strong' },
+      { name:'Squad Quality', val: 72, label:'PT stronger' },
+      { name:'Injury Impact', val: 78, label:'Ronaldo included' },
+      { name:'H2H History', val: 60, label:'PT 2W-2D-1L — CO competitive' },
+      { name:'Tactical Style', val: 62, label:'PT possession vs CO counters' },
+    ],
+    tip: '⚖️ Best Bet: Portugal Win @ ~1.80 — Good game expected, PT should edge it', tipClass: 'conf-med'
+  },
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group K',
+    matchday: 2,
+    home: { flag:'🇺🇿', name:'Uzbekistan' }, away: { flag:'🇨🇩', name:'DR Congo' },
+    homeProb: 45, drawProb: 28, awayProb: 27, scorePred: '1-0',
+    confidence: 'low', tags: ['value'],
+    factors: [
+      { name:'Elo Rating', val: 52, label:'UZ slight edge' },
+      { name:'Recent Form', val: 55, label:'UZ decent' },
+      { name:'Squad Quality', val: 52, label:'Close matchup' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 50, label:'No prior H2H' },
+    ],
+    tip: '⚖️ Best Bet: Uzbekistan Win @ ~2.40 — Slight edge in this tie', tipClass: 'conf-low'
+  },
+
+  // ── GROUP L MD2 ──
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group L',
+    matchday: 2,
+    home: { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England' }, away: { flag:'🇭🇷', name:'Croatia' },
+    homeProb: 65, drawProb: 22, awayProb: 13, scorePred: '2-1',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 78, label:'EN +210' },
+      { name:'Recent Form', val: 82, label:'EN W5-D0-L0' },
+      { name:'Squad Quality', val: 88, label:'EN deep squad' },
+      { name:'Injury Impact', val: 90, label:'EN full squad' },
+      { name:'H2H History', val: 55, label:'EN 2W-2D-2L — CR tough' },
+      { name:'Tournament Exp.', val: 80, label:'CR WC finalists 2018' },
+    ],
+    tip: '✅ Best Bet: England Win @ ~1.60 — Quality and fitness edge', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Various Stadiums', group: 'Group L',
+    matchday: 2,
+    home: { flag:'🇬🇭', name:'Ghana' }, away: { flag:'🇵🇦', name:'Panama' },
+    homeProb: 48, drawProb: 28, awayProb: 24, scorePred: '1-0',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 55, label:'GH slight edge' },
+      { name:'Recent Form', val: 52, label:'Both average' },
+      { name:'Squad Quality', val: 55, label:'GH marginally better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 58, label:'GH 1W-1D-0L' },
+    ],
+    tip: '⚖️ Best Bet: Ghana Win @ ~2.20 — Slight edge, expect tight game', tipClass: 'conf-low'
+  },
+
+  // ══════════════════════════════════
+  // MATCHDAY 3
+  // ══════════════════════════════════
+
+  // ── GROUP A MD3 ──
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Estadio Azteca, Mexico City', group: 'Group A',
+    matchday: 3,
+    home: { flag:'🇿🇦', name:'South Africa' }, away: { flag:'🇰🇷', name:'S. Korea' },
+    homeProb: 15, drawProb: 25, awayProb: 60, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 18, label:'SK +320' },
+      { name:'Recent Form', val: 22, label:'SA poor' },
+      { name:'Squad Quality', val: 20, label:'SK much better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 25, label:'SK 2W-0D-0L' },
+    ],
+    tip: '✅ Best Bet: S. Korea Win @ ~1.55 — Major quality gap', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 21, 2026 · Various', venue: 'Estadio Akron, Guadalajara', group: 'Group A',
+    matchday: 3,
+    home: { flag:'🇲🇽', name:'Mexico' }, away: { flag:'🇨🇿', name:'Czechia' },
+    homeProb: 75, drawProb: 16, awayProb: 9, scorePred: '2-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 80, label:'MX +230' },
+      { name:'Recent Form', val: 75, label:'MX strong' },
+      { name:'Home Advantage', val: 90, label:'Azteca crowd' },
+      { name:'Squad Quality', val: 72, label:'MX advantage' },
+      { name:'Injury Impact', val: 82, label:'Both fit' },
+      { name:'H2H History', val: 72, label:'MX 3W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Mexico Win @ ~1.40 — Azteca fortress', tipClass: 'conf-high'
+  },
+
+  // ── GROUP B MD3 ──
+  {
+    date: 'Jun 22, 2026 · Various', venue: 'BMO Field, Toronto', group: 'Group B',
+    matchday: 3,
+    home: { flag:'🇧🇦', name:'Bosnia' }, away: { flag:'🇶🇦', name:'Qatar' },
+    homeProb: 48, drawProb: 28, awayProb: 24, scorePred: '1-0',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 55, label:'BA slight edge' },
+      { name:'Recent Form', val: 52, label:'Both fighting' },
+      { name:'Squad Quality', val: 58, label:'BA better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 55, label:'First meeting' },
+    ],
+    tip: '⚖️ Best Bet: Bosnia Win @ ~2.20 — Both need points, tight game', tipClass: 'conf-low'
+  },
+  {
+    date: 'Jun 22, 2026 · Various', venue: "Levi's Stadium, Santa Clara", group: 'Group B',
+    matchday: 3,
+    home: { flag:'🇨🇭', name:'Switzerland' }, away: { flag:'🇨🇦', name:'Canada' },
+    homeProb: 60, drawProb: 22, awayProb: 18, scorePred: '2-1',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 70, label:'CH ahead' },
+      { name:'Recent Form', val: 68, label:'CH W2-D1-L0 in grp' },
+      { name:'Squad Quality', val: 68, label:'CH stronger' },
+      { name:'Injury Impact', val: 65, label:'Davies status key for CA' },
+      { name:'H2H History', val: 62, label:'CH 2W-1D-0L' },
+      { name:'Tactical Style', val: 65, label:'CH disciplined vs CA attack' },
+    ],
+    tip: '✅ Best Bet: Switzerland Win @ ~1.75 — Group leaders should hold firm', tipClass: 'conf-high'
+  },
+
+  // ── GROUP C MD3 ──
+  {
+    date: 'Jun 22, 2026 · Various', venue: 'MetLife Stadium, New Jersey', group: 'Group C',
+    matchday: 3,
+    home: { flag:'🇲🇦', name:'Morocco' }, away: { flag:'🇭🇹', name:'Haiti' },
+    homeProb: 78, drawProb: 14, awayProb: 8, scorePred: '3-0',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 88, label:'MA dominant' },
+      { name:'Recent Form', val: 80, label:'MA strong' },
+      { name:'Squad Quality', val: 85, label:'MA vastly superior' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 82, label:'MA 2W-0D-0L' },
+    ],
+    tip: '✅ Best Bet: Morocco Win + Over 2.5 Goals @ ~1.40', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 22, 2026 · Various', venue: 'Gillette Stadium, Massachusetts', group: 'Group C',
+    matchday: 3,
+    home: { flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', name:'Scotland' }, away: { flag:'🇧🇷', name:'Brazil' },
+    homeProb: 8, drawProb: 12, awayProb: 80, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 8, label:'BR +500' },
+      { name:'Recent Form', val: 10, label:'SC fighting to qualify' },
+      { name:'Squad Quality', val: 8, label:'BR elite' },
+      { name:'Injury Impact', val: 65, label:'BR Rodrygo OUT — still strong' },
+      { name:'H2H History', val: 10, label:'BR 3W-0D-0L vs SC' },
+      { name:'Tournament Exp.', val: 5, label:'BR 5x champions' },
+    ],
+    tip: '✅ Best Bet: Brazil Win @ ~1.20 — Scotland have no path here', tipClass: 'conf-high'
+  },
+
+  // ── GROUP D MD3 ──
+  {
+    date: 'Jun 22, 2026 · Various', venue: 'SoFi Stadium, Los Angeles', group: 'Group D',
+    matchday: 3,
+    home: { flag:'🇵🇾', name:'Paraguay' }, away: { flag:'🇦🇺', name:'Australia' },
+    homeProb: 38, drawProb: 30, awayProb: 32, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Very close' },
+      { name:'Recent Form', val: 50, label:'Both mid-table' },
+      { name:'Squad Quality', val: 50, label:'Even squads' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 52, label:'No H2H history' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.0 — Very even contest, both need points', tipClass: 'conf-low'
+  },
+  {
+    date: 'Jun 22, 2026 · Various', venue: 'AT&T Stadium, Dallas', group: 'Group D',
+    matchday: 3,
+    home: { flag:'🇹🇷', name:'Türkiye' }, away: { flag:'🇺🇸', name:'USA' },
+    homeProb: 25, drawProb: 28, awayProb: 47, scorePred: '0-1',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 30, label:'USA +180' },
+      { name:'Recent Form', val: 35, label:'USA stronger' },
+      { name:'Squad Quality', val: 32, label:'USA deeper' },
+      { name:'Injury Impact', val: 82, label:'Both fit' },
+      { name:'H2H History', val: 40, label:'USA 2W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: USA Win @ ~2.10 — TR dangerous but USA quality wins', tipClass: 'conf-med'
+  },
+
+  // ── GROUP E MD3 ──
+  {
+    date: 'Jun 23, 2026 · Various', venue: 'Various Stadiums', group: 'Group E',
+    matchday: 3,
+    home: { flag:'🇨🇼', name:'Curaçao' }, away: { flag:'🇨🇮', name:'Ivory Coast' },
+    homeProb: 8, drawProb: 18, awayProb: 74, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 8, label:'IC +400' },
+      { name:'Recent Form', val: 10, label:'CW struggling' },
+      { name:'Squad Quality', val: 8, label:'IC vastly superior' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 12, label:'Massive gap expected' },
+    ],
+    tip: '✅ Best Bet: Ivory Coast Win @ ~1.30 — No path for Curaçao', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 23, 2026 · Various', venue: 'Various Stadiums', group: 'Group E',
+    matchday: 3,
+    home: { flag:'🇪🇨', name:'Ecuador' }, away: { flag:'🇩🇪', name:'Germany' },
+    homeProb: 5, drawProb: 12, awayProb: 83, scorePred: '0-3',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 5, label:'GE +550' },
+      { name:'Recent Form', val: 8, label:'GE dominant' },
+      { name:'Squad Quality', val: 5, label:'GE elite' },
+      { name:'Injury Impact', val: 70, label:'GE Gnabry OUT — still strong' },
+      { name:'H2H History', val: 8, label:'GE 2W-0D-0L' },
+      { name:'Tournament Exp.', val: 5, label:'GE 4x World Champs' },
+    ],
+    tip: '✅ Best Bet: Germany Win + Over 2.5 Goals @ ~1.30', tipClass: 'conf-high'
+  },
+
+  // ── GROUP F MD3 ──
+  {
+    date: 'Jun 24, 2026 · Various', venue: 'Various Stadiums', group: 'Group F',
+    matchday: 3,
+    home: { flag:'🇹🇳', name:'Tunisia' }, away: { flag:'🇳🇱', name:'Netherlands' },
+    homeProb: 10, drawProb: 20, awayProb: 70, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 12, label:'NL +350' },
+      { name:'Recent Form', val: 15, label:'TN outclassed' },
+      { name:'Squad Quality', val: 10, label:'NL vastly superior' },
+      { name:'Injury Impact', val: 48, label:'NL Simons still OUT' },
+      { name:'H2H History', val: 18, label:'NL dominant' },
+    ],
+    tip: '✅ Best Bet: Netherlands Win @ ~1.35 — Should cruise', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 24, 2026 · Various', venue: 'Various Stadiums', group: 'Group F',
+    matchday: 3,
+    home: { flag:'🇯🇵', name:'Japan' }, away: { flag:'🇸🇪', name:'Sweden' },
+    homeProb: 42, drawProb: 30, awayProb: 28, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 52, label:'Close matchup' },
+      { name:'Recent Form', val: 55, label:'JP W2-D0-L0 in grp' },
+      { name:'Squad Quality', val: 52, label:'JP slight edge in form' },
+      { name:'Injury Impact', val: 80, label:'Both fit' },
+      { name:'H2H History', val: 50, label:'JP 1W-1D-1L' },
+    ],
+    tip: '⚖️ Best Bet: Japan Win or Draw (1X) @ ~1.65 — JP on form, SE desperate', tipClass: 'conf-low'
+  },
+
+  // ── GROUP G MD3 ──
+  {
+    date: 'Jun 24, 2026 · Various', venue: 'Various Stadiums', group: 'Group G',
+    matchday: 3,
+    home: { flag:'🇳🇿', name:'New Zealand' }, away: { flag:'🇧🇪', name:'Belgium' },
+    homeProb: 5, drawProb: 12, awayProb: 83, scorePred: '0-3',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 5, label:'BE +600' },
+      { name:'Recent Form', val: 8, label:'NZ outclassed' },
+      { name:'Squad Quality', val: 5, label:'BE dominant' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 8, label:'Massive gap' },
+    ],
+    tip: '✅ Best Bet: Belgium Win -2 handicap @ ~1.65 — Should cruise', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 24, 2026 · Various', venue: 'Various Stadiums', group: 'Group G',
+    matchday: 3,
+    home: { flag:'🇪🇬', name:'Egypt' }, away: { flag:'🇮🇷', name:'Iran' },
+    homeProb: 38, drawProb: 32, awayProb: 30, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Very close' },
+      { name:'Recent Form', val: 52, label:'EG slight edge' },
+      { name:'Squad Quality', val: 50, label:'Even matchup' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 52, label:'EG 1W-2D-1L' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.0 — Very tight fixture, both fighting for best 3rd', tipClass: 'conf-low'
+  },
+
+  // ── GROUP H MD3 ──
+  {
+    date: 'Jun 24, 2026 · Various', venue: 'Various Stadiums', group: 'Group H',
+    matchday: 3,
+    home: { flag:'🇸🇦', name:'Saudi Arabia' }, away: { flag:'🇪🇸', name:'Spain' },
+    homeProb: 8, drawProb: 12, awayProb: 80, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 8, label:'SP world #1' },
+      { name:'Recent Form', val: 10, label:'SA outclassed' },
+      { name:'Squad Quality', val: 8, label:'SP elite' },
+      { name:'Injury Impact', val: 78, label:'SP should be fit' },
+      { name:'H2H History', val: 12, label:'SP dominant' },
+      { name:'Tournament Exp.', val: 8, label:'SP far superior' },
+    ],
+    tip: '✅ Best Bet: Spain Win @ ~1.25 — Huge quality gap, Saudi Arabia won 2022 but SP much better now', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 24, 2026 · Various', venue: 'Various Stadiums', group: 'Group H',
+    matchday: 3,
+    home: { flag:'🇨🇻', name:'Cape Verde' }, away: { flag:'🇺🇾', name:'Uruguay' },
+    homeProb: 14, drawProb: 24, awayProb: 62, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 18, label:'UR +280' },
+      { name:'Recent Form', val: 20, label:'CV outclassed' },
+      { name:'Squad Quality', val: 15, label:'UR much better' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 20, label:'No H2H — large gap' },
+    ],
+    tip: '✅ Best Bet: Uruguay Win @ ~1.45 — Should comfortably beat Cape Verde', tipClass: 'conf-high'
+  },
+
+  // ── GROUP I MD3 ──
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group I',
+    matchday: 3,
+    home: { flag:'🇳🇴', name:'Norway' }, away: { flag:'🇫🇷', name:'France' },
+    homeProb: 18, drawProb: 22, awayProb: 60, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 20, label:'FR +300' },
+      { name:'Recent Form', val: 25, label:'FR dominant' },
+      { name:'Squad Quality', val: 18, label:'FR elite' },
+      { name:'Injury Impact', val: 75, label:'FR Mbappe monitored' },
+      { name:'H2H History', val: 22, label:'FR 3W-1D-0L' },
+      { name:'Tournament Exp.', val: 18, label:'FR 2x World Champs' },
+    ],
+    tip: '✅ Best Bet: France Win @ ~1.55 — Quality should prevail despite Haaland threat', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group I',
+    matchday: 3,
+    home: { flag:'🇮🇶', name:'Iraq' }, away: { flag:'🇸🇳', name:'Senegal' },
+    homeProb: 30, drawProb: 30, awayProb: 40, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 38, label:'SE slight edge' },
+      { name:'Recent Form', val: 42, label:'SE better' },
+      { name:'Squad Quality', val: 40, label:'SE stronger' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 45, label:'No clear H2H history' },
+    ],
+    tip: '⚖️ Best Bet: Senegal Win or Draw (2X) @ ~1.70 — SE have enough quality', tipClass: 'conf-low'
+  },
+
+  // ── GROUP J MD3 ──
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group J',
+    matchday: 3,
+    home: { flag:'🇩🇿', name:'Algeria' }, away: { flag:'🇦🇷', name:'Argentina' },
+    homeProb: 5, drawProb: 12, awayProb: 83, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 5, label:'AR reigning champs' },
+      { name:'Recent Form', val: 8, label:'AR W5-D0-L0' },
+      { name:'Squad Quality', val: 6, label:'AR elite — Messi' },
+      { name:'Injury Impact', val: 88, label:'AR full squad' },
+      { name:'H2H History', val: 8, label:'AR dominant' },
+      { name:'Tournament Exp.', val: 5, label:'AR defending champions' },
+    ],
+    tip: '✅ Best Bet: Argentina Win @ ~1.20 — Algeria have no chance against this squad', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group J',
+    matchday: 3,
+    home: { flag:'🇯🇴', name:'Jordan' }, away: { flag:'🇦🇹', name:'Austria' },
+    homeProb: 35, drawProb: 30, awayProb: 35, scorePred: '1-1',
+    confidence: 'low', tags: ['upset'],
+    factors: [
+      { name:'Elo Rating', val: 48, label:'Very close' },
+      { name:'Recent Form', val: 50, label:'Both competitive' },
+      { name:'Squad Quality', val: 52, label:'AT slight edge' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 50, label:'First meeting' },
+    ],
+    tip: '⚖️ Best Bet: Draw @ ~3.0 — Both fighting for 3rd place, very even', tipClass: 'conf-low'
+  },
+
+  // ── GROUP K MD3 ──
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group K',
+    matchday: 3,
+    home: { flag:'🇺🇿', name:'Uzbekistan' }, away: { flag:'🇵🇹', name:'Portugal' },
+    homeProb: 8, drawProb: 18, awayProb: 74, scorePred: '0-2',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 8, label:'PT dominant' },
+      { name:'Recent Form', val: 10, label:'PT strong' },
+      { name:'Squad Quality', val: 8, label:'PT vastly superior' },
+      { name:'Injury Impact', val: 80, label:'Ronaldo included' },
+      { name:'H2H History', val: 12, label:'No H2H — massive gap' },
+    ],
+    tip: '✅ Best Bet: Portugal Win @ ~1.25 — Huge quality difference', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group K',
+    matchday: 3,
+    home: { flag:'🇨🇩', name:'DR Congo' }, away: { flag:'🇨🇴', name:'Colombia' },
+    homeProb: 18, drawProb: 26, awayProb: 56, scorePred: '0-2',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 22, label:'CO +280' },
+      { name:'Recent Form', val: 25, label:'CO stronger' },
+      { name:'Squad Quality', val: 22, label:'CO superior' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'H2H History', val: 28, label:'CO 1W-1D-0L' },
+    ],
+    tip: '✅ Best Bet: Colombia Win @ ~1.65 — Should handle DR Congo comfortably', tipClass: 'conf-med'
+  },
+
+  // ── GROUP L MD3 ──
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group L',
+    matchday: 3,
+    home: { flag:'🇬🇭', name:'Ghana' }, away: { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England' },
+    homeProb: 8, drawProb: 14, awayProb: 78, scorePred: '0-3',
+    confidence: 'high', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 8, label:'EN +400' },
+      { name:'Recent Form', val: 10, label:'EN W5-D0-L0' },
+      { name:'Squad Quality', val: 8, label:'EN elite squad' },
+      { name:'Injury Impact', val: 90, label:'EN full squad' },
+      { name:'H2H History', val: 12, label:'EN dominant' },
+      { name:'Tournament Exp.', val: 10, label:'EN consistent contenders' },
+    ],
+    tip: '✅ Best Bet: England Win + Over 2.5 Goals @ ~1.35 — Expect a big England showing', tipClass: 'conf-high'
+  },
+  {
+    date: 'Jun 25, 2026 · Various', venue: 'Various Stadiums', group: 'Group L',
+    matchday: 3,
+    home: { flag:'🇵🇦', name:'Panama' }, away: { flag:'🇭🇷', name:'Croatia' },
+    homeProb: 18, drawProb: 25, awayProb: 57, scorePred: '0-2',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating', val: 20, label:'CR +260' },
+      { name:'Recent Form', val: 25, label:'CR stronger' },
+      { name:'Squad Quality', val: 22, label:'CR superior' },
+      { name:'Injury Impact', val: 78, label:'Both fit' },
+      { name:'Tournament Exp.', val: 18, label:'CR WC finalists 2018' },
+    ],
+    tip: '✅ Best Bet: Croatia Win @ ~1.60 — Should handle Panama comfortably', tipClass: 'conf-med'
   },
 ];
 
@@ -2546,6 +3608,129 @@ const sources = [
 // RENDERERS
 // ══════════════════════════════════════════
 
+// SCORE TABLE
+function renderScoreTable() {
+  const grid = document.getElementById('scoreTableGrid');
+  if (!grid) return;
+
+  // Build standings from ALL matches (parse scorePred for home/away goals)
+  const standingsMap = {};
+  const groupTeams = {};
+
+  // Init teams from groups array
+  groups.forEach(g => {
+    standingsMap[g.letter] = {};
+    groupTeams[g.letter] = g.teams.map(t => t.name);
+    g.teams.forEach(t => {
+      standingsMap[g.letter][t.name] = { name: t.name, flag: t.flag, mp:0, w:0, d:0, l:0, gf:0, ga:0, pts:0 };
+    });
+  });
+
+  // Process all matches
+  matches.forEach(m => {
+    const letter = m.group.replace('Group ','');
+    if (!standingsMap[letter]) return;
+    const hName = m.home.name;
+    const aName = m.away.name;
+    const parts = m.scorePred.split('-');
+    const hg = parseInt(parts[0]) || 0;
+    const ag = parseInt(parts[1]) || 0;
+
+    // Normalize team name (matches array uses slightly different names sometimes)
+    const findTeam = (name) => {
+      if (standingsMap[letter][name]) return name;
+      // fuzzy: find key that includes or is included
+      return Object.keys(standingsMap[letter]).find(k => k.includes(name) || name.includes(k)) || name;
+    };
+    const hKey = findTeam(hName);
+    const aKey = findTeam(aName);
+    if (!standingsMap[letter][hKey] || !standingsMap[letter][aKey]) return;
+
+    standingsMap[letter][hKey].mp++;
+    standingsMap[letter][aKey].mp++;
+    standingsMap[letter][hKey].gf += hg;
+    standingsMap[letter][hKey].ga += ag;
+    standingsMap[letter][aKey].gf += ag;
+    standingsMap[letter][aKey].ga += hg;
+
+    if (hg > ag) {
+      standingsMap[letter][hKey].w++; standingsMap[letter][hKey].pts += 3;
+      standingsMap[letter][aKey].l++;
+    } else if (hg === ag) {
+      standingsMap[letter][hKey].d++; standingsMap[letter][hKey].pts += 1;
+      standingsMap[letter][aKey].d++; standingsMap[letter][aKey].pts += 1;
+    } else {
+      standingsMap[letter][aKey].w++; standingsMap[letter][aKey].pts += 3;
+      standingsMap[letter][hKey].l++;
+    }
+  });
+
+  grid.innerHTML = groups.map(g => {
+    const rows = Object.values(standingsMap[g.letter])
+      .sort((a,b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+    return `
+    <div class="group-standing-card">
+      <div class="group-header">
+        <div class="group-letter">${g.letter}</div>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem">Group ${g.letter}</div>
+          <h3 style="font-size:0.75rem">${g.city}</h3>
+        </div>
+        <div style="margin-left:auto;font-size:0.7rem;color:var(--muted)">Predicted Standings</div>
+      </div>
+      <table class="standing-table">
+        <thead><tr>
+          <th>#</th><th>🏳</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map((t,i) => {
+            const gd = t.gf - t.ga;
+            const rowClass = i < 2 ? 'qualify-auto' : i === 2 ? 'qualify-maybe' : 'eliminated';
+            return `<tr class="${rowClass}">
+              <td>${i+1}</td>
+              <td style="font-size:1.1rem">${t.flag}</td>
+              <td>${t.name}</td>
+              <td>${t.mp}</td>
+              <td style="color:var(--green)">${t.w}</td>
+              <td style="color:var(--yellow)">${t.d}</td>
+              <td style="color:var(--red)">${t.l}</td>
+              <td>${t.gf}</td>
+              <td>${t.ga}</td>
+              <td style="color:${gd>=0?'var(--green)':'var(--red)'}">${gd >= 0 ? '+' : ''}${gd}</td>
+              <td class="pts-cell">${t.pts}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+      <div style="padding:8px 12px;font-size:0.68rem;color:var(--muted);border-top:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap">
+        <span><span style="color:var(--green)">■</span> Qualify (top 2)</span>
+        <span><span style="color:var(--yellow)">■</span> Best 3rd (may qualify)</span>
+        <span><span style="color:var(--red)">■</span> Eliminated</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // PL standings table 2 (reuse plStandings data)
+  const t2 = document.getElementById('plStandingsTable2');
+  if (t2 && typeof plStandings !== 'undefined') {
+    const zoneClass = s => s === 'champion' || s === 'ucl' ? 'pl-cl-zone' : s === 'uel' ? 'pl-europa-zone' : s === 'uecl' ? 'pl-conf-zone' : s === 'relegated' ? 'pl-rel-zone' : '';
+    t2.innerHTML = `<thead><tr>
+      <th style="text-align:center">#</th>
+      <th style="text-align:left;padding-left:10px">Club</th>
+      <th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+    </tr></thead>
+    <tbody>${plStandings.map(t => `<tr class="${zoneClass(t.status)}">
+      <td style="text-align:center;color:var(--muted)">${t.pos}</td>
+      <td style="text-align:left;padding-left:10px">${t.badge} <strong>${t.name}</strong></td>
+      <td>${t.mp}</td><td style="color:var(--green)">${t.w}</td>
+      <td style="color:var(--yellow)">${t.d}</td><td style="color:var(--red)">${t.l}</td>
+      <td>${t.gf}</td><td>${t.ga}</td>
+      <td style="color:${t.gd.startsWith('+')?'var(--green)':'var(--red)'}">${t.gd}</td>
+      <td style="font-weight:900;color:var(--gold)">${t.pts}</td>
+    </tr>`).join('')}</tbody>`;
+  }
+}
+
 // GROUPS
 function renderGroups() {
   const grid = document.getElementById('groupsGrid');
@@ -2580,12 +3765,19 @@ function renderPredictions(filter='all') {
     filter==='upset' ? matches.filter(m=>m.tags.includes('upset')) :
     matches.filter(m=>m.tags.includes('value'));
 
-  grid.innerHTML = filtered.map(m => {
+  // Group by matchday
+  let html = '';
+  let lastMD = null;
+  filtered.forEach(m => {
+    const md = m.matchday || 1;
+    if (md !== lastMD) {
+      html += `<div class="match-day-header"><h3>⚽ Matchday ${md}</h3></div>`;
+      lastMD = md;
+    }
     const favHome = m.homeProb > m.awayProb;
     const confClass = m.homeProb>=70||m.awayProb>=70 ? 'conf-high' : m.homeProb>=55||m.awayProb>=55 ? 'conf-med' : 'conf-low';
     const confLabel = m.homeProb>=70||m.awayProb>=70 ? '🔒 High Confidence' : m.homeProb>=55||m.awayProb>=55 ? '⚖️ Medium Confidence' : '🎲 Low Confidence';
-    return `
-    <div class="match-card">
+    html += `<div class="match-card">
       <div class="match-header">
         <div>
           <div class="match-date">📅 ${m.date}</div>
@@ -2596,7 +3788,6 @@ function renderPredictions(filter='all') {
           <span class="conf-badge ${confClass}">${confLabel}</span>
         </div>
       </div>
-
       <div class="match-body">
         <div class="team-block">
           <div class="flag">${m.home.flag}</div>
@@ -2618,7 +3809,6 @@ function renderPredictions(filter='all') {
           <div class="prob-label">Win Probability</div>
         </div>
       </div>
-
       <div class="prob-bar-wrap">
         <div class="prob-bar">
           <div class="seg-h" style="width:${m.homeProb}%"></div>
@@ -2631,17 +3821,12 @@ function renderPredictions(filter='all') {
           <span style="color:var(--red)">${m.away.name} ${m.awayProb}%</span>
         </div>
       </div>
-
       <div class="factors">
         <div class="factors-title">🔎 Prediction Factors</div>
         <div class="factor-grid">
           ${m.factors.map(f => {
             const fc = f.val>=70?'#22c55e':f.val>=45?'#f59e0b':'#ef4444';
-            return `<div class="factor-item">
-              <div class="factor-name">${f.name}</div>
-              <div class="factor-bar"><div class="factor-fill" style="width:${f.val}%;background:${fc}"></div></div>
-              <div class="factor-val" style="color:${fc}">${f.label}</div>
-            </div>`;
+            return '<div class="factor-item"><div class="factor-name">'+f.name+'</div><div class="factor-bar"><div class="factor-fill" style="width:'+f.val+'%;background:'+fc+'"></div></div><div class="factor-val" style="color:'+fc+'">'+f.label+'</div></div>';
           }).join('')}
         </div>
         <div style="margin-top:12px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:10px 12px;font-size:0.8rem">
@@ -2649,7 +3834,8 @@ function renderPredictions(filter='all') {
         </div>
       </div>
     </div>`;
-  }).join('');
+  });
+  grid.innerHTML = html;
 }
 
 function filterMatches(filter, btn) {
@@ -4542,18 +5728,22 @@ function calibrateProbs(match) {
 // ── Generate insights from history ──
 function generateInsights() {
   const insights = [];
-  const n = engine.history.length;
+  const _isPLi = currentCompetition === 'pl';
+  const _isPlEntryI = h => h.matchId && h.matchId.startsWith('PL_GW38_');
+  const history = engine.history.filter(h => _isPLi ? _isPlEntryI(h) : !_isPlEntryI(h));
+  const n = history.length;
 
   if (n === 0) {
     return ['<div class="insight-card">📊 No results logged yet. Enter match results to generate model insights.</div>'];
   }
 
   // Accuracy insight
-  const acc = Math.round((engine.correctPredictions/n)*100);
+  const correct = history.filter(h => h.correct).length;
+  const acc = Math.round((correct/n)*100);
   insights.push(`<div class="insight-card">🎯 <strong>Overall accuracy: ${acc}%</strong> across ${n} logged matches. ${acc>=70?'Model is performing well above chance.':acc>=55?'Model is performing above random baseline.':'Model needs more data — early-stage learning.'}</div>`);
 
   // Brier score trend
-  const avgBS = Math.round((engine.history.reduce((s,h)=>s+h.brierScore,0)/n)*1000)/1000;
+  const avgBS = Math.round((history.reduce((s,h)=>s+h.brierScore,0)/n)*1000)/1000;
   insights.push(`<div class="insight-card">📉 <strong>Average Brier Score: ${avgBS}</strong> (lower is better, 0 = perfect, 0.25 = decent, 0.5+ = poor). ${avgBS<0.2?'Excellent calibration.':avgBS<0.3?'Good calibration.':'Model over/under-confident in some markets.'}</div>`);
 
   // Weight changes
@@ -4568,7 +5758,7 @@ function generateInsights() {
   }
 
   // Upsets analysis
-  const upsets = engine.history.filter(h => {
+  const upsets = history.filter(h => {
     const fav = h.predictedH > h.predictedA ? 'H' : 'A';
     return h.actualResult !== fav && h.actualResult !== 'D';
   });
@@ -4969,20 +6159,24 @@ function renderIntelligence() {
 
 function renderEngineStatus() {
   const el = document.getElementById('engineStatusRow');
-  const n = engine.history.length;
-  const acc = n > 0 ? Math.round((engine.correctPredictions/n)*100) : '–';
-  const avgBS = n > 0 ? Math.round((engine.history.reduce((s,h)=>s+h.brierScore,0)/n)*1000)/1000 : '–';
-  const wChanged = FACTOR_KEYS.filter(k => Math.abs(engine.weights[k]-BASELINE_WEIGHTS[k]) > 1).length;
+  const isPL = currentCompetition === 'pl';
+  const isPlEntry = h => h.matchId && h.matchId.startsWith('PL_GW38_');
+  const history = engine.history.filter(h => isPL ? isPlEntry(h) : !isPlEntry(h));
+  const n = history.length;
+  const correct = history.filter(h => h.correct).length;
+  const acc = n > 0 ? Math.round((correct/n)*100) : '–';
+  const avgBS = n > 0 ? Math.round((history.reduce((s,h)=>s+h.brierScore,0)/n)*1000)/1000 : '–';
 
-  const pending = (engine.pendingPredictions || []).length;
-  const autoRes = engine.autoResolved || 0;
+  const allPending = engine.pendingPredictions || [];
+  const pending = allPending.filter(p => isPL ? p.source === 'pl' : p.source !== 'pl').length;
+  const autoRes = history.filter(h => h.autoResolved).length;
   el.innerHTML = [
     { val: n, lbl: 'Results Logged', color: '#FFD700' },
     { val: acc + (n>0?'%':''), lbl: 'Prediction Accuracy', color: acc >= 60 ? '#22c55e' : acc >= 45 ? '#f59e0b' : '#ef4444' },
     { val: avgBS, lbl: 'Avg Brier Score', color: avgBS !== '–' ? (avgBS < 0.25 ? '#22c55e' : avgBS < 0.35 ? '#f59e0b' : '#ef4444') : '#8899aa' },
     { val: pending, lbl: 'Tracking (Pending)', color: pending > 0 ? '#3b82f6' : '#8899aa' },
     { val: autoRes, lbl: 'Auto-Resolved', color: autoRes > 0 ? '#22c55e' : '#8899aa' },
-    { val: engine.totalMatches === 0 ? 'Ready' : engine.correctPredictions >= engine.totalMatches*0.7 ? '🟢 Sharp' : engine.correctPredictions >= engine.totalMatches*0.5 ? '🟡 Learning' : '🔴 Calibrating', lbl: 'Engine Status', color: '#14b8a6' },
+    { val: n === 0 ? 'Ready' : correct >= n*0.7 ? '🟢 Sharp' : correct >= n*0.5 ? '🟡 Learning' : '🔴 Calibrating', lbl: 'Engine Status', color: '#14b8a6' },
   ].map(m => `<div class="metric-pill"><div class="val" style="color:${m.color}">${m.val}</div><div class="lbl">${m.lbl}</div></div>`).join('');
 }
 
@@ -5048,12 +6242,15 @@ function renderWeightEvolution() {
 
   // Weight history mini chart
   const histEl = document.getElementById('weightHistoryChart');
-  if (engine.history.length === 0) {
+  const _isPLw = currentCompetition === 'pl';
+  const _isPlEntryW = h => h.matchId && h.matchId.startsWith('PL_GW38_');
+  const filteredHistW = engine.history.filter(h => _isPLw ? _isPlEntryW(h) : !_isPlEntryW(h));
+  if (filteredHistW.length === 0) {
     histEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;padding:10px">Log match results to see weight evolution over time.</div>';
     return;
   }
   histEl.innerHTML = `<h3 style="font-size:0.9rem;margin-bottom:14px">📜 Weight Changes After Each Match</h3>` +
-    engine.history.map((h,i) => `
+    filteredHistW.map((h,i) => `
     <div style="margin-bottom:12px;background:var(--card2);border-radius:8px;padding:10px 14px">
       <div style="font-size:0.78rem;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between">
         <span>Match ${i+1}: ${h.home} vs ${h.away} → <span style="color:${h.correct?'var(--green)':'var(--red)'}">${h.actualResult==='H'?h.home:h.actualResult==='D'?'Draw':h.away} ${h.correct?'✓':'✗'}</span></span>
@@ -5070,17 +6267,21 @@ function renderWeightEvolution() {
 }
 
 function renderAccuracy() {
-  const n = engine.history.length;
+  const _isPLa = currentCompetition === 'pl';
+  const _isPlEntryA = h => h.matchId && h.matchId.startsWith('PL_GW38_');
+  const history = engine.history.filter(h => _isPLa ? _isPlEntryA(h) : !_isPlEntryA(h));
+  const n = history.length;
+  const correctCount = history.filter(h => h.correct).length;
 
   // Accuracy panel
   const accEl = document.getElementById('accuracyPanel');
   if (n === 0) { accEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">No results logged yet.</div>'; }
   else {
-    const acc = Math.round((engine.correctPredictions/n)*100);
+    const acc = Math.round((correctCount/n)*100);
     accEl.innerHTML = `
       <div style="text-align:center;margin-bottom:16px">
         <div style="font-size:3rem;font-weight:900;color:${acc>=65?'var(--green)':acc>=50?'var(--yellow)':'var(--red)'}">${acc}%</div>
-        <div style="color:var(--muted);font-size:0.8rem">${engine.correctPredictions}/${n} correct</div>
+        <div style="color:var(--muted);font-size:0.8rem">${correctCount}/${n} correct</div>
       </div>
       <div style="height:8px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px">
         <div style="width:${acc}%;height:100%;background:${acc>=65?'var(--green)':acc>=50?'var(--yellow)':'var(--red)'};border-radius:8px;transition:width 0.8s"></div>
@@ -5093,7 +6294,7 @@ function renderAccuracy() {
   const bsEl = document.getElementById('brierPanel');
   if (n === 0) { bsEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">No results logged yet.</div>'; }
   else {
-    const scores = engine.history.map(h=>h.brierScore);
+    const scores = history.map(h=>h.brierScore);
     const avg = (scores.reduce((s,v)=>s+v,0)/n).toFixed(3);
     bsEl.innerHTML = `
       <div style="text-align:center;margin-bottom:14px">
@@ -5118,8 +6319,7 @@ function renderAccuracy() {
   if (n < 3) { calEl.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">Need at least 3 results for calibration analysis.</div>'; }
   else {
     const buckets = [{label:'50-60%',min:50,max:60,correct:0,total:0},{label:'60-70%',min:60,max:70,correct:0,total:0},{label:'70-80%',min:70,max:80,correct:0,total:0},{label:'80%+',min:80,max:100,correct:0,total:0}];
-    engine.history.forEach(h => {
-      const favProb = h.actualResult==='H'?h.predictedH:h.actualResult==='D'?h.predictedD:h.predictedA;
+    history.forEach(h => {
       const predictedFavProb = Math.max(h.predictedH,h.predictedD,h.predictedA);
       buckets.forEach(b => {
         if (predictedFavProb>=b.min && predictedFavProb<b.max) {
@@ -5148,7 +6348,7 @@ function renderAccuracy() {
   else {
     htEl.innerHTML = `<table class="odds-table" style="min-width:600px">
       <thead><tr><th>#</th><th>Match</th><th>Predicted</th><th>Actual</th><th>Result</th><th>Brier</th></tr></thead>
-      <tbody>${engine.history.map((h,i)=>`<tr>
+      <tbody>${history.map((h,i)=>`<tr>
         <td style="color:var(--muted)">${i+1}</td>
         <td><strong>${h.home}</strong> vs <strong>${h.away}</strong><div style="font-size:0.7rem;color:var(--muted)">${h.date}</div></td>
         <td style="font-size:0.78rem">${h.home} ${h.predictedH}% · D ${h.predictedD}% · ${h.away} ${h.predictedA}%</td>
@@ -5274,6 +6474,7 @@ async function refreshAllData() {
 
 // ── INIT ──
 renderGroups();
+renderScoreTable();
 renderPredictions();
 renderOdds();
 renderInjuries();
