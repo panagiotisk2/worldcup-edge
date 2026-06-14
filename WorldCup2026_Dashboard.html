@@ -5490,11 +5490,12 @@ async function fetchFootballData() {
 
     const json = await res.json();
 
-    // Handle both SportAPI format { live:[...], scheduled:[...] } and API-Football { response:[...] }
+    // Handle both SportAPI format { live:[...], scheduled:[...], all:[...] } and API-Football { response:[...] }
     const liveEvents    = json.live      || [];
     const schedEvents   = json.scheduled || [];
     const apiFootball   = json.response  || [];
-    const allEvents     = [...liveEvents, ...schedEvents, ...apiFootball];
+    // 'all' is the deduplicated union including last 4 days of finished results
+    const allEvents     = json.all || [...liveEvents, ...schedEvents, ...apiFootball];
 
     const remaining = res.headers.get('x-ratelimit-requests-remaining');
     const quotaEl = document.getElementById('footballApiQuota');
@@ -5834,10 +5835,27 @@ function generateInsights() {
 // AUTO-LEARNING ENGINE
 // ══════════════════════════════════════════
 
+// Canonical aliases: map any known variant → standard short name used in dashboard
+const TEAM_ALIASES = {
+  'south korea': 'skorea', 'republic of korea': 'skorea', 'korea republic': 'skorea', 's korea': 'skorea',
+  'usa': 'unitedstates', 'united states': 'unitedstates', 'us': 'unitedstates',
+  'netherlands': 'netherlands', 'holland': 'netherlands',
+  'ivory coast': 'ivorycoast', 'cote divoire': 'ivorycoast', "côte d'ivoire": 'ivorycoast',
+  'curacao': 'curacao', 'curaçao': 'curacao',
+  'türkiye': 'turkey', 'turkey': 'turkey',
+  'bosnia': 'bosnia', 'bosnia and herzegovina': 'bosnia', 'bosnia herzegovina': 'bosnia',
+  'dr congo': 'drcongo', 'democratic republic of congo': 'drcongo', 'congo dr': 'drcongo',
+  'england': 'england', 'scotland': 'scotland',
+  'cape verde': 'capeverde', 'cabo verde': 'capeverde',
+  'saudi arabia': 'saudiarabia', 'ksa': 'saudiarabia',
+};
+
 function normalizeTeamName(name) {
-  return (name || '').toLowerCase()
-    .replace(/\s+(fc|sc|united|city|athletic|cf|afc|utd|hotspur|wanderers|wednesday|albion|palace|county|rovers|town|villa)\s*$/gi, '')
-    .replace(/[^a-z0-9]/g, '').trim();
+  const lower = (name || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+  if (TEAM_ALIASES[lower]) return TEAM_ALIASES[lower];
+  return lower
+    .replace(/\s+(fc|sc|united|city|athletic|cf|afc|utd|hotspur|wanderers|wednesday|albion|palace|county|rovers|town|villa)\s*$/g, '')
+    .replace(/\s+/g, '').trim();
 }
 
 function teamsMatch(a, b) {
@@ -5855,11 +5873,17 @@ function snapshotMatchPredictions() {
   // WC matches
   matches.forEach(m => {
     const id = m.date + m.home.name + m.away.name;
-    if (!loggedIds.has(id) && !pendingIds.has(id)) {
-      // Inject market factor from matchLines (hardcoded or live odds)
+    if (loggedIds.has(id) || pendingIds.has(id)) return;
+
+    // If this match is already completed, resolve it immediately from completedResults
+    const doneResult = completedResults.find(r =>
+      teamsMatch(r.home, m.home.name) && teamsMatch(r.away, m.away.name)
+    );
+    if (doneResult) {
+      const actualResult = doneResult.hg > doneResult.ag ? 'H' : doneResult.ag > doneResult.hg ? 'A' : 'D';
       const ml = matchLines.find(l => teamsMatch(l.home, m.home.name));
       const marketVal = ml ? Math.round(parseFloat(mlToImplied(ml.homeML))) : 50;
-      engine.pendingPredictions.push({
+      const synthetic = {
         id, source: 'wc',
         home: m.home.name, away: m.away.name,
         homeFlag: m.home.flag, awayFlag: m.away.flag,
@@ -5868,8 +5892,24 @@ function snapshotMatchPredictions() {
         factors: [...m.factors.map(f => ({ name: f.name, val: f.val })), { name: 'Market Odds', val: marketVal }],
         weightsAtSnapshot: { ...engine.weights },
         snappedAt: Date.now()
-      });
+      };
+      autoResolveMatch(synthetic, actualResult, `${doneResult.hg}-${doneResult.ag}`);
+      return;
     }
+
+    // Upcoming match — add to pending queue for auto-resolve when result arrives
+    const ml = matchLines.find(l => teamsMatch(l.home, m.home.name));
+    const marketVal = ml ? Math.round(parseFloat(mlToImplied(ml.homeML))) : 50;
+    engine.pendingPredictions.push({
+      id, source: 'wc',
+      home: m.home.name, away: m.away.name,
+      homeFlag: m.home.flag, awayFlag: m.away.flag,
+      group: m.group, date: m.date,
+      probs: { h: m.homeProb, d: m.drawProb, a: m.awayProb },
+      factors: [...m.factors.map(f => ({ name: f.name, val: f.val })), { name: 'Market Odds', val: marketVal }],
+      weightsAtSnapshot: { ...engine.weights },
+      snappedAt: Date.now()
+    });
   });
 
   // PL Final Day matches — generate synthetic factor scores from probabilities
