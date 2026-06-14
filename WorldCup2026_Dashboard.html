@@ -3481,16 +3481,17 @@ const matches = [
 // 'home' and 'away' must match the names used in the matches array exactly.
 // ══════════════════════════════════════════
 const completedResults = [
-  { home:'Mexico',       away:'South Africa', hg:2, ag:0, group:'A', date:'Jun 11' },
-  { home:'S. Korea',     away:'Czechia',      hg:1, ag:1, group:'A', date:'Jun 11' },
-  { home:'Canada',       away:'Bosnia',       hg:1, ag:1, group:'B', date:'Jun 12' },
-  { home:'USA',          away:'Paraguay',     hg:2, ag:1, group:'D', date:'Jun 12' },
-  { home:'Australia',    away:'Türkiye',      hg:1, ag:1, group:'D', date:'Jun 12' },
-  { home:'Qatar',        away:'Switzerland',  hg:0, ag:2, group:'B', date:'Jun 13' },
-  { home:'Brazil',       away:'Morocco',      hg:2, ag:1, group:'C', date:'Jun 13' },
-  { home:'Haiti',        away:'Scotland',     hg:0, ag:2, group:'C', date:'Jun 13' },
-  { home:'Germany',      away:'Curaçao',      hg:4, ag:0, group:'E', date:'Jun 14' },
-  { home:'Ivory Coast',  away:'Ecuador',      hg:1, ag:1, group:'E', date:'Jun 14' },
+  // ── Matchday 1 — confirmed real results ──
+  { home:'Mexico',      away:'South Africa', hg:2, ag:0, group:'A', date:'Jun 11' },  // ✅ correct pred
+  { home:'S. Korea',    away:'Czechia',      hg:2, ag:1, group:'A', date:'Jun 11' },  // pred 1-1
+  { home:'Canada',      away:'Bosnia',       hg:1, ag:1, group:'B', date:'Jun 12' },  // ✅ correct pred
+  { home:'USA',         away:'Paraguay',     hg:4, ag:1, group:'D', date:'Jun 12' },  // pred 2-1
+  { home:'Qatar',       away:'Switzerland',  hg:1, ag:1, group:'B', date:'Jun 13' },  // pred 0-2
+  { home:'Brazil',      away:'Morocco',      hg:1, ag:1, group:'C', date:'Jun 13' },  // pred 2-1
+  { home:'Haiti',       away:'Scotland',     hg:0, ag:1, group:'C', date:'Jun 13' },  // pred 0-2
+  { home:'Australia',   away:'Türkiye',      hg:2, ag:0, group:'D', date:'Jun 14' },  // pred 1-1
+  { home:'Germany',     away:'Curaçao',      hg:4, ag:0, group:'E', date:'Jun 14' },  // ✅ correct pred
+  // Ivory Coast vs Ecuador (Jun 14) — evening kickoff, not yet played
 ];
 
 // O(1) lookup set — key: 'Home|Away'
