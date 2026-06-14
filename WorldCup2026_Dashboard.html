@@ -4781,6 +4781,11 @@ const matchLines = [
     ou:2.5, ouDir:'Over -125', btts:'No -160',
     modelHome:14, modelDraw:22, modelAway:64,
     pick:'Scotland ML ✅', pickConf:'high', result:'0-1' },
+  { date:'Jun 13 FT', home:'🇦🇺 Australia', away:'🇹🇷 Türkiye', group:'D',
+    homeML:+290, draw:+290, awayML:-110,
+    ou:2.5, ouDir:'Over -120', btts:'No -130',
+    modelHome:32, modelDraw:28, modelAway:40,
+    pick:'Draw ❌', pickConf:'med', result:'2-0' },
   { date:'Jun 14 FT', home:'🇩🇪 Germany', away:'🇨🇼 Curaçao', group:'E',
     homeML:-900, draw:+1200, awayML:+2200,
     ou:3.5, ouDir:'Over -140', btts:'No -200',
@@ -5063,7 +5068,7 @@ function renderMatchLines() {
   if (sourceNote) {
     sourceNote.textContent = currentCompetition === 'pl'
       ? '— All 10 matches finished. 4/8 confirmed predictions correct (50%). Model weights recalibrated for World Cup.'
-      : '— 8 of 12 MD1 matches complete. 4/8 picks correct (50%). Live odds active — press 🔄 Refresh to update.';
+      : '— 9 of 12 MD1 matches complete. 4/9 picks correct (44%). Live odds active — press 🔄 Refresh to update.';
   }
   const disclaimer = document.getElementById('bettingDisclaimer');
   if (disclaimer) disclaimer.style.display = currentCompetition === 'pl' ? 'none' : '';
@@ -6079,6 +6084,7 @@ const TEAM_ALIASES = {
   'usa': 'unitedstates', 'united states': 'unitedstates', 'us': 'unitedstates',
   'netherlands': 'netherlands', 'holland': 'netherlands',
   'ivory coast': 'ivorycoast', 'cote divoire': 'ivorycoast', "côte d'ivoire": 'ivorycoast',
+  'cte d ivoire': 'ivorycoast', 'cote d ivoire': 'ivorycoast',  // post-normalization forms (ô and ' stripped)
   'curacao': 'curacao', 'curaçao': 'curacao',
   'türkiye': 'turkey', 'turkey': 'turkey',
   'bosnia': 'bosnia', 'bosnia and herzegovina': 'bosnia', 'bosnia herzegovina': 'bosnia',
