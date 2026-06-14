@@ -7023,6 +7023,33 @@ function updatePollingIndicator() {
     el.innerHTML = ' &nbsp;<span style="color:#6b7280">⬤</span> Auto-refresh: off';
   }
 }
+
+// ══════════════════════════════════════════
+// POLLING ENGINE — STATE MACHINE
+// ══════════════════════════════════════════
+function stopPolling() {
+  clearInterval(pollingTimer);
+  pollingTimer = null;
+  pollingMode = null;
+  updatePollingIndicator();
+}
+
+function setPollingMode(mode) {
+  if (pollingMode === mode) return;   // no-op if already in this mode
+  pollingMode = mode;
+  clearInterval(pollingTimer);
+  const delay = mode === 'live' ? 30_000 : 5 * 60_000;
+  pollingTimer = setInterval(pollTick, delay);
+  updatePollingIndicator();
+}
+
+function startPolling() {
+  if (currentCompetition !== 'wc') return;  // PL mode has no live WC fixtures
+  stopPolling();
+  pollTick();               // fire immediately — don't wait for first interval
+  setPollingMode('idle');   // start on idle cadence; upgrades to live if match found
+  startUpdatedCounter();
+}
 </script>
 </body>
 </html>
