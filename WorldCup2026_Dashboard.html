@@ -2188,7 +2188,7 @@ function showTab(id, el) {
   if (el) el.classList.add('active');
   // Persist active tab in URL hash so Cmd+R restores it
   history.replaceState(null, '', '#' + id);
-  if (id === 'scoretable') renderScoreTable();
+  if (id === 'scoretable') fetchLiveStandings();
 }
 
 // ── RESTORE TAB FROM URL HASH ──
@@ -3494,11 +3494,21 @@ const completedResults = [
   // Ivory Coast vs Ecuador (Jun 14) — evening kickoff, not yet played
 ];
 
-// O(1) lookup set — key: 'Home|Away'
+// O(1) lookup set — key: 'Home|Away' (used by engine snapshot & score table fallback)
 const completedSet = new Set(completedResults.map(r => r.home + '|' + r.away));
 
+// Date-based check: hide any match whose date has passed (no manual updates needed)
 function isMatchCompleted(m) {
-  return completedSet.has(m.home.name + '|' + m.away.name);
+  try {
+    const dateStr = m.date.split('·')[0].trim(); // e.g. "Jun 15, 2026"
+    const matchDate = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return matchDate < today;
+  } catch {
+    // Fallback: check hardcoded completedResults
+    return completedSet.has(m.home.name + '|' + m.away.name);
+  }
 }
 
 const oddsData = [
@@ -3641,6 +3651,9 @@ const sources = [
 
 // SCORE TABLE
 let scoreTableMode = 'live'; // 'live' | 'predicted'
+let apiStandingsCache = null;  // Results fetched from fixtures API
+const ST_CACHE_KEY = 'wce_live_standings';
+const ST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function setScoreTableMode(mode, btn) {
   scoreTableMode = mode;
@@ -3648,6 +3661,89 @@ function setScoreTableMode(mode, btn) {
   btn.classList.add('active');
   document.getElementById('stLiveDesc').style.display = mode === 'live' ? '' : 'none';
   document.getElementById('stPredDesc').style.display = mode === 'predicted' ? '' : 'none';
+  if (mode === 'live') fetchLiveStandings();
+  else renderScoreTable();
+}
+
+// Fetch all finished WC matches from fixtures API → build live standings
+async function fetchLiveStandings() {
+  // 1. Show immediately from cache or completedResults fallback
+  renderScoreTable();
+
+  // 2. Try localStorage cache first (5-min TTL)
+  try {
+    const cached = JSON.parse(localStorage.getItem(ST_CACHE_KEY) || 'null');
+    if (cached && Date.now() - cached.ts < ST_CACHE_TTL) {
+      apiStandingsCache = cached.results;
+      renderScoreTable();
+      return;
+    }
+  } catch {}
+
+  // 3. Show loading indicator on the grid
+  const grid = document.getElementById('scoreTableGrid');
+  if (grid && scoreTableMode === 'live') {
+    const loader = document.createElement('div');
+    loader.id = 'stLoader';
+    loader.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);font-size:0.85rem';
+    loader.textContent = '⏳ Fetching live results…';
+    grid.prepend(loader);
+  }
+
+  try {
+    const res = await fetch('/api/fixtures');
+    if (!res.ok) throw new Error('API error');
+    const json = await res.json();
+    const allEvents = json.all || [...(json.live || []), ...(json.scheduled || [])];
+
+    // Extract finished WC matches
+    const apiResults = [];
+    allEvents.forEach(ev => {
+      const statusRaw = ev.status?.type || ev.status?.description || ev.fixture?.status?.short || '';
+      const status = statusRaw.toLowerCase();
+      const isFinished = status === 'finished' || status === 'ended' || status === 'ft' ||
+                         status === 'aet' || status.includes('finish') || status.includes('ended');
+      if (!isFinished) return;
+
+      const apiHome = ev.homeTeam?.name || ev.teams?.home?.name || '';
+      const apiAway = ev.awayTeam?.name || ev.teams?.away?.name || '';
+      const hg = ev.homeScore?.current ?? ev.goals?.home ?? null;
+      const ag = ev.awayScore?.current ?? ev.goals?.away ?? null;
+      if (!apiHome || !apiAway || hg === null || ag === null) return;
+
+      // Match to our known games using fuzzy name matching
+      const knownMatch = matches.find(m =>
+        teamsMatch(m.home.name, apiHome) && teamsMatch(m.away.name, apiAway)
+      );
+      if (!knownMatch) return;
+
+      const group = knownMatch.group.replace('Group ', '');
+      apiResults.push({
+        home: knownMatch.home.name,
+        away: knownMatch.away.name,
+        hg: Number(hg),
+        ag: Number(ag),
+        group,
+        date: knownMatch.date,
+      });
+    });
+
+    if (apiResults.length > 0) {
+      apiStandingsCache = apiResults;
+      // Save to localStorage cache
+      try {
+        localStorage.setItem(ST_CACHE_KEY, JSON.stringify({ ts: Date.now(), results: apiResults }));
+      } catch {}
+    } else {
+      // API returned no finished matches — fall back to hardcoded completedResults
+      apiStandingsCache = null;
+    }
+  } catch (e) {
+    apiStandingsCache = null; // fall back to completedResults
+  }
+
+  // Remove loader and re-render with fresh data
+  document.getElementById('stLoader')?.remove();
   renderScoreTable();
 }
 
@@ -3702,8 +3798,11 @@ function renderScoreTable() {
   const isLive = scoreTableMode === 'live';
 
   if (isLive) {
-    // Use only actual completed results
-    standingsMap = buildStandings(completedResults.map(r => ({ ...r, group: r.group })));
+    // Prefer API-fetched real results; fall back to hardcoded completedResults
+    const source = apiStandingsCache && apiStandingsCache.length > 0
+      ? apiStandingsCache
+      : completedResults;
+    standingsMap = buildStandings(source);
   } else {
     // Use all 72 predicted results
     const predData = matches.map(m => ({
@@ -6570,7 +6669,7 @@ async function refreshAllData() {
 
 // ── INIT ──
 renderGroups();
-renderScoreTable();
+fetchLiveStandings(); // async: renders from completedResults immediately, then updates from API
 renderPredictions();
 renderOdds();
 renderInjuries();

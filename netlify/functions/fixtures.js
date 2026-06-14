@@ -1,5 +1,6 @@
 // Netlify Function — SportAPI Fixtures Proxy
-// Fetches: live events + last 4 days of results (for auto-resolve) + today's schedule.
+// Fetches live events + every date from tournament start (Jun 11 2026) through today.
+// This gives the client all finished WC matches for auto-building live standings.
 // Phase 2: swap for FastAPI on Hetzner.
 
 exports.handler = async (event) => {
@@ -26,17 +27,16 @@ exports.handler = async (event) => {
     }
   };
 
-  // Build date strings for today + last 4 days (to pick up finished matches)
+  // Build all dates from tournament start to today (max 40 = full group stage)
+  const tournamentStart = new Date('2026-06-11');
   const today = new Date();
   const dates = [];
-  for (let i = 0; i <= 4; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
+  for (let d = new Date(tournamentStart); d <= today && dates.length < 40; d.setDate(d.getDate() + 1)) {
     dates.push(d.toISOString().split('T')[0]);
   }
 
   try {
-    // Parallel: live events + scheduled/finished for each of the last 4 days
+    // Fetch live events + scheduled/finished for each date in parallel
     const [liveData, ...schedResults] = await Promise.all([
       fetchJson('https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live'),
       ...dates.map(d => fetchJson(`https://sportapi7.p.rapidapi.com/api/v1/sport/football/scheduled-events/${d}`)),
@@ -60,13 +60,14 @@ exports.handler = async (event) => {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'x-ratelimit-requests-remaining': '',
+        'Cache-Control': 'public, max-age=120', // 2-min cache
       },
       body: JSON.stringify({
         live: liveEvents,
         scheduled: scheduledEvents,
         all: allEvents,
-        date: dates[0],
+        date: today.toISOString().split('T')[0],
+        datesChecked: dates.length,
       }),
     };
   } catch (err) {
