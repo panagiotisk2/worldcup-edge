@@ -231,6 +231,26 @@
   .match-date { font-size: 0.78rem; color: var(--gold); font-weight: 700; }
   .match-venue { font-size: 0.73rem; color: var(--muted); }
   .tz-ref { color: var(--muted); font-size: 0.82em; font-weight: 400; }
+  /* ── Live Ticker ── */
+  @keyframes tickerPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  #liveTicker { margin-bottom:18px; border-radius:10px; overflow:hidden; border:1px solid var(--border); display:none; }
+  .ticker-wrap-live { border-left:3px solid #ef4444; }
+  .ticker-wrap-idle { border-left:3px solid var(--border); }
+  .ticker-header { display:flex; align-items:center; gap:8px; padding:8px 14px; background:rgba(239,68,68,0.08); font-size:0.78rem; font-weight:700; }
+  .ticker-dot { width:8px; height:8px; border-radius:50%; background:#ef4444; animation:tickerPulse 1.5s infinite; display:inline-block; flex-shrink:0; }
+  .ticker-label { color:#ef4444; letter-spacing:0.05em; }
+  .ticker-updated { color:var(--muted); font-weight:400; }
+  .ticker-count { margin-left:auto; color:var(--muted); font-weight:400; }
+  .ticker-matches { padding:4px 0; }
+  .ticker-row { display:flex; align-items:center; gap:10px; padding:8px 14px; font-size:0.85rem; border-top:1px solid var(--border); }
+  .ticker-team { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ticker-winning { color:#fff; font-weight:700; }
+  .ticker-score { font-size:1.1rem; font-weight:900; color:#fff; min-width:50px; text-align:center; }
+  .ticker-minute { color:var(--gold); font-size:0.78rem; min-width:32px; text-align:right; }
+  .ticker-upcoming { justify-content:center; gap:16px; padding:10px 14px; background:rgba(255,255,255,0.03); }
+  .ticker-teams { color:#fff; font-weight:600; }
+  .ticker-countdown { color:var(--gold); }
+  #pollingStatus { font-size:0.72rem; color:rgba(255,255,255,0.4); }
   .match-group { font-size: 0.73rem; color: var(--blue); background: rgba(59,130,246,0.1); padding: 2px 8px; border-radius: 10px; }
 
   .match-body {
