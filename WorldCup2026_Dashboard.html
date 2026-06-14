@@ -3808,6 +3808,16 @@ const sources = [
 
 // SCORE TABLE
 let scoreTableMode = 'live'; // 'live' | 'predicted'
+// ── Live Polling Engine State ──
+let pollingTimer       = null;   // active setInterval handle
+let pollingMode        = null;   // 'live' | 'idle' | null
+let lastPollTime       = null;   // ms timestamp of last successful tick
+let pollInFlight       = false;  // guard: prevent overlapping fetches
+let liveEventCache     = [];     // in-progress WC events from last tick
+let allEventsCache     = [];     // all events from last tick (for next-match lookup)
+let secondsSinceUpdate = 0;      // counter for "updated X ago" display
+let updatedCounterInterval = null; // setInterval handle for the counter
+
 let apiStandingsCache = null;  // Results fetched from fixtures API
 const ST_CACHE_KEY = 'wce_live_standings';
 const ST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
