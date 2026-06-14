@@ -1020,43 +1020,9 @@
   </div>
 
   <h2>📅 Next <span>Upcoming Matches</span></h2>
-  <p class="section-desc">Tournament kicks off June 11, 2026. Go to the Predictions tab for full match-by-match analysis.</p>
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 11 · 3pm ET</span>
-      <span style="font-size:1.1rem">🇲🇽 Mexico</span>
-      <span style="color:var(--muted);margin:0 8px">vs</span>
-      <span style="font-size:1.1rem">🇿🇦 South Africa</span>
-      <span style="margin-left:auto" class="conf-badge conf-high">MX 62% Win</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 11 · 10pm ET</span>
-      <span style="font-size:1.1rem">🇰🇷 S. Korea</span>
-      <span style="color:var(--muted);margin:0 8px">vs</span>
-      <span style="font-size:1.1rem">🇨🇿 Czechia</span>
-      <span style="margin-left:auto" class="conf-badge conf-med">41% Draw Likely</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 12 · 3pm ET</span>
-      <span style="font-size:1.1rem">🇨🇦 Canada</span>
-      <span style="color:var(--muted);margin:0 8px">vs</span>
-      <span style="font-size:1.1rem">🇧🇦 Bosnia</span>
-      <span style="margin-left:auto" class="conf-badge conf-med">⚠️ Davies Doubt</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 12 · 6pm ET</span>
-      <span style="font-size:1.1rem">🇺🇸 USA</span>
-      <span style="color:var(--muted);margin:0 8px">vs</span>
-      <span style="font-size:1.1rem">🇵🇾 Paraguay</span>
-      <span style="margin-left:auto" class="conf-badge conf-high">USA 52% Win</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
-      <span style="color:var(--gold);font-weight:700;width:100px;font-size:0.82rem">Jun 13 · 6pm ET</span>
-      <span style="font-size:1.1rem">🇧🇷 Brazil</span>
-      <span style="color:var(--muted);margin:0 8px">vs</span>
-      <span style="font-size:1.1rem">🇲🇦 Morocco</span>
-      <span style="margin-left:auto" class="conf-badge conf-high">BR 68% Win</span>
-    </div>
+  <p class="section-desc">Next 5 unplayed matches. Updated automatically. Go to the Predictions tab for full analysis.</p>
+  <div id="upcomingMatchesGrid" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">
+    <div style="color:var(--muted);font-size:0.85rem;padding:10px 0">⏳ Loading upcoming matches…</div>
   </div>
 </div><!-- /overviewWC -->
 
@@ -4080,6 +4046,56 @@ function renderGroups() {
   `).join('');
 }
 
+// UPCOMING MATCHES (Overview tab)
+function renderUpcomingMatches() {
+  const grid = document.getElementById('upcomingMatchesGrid');
+  if (!grid) return;
+
+  const upcoming = matches
+    .filter(m => !isMatchCompleted(m))
+    .slice(0, 5);
+
+  if (!upcoming.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:10px 0">🏆 Group stage complete — knockout rounds next.</div>';
+    return;
+  }
+
+  grid.innerHTML = upcoming.map((m, i) => {
+    const isLast = i === upcoming.length - 1;
+    const border = isLast ? '' : 'border-bottom:1px solid var(--border);';
+
+    // Date + kickoff label
+    const parts = (m.date || '').split('·').map(s => s.trim());
+    const datePart = parts[0] || '';
+    const timePart = parts[1] || '';
+    // Shorten date: "Jun 15, 2026" → "Jun 15"
+    const shortDate = datePart.replace(/,?\s*2026/, '').trim();
+    const dateLabel = timePart ? `${shortDate} · ${timePart}` : shortDate;
+
+    // Prediction badge
+    const maxProb = Math.max(m.homeProb, m.drawProb || 0, m.awayProb);
+    let badge = '';
+    if (m.homeProb === maxProb) {
+      const cls = m.homeProb >= 65 ? 'conf-high' : 'conf-med';
+      badge = `<span class="conf-badge ${cls}">${m.home.name} ${m.homeProb}%</span>`;
+    } else if (m.awayProb === maxProb) {
+      const cls = m.awayProb >= 65 ? 'conf-high' : 'conf-med';
+      badge = `<span class="conf-badge ${cls}">${m.away.name} ${m.awayProb}%</span>`;
+    } else {
+      badge = `<span class="conf-badge conf-low">Draw ${m.drawProb || 0}%</span>`;
+    }
+
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;${border}flex-wrap:wrap">
+      <span style="color:var(--gold);font-weight:700;min-width:130px;font-size:0.8rem">${dateLabel}</span>
+      <span style="font-size:1.05rem">${m.home.flag} ${m.home.name}</span>
+      <span style="color:var(--muted);margin:0 4px">vs</span>
+      <span style="font-size:1.05rem">${m.away.flag} ${m.away.name}</span>
+      <span style="color:var(--muted);font-size:0.75rem;margin-left:4px">${m.group}</span>
+      <span style="margin-left:auto">${badge}</span>
+    </div>`;
+  }).join('');
+}
+
 // MATCH PREDICTIONS
 let currentFilter = 'all';
 function renderPredictions(filter='all') {
@@ -6861,6 +6877,7 @@ async function refreshAllData() {
 
 // ── INIT ──
 renderGroups();
+renderUpcomingMatches(); // Overview tab — next 5 unplayed matches
 fetchLiveStandings(); // async: renders from completedResults immediately, then updates from API
 renderPredictions();
 renderOdds();
@@ -7056,8 +7073,9 @@ async function pollTick() {
     // 2. Switch polling cadence based on live events
     setPollingMode(liveEventCache.length > 0 ? 'live' : 'idle');
 
-    // 3. Render live ticker
+    // 3. Render live ticker + overview upcoming matches
     renderLiveTicker();
+    renderUpcomingMatches();
 
     // 4. Rebuild standings if Score Table is in live mode
     if (scoreTableMode === 'live' && apiStandingsCache && apiStandingsCache.length > 0) {
