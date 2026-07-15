@@ -3469,6 +3469,48 @@ const matches = [
     ],
     tip: '✅ Best Bet: Croatia Win @ ~1.60 — Should handle Panama comfortably', tipClass: 'conf-med'
   },
+
+  // ══════════════════════════════════
+  // KNOCKOUT STAGE PREDICTIONS
+  // ══════════════════════════════════
+
+  // ── SEMIFINAL 2 ──
+  {
+    date: 'Jul 15, 2026 · 8:00 PM ET', venue: 'Mercedes-Benz Stadium, Atlanta', group: 'Semifinal',
+    matchday: 10,
+    home: { flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'England' }, away: { flag:'🇦🇷', name:'Argentina' },
+    homeProb: 45, drawProb: 28, awayProb: 27, scorePred: '1-1 (AET)',
+    confidence: 'low', tags: ['high'],
+    factors: [
+      { name:'Elo Rating',      val: 52, label:'EN slight edge' },
+      { name:'Recent Form',     val: 58, label:'EN 4W in knockouts' },
+      { name:'Squad Quality',   val: 54, label:'EN depth vs AR magic' },
+      { name:'Injury Impact',   val: 80, label:'Both close to full strength' },
+      { name:'H2H History',     val: 42, label:'AR 3W-0D-2L all-time' },
+      { name:'Tournament Exp.', val: 68, label:'AR reigning champions' },
+      { name:'Market Odds',     val: 54, label:'EN -120 slight fav' },
+    ],
+    tip: '⚖️ Near 50/50 classic — Bellingham vs Messi. England -120 narrow fav. Expect extra time.', tipClass: 'conf-low'
+  },
+
+  // ── WORLD CUP FINAL (Jul 19) ──
+  {
+    date: 'Jul 19, 2026 · 3:00 PM ET', venue: 'MetLife Stadium, East Rutherford NJ', group: 'Final',
+    matchday: 11,
+    home: { flag:'🇪🇸', name:'Spain' }, away: { flag:'🏆', name:'SF2 Winner' },
+    homeProb: 52, drawProb: 26, awayProb: 22, scorePred: '1-0',
+    confidence: 'med', tags: ['high'],
+    factors: [
+      { name:'Elo Rating',      val: 78, label:'SP #1 in tournament' },
+      { name:'Recent Form',     val: 82, label:'SP 5W in knockouts' },
+      { name:'Squad Quality',   val: 84, label:'Yamal, Olmo, Pedri dominant' },
+      { name:'Injury Impact',   val: 85, label:'SP near full strength' },
+      { name:'Tactical Style',  val: 80, label:'SP possession + press' },
+      { name:'Tournament Exp.', val: 72, label:'SP 2010 champs' },
+      { name:'Market Odds',     val: 62, label:'SP -156 vs EN / -150 vs AR' },
+    ],
+    tip: '✅ Spain ML — Best team in tournament, dominant all-round. vs EN: -156 / vs AR: -150.', tipClass: 'conf-med'
+  },
 ];
 
 // ══════════════════════════════════════════
@@ -4974,6 +5016,22 @@ const matchLines = [
     ou:3.5, ouDir:'Over -155', btts:'No -210',
     modelHome:90, modelDraw:7, modelAway:3,
     pick:'England ML + Over 3.5 ❌', pickConf:'high', result:'2-0' },
+  // ── UPCOMING: KNOCKOUT STAGE ──
+  { date:'Jul 15', home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', away:'🇦🇷 Argentina', group:'SF',
+    homeML:-120, draw:+240, awayML:+100,
+    ou:2.5, ouDir:'Under -115', btts:'Yes +120',
+    modelHome:45, modelDraw:28, modelAway:27,
+    pick:'England ML (narrow fav)', pickConf:'low' },
+  { date:'Jul 19', home:'🇪🇸 Spain', away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (if)', group:'Final',
+    homeML:-156, draw:+280, awayML:+290,
+    ou:2.5, ouDir:'Under -125', btts:'No -130',
+    modelHome:52, modelDraw:26, modelAway:22,
+    pick:'Spain ML', pickConf:'med' },
+  { date:'Jul 19', home:'🇪🇸 Spain', away:'🇦🇷 Argentina (if)', group:'Final',
+    homeML:-150, draw:+285, awayML:+370,
+    ou:2.5, ouDir:'Under -120', btts:'No -130',
+    modelHome:50, modelDraw:26, modelAway:24,
+    pick:'Spain ML', pickConf:'med' },
 ];
 
 // PL GW38 bookmaker comparison — pre-match odds across 6 UK/EU books, with actual results
@@ -5230,7 +5288,7 @@ function renderMatchLines() {
   if (sourceNote) {
     sourceNote.textContent = currentCompetition === 'pl'
       ? '— All 10 matches finished. 4/8 confirmed predictions correct (50%). Model weights recalibrated for World Cup.'
-      : '— Group stage + knockouts complete (Jul 15). 5/13 picks correct (38%). Spain in Final. England vs Argentina SF result pending.';
+      : '— Group stage + knockouts complete (Jul 15). 5/13 resolved picks (38%). 3 upcoming: England-Argentina SF tonight + Final Jul 19.';
   }
   const disclaimer = document.getElementById('bettingDisclaimer');
   if (disclaimer) disclaimer.style.display = currentCompetition === 'pl' ? 'none' : '';
