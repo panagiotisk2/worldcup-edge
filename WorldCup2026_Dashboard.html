@@ -3477,17 +3477,124 @@ const matches = [
 // 'home' and 'away' must match the names used in the matches array exactly.
 // ══════════════════════════════════════════
 const completedResults = [
-  // ── Matchday 1 — confirmed real results ──
-  { home:'Mexico',      away:'South Africa', hg:2, ag:0, group:'A', date:'Jun 11' },  // ✅ correct pred
-  { home:'S. Korea',    away:'Czechia',      hg:2, ag:1, group:'A', date:'Jun 11' },  // pred 1-1
-  { home:'Canada',      away:'Bosnia',       hg:1, ag:1, group:'B', date:'Jun 12' },  // ✅ correct pred
-  { home:'USA',         away:'Paraguay',     hg:4, ag:1, group:'D', date:'Jun 12' },  // pred 2-1
-  { home:'Qatar',       away:'Switzerland',  hg:1, ag:1, group:'B', date:'Jun 13' },  // pred 0-2
-  { home:'Brazil',      away:'Morocco',      hg:1, ag:1, group:'C', date:'Jun 13' },  // pred 2-1
-  { home:'Haiti',       away:'Scotland',     hg:0, ag:1, group:'C', date:'Jun 13' },  // pred 0-2
-  { home:'Australia',   away:'Türkiye',      hg:2, ag:0, group:'D', date:'Jun 14' },  // pred 1-1
-  { home:'Germany',     away:'Curaçao',      hg:4, ag:0, group:'E', date:'Jun 14' },  // ✅ correct pred
-  // Ivory Coast vs Ecuador (Jun 14) — evening kickoff, not yet played
+  // ── GROUP A: Mexico, S. Korea, South Africa, Czechia ──
+  { home:'Mexico',       away:'South Africa', hg:2, ag:0, group:'A', date:'Jun 11' },
+  { home:'S. Korea',     away:'Czechia',      hg:2, ag:1, group:'A', date:'Jun 11' },
+  { home:'Czechia',      away:'South Africa', hg:1, ag:1, group:'A', date:'Jun 18' },
+  { home:'Mexico',       away:'S. Korea',     hg:1, ag:0, group:'A', date:'Jun 18' },
+  { home:'Czechia',      away:'Mexico',       hg:0, ag:3, group:'A', date:'Jun 24' },
+  { home:'South Africa', away:'S. Korea',     hg:1, ag:0, group:'A', date:'Jun 24' },
+  // ── GROUP B: Canada, Switzerland, Qatar, Bosnia ──
+  { home:'Canada',       away:'Bosnia',       hg:1, ag:1, group:'B', date:'Jun 12' },
+  { home:'Qatar',        away:'Switzerland',  hg:1, ag:1, group:'B', date:'Jun 13' },
+  { home:'Switzerland',  away:'Bosnia',       hg:4, ag:1, group:'B', date:'Jun 18' },
+  { home:'Canada',       away:'Qatar',        hg:6, ag:0, group:'B', date:'Jun 18' },
+  { home:'Switzerland',  away:'Canada',       hg:2, ag:1, group:'B', date:'Jun 24' },
+  { home:'Bosnia',       away:'Qatar',        hg:3, ag:1, group:'B', date:'Jun 24' },
+  // ── GROUP C: Brazil, Morocco, Haiti, Scotland ──
+  { home:'Brazil',       away:'Morocco',      hg:1, ag:1, group:'C', date:'Jun 13' },
+  { home:'Haiti',        away:'Scotland',     hg:0, ag:1, group:'C', date:'Jun 13' },
+  { home:'Scotland',     away:'Morocco',      hg:0, ag:1, group:'C', date:'Jun 19' },
+  { home:'Brazil',       away:'Haiti',        hg:3, ag:0, group:'C', date:'Jun 19' },
+  { home:'Scotland',     away:'Brazil',       hg:0, ag:3, group:'C', date:'Jun 24' },
+  { home:'Morocco',      away:'Haiti',        hg:4, ag:2, group:'C', date:'Jun 24' },
+  // ── GROUP D: USA, Paraguay, Australia, Türkiye ──
+  { home:'USA',          away:'Paraguay',     hg:4, ag:1, group:'D', date:'Jun 12' },
+  { home:'Australia',    away:'Türkiye',      hg:2, ag:0, group:'D', date:'Jun 13' },
+  { home:'USA',          away:'Australia',    hg:2, ag:0, group:'D', date:'Jun 19' },
+  { home:'Türkiye',      away:'Paraguay',     hg:0, ag:1, group:'D', date:'Jun 19' },
+  { home:'Türkiye',      away:'USA',          hg:3, ag:2, group:'D', date:'Jun 25' },
+  { home:'Paraguay',     away:'Australia',    hg:0, ag:0, group:'D', date:'Jun 25' },
+  // ── GROUP E: Germany, Ivory Coast, Ecuador, Curaçao ──
+  { home:'Germany',      away:'Curaçao',      hg:7, ag:1, group:'E', date:'Jun 14' },
+  { home:'Ivory Coast',  away:'Ecuador',      hg:1, ag:0, group:'E', date:'Jun 14' },
+  { home:'Germany',      away:'Ivory Coast',  hg:2, ag:1, group:'E', date:'Jun 20' },
+  { home:'Ecuador',      away:'Curaçao',      hg:0, ag:0, group:'E', date:'Jun 20' },
+  { home:'Curaçao',      away:'Ivory Coast',  hg:0, ag:2, group:'E', date:'Jun 25' },
+  { home:'Ecuador',      away:'Germany',      hg:2, ag:1, group:'E', date:'Jun 25' },
+  // ── GROUP F: Netherlands, Japan, Sweden, Tunisia ──
+  { home:'Netherlands',  away:'Japan',        hg:2, ag:2, group:'F', date:'Jun 14' },
+  { home:'Sweden',       away:'Tunisia',      hg:5, ag:1, group:'F', date:'Jun 14' },
+  { home:'Netherlands',  away:'Sweden',       hg:5, ag:1, group:'F', date:'Jun 20' },
+  { home:'Japan',        away:'Tunisia',      hg:4, ag:0, group:'F', date:'Jun 20' },
+  { home:'Japan',        away:'Sweden',       hg:1, ag:1, group:'F', date:'Jun 25' },
+  { home:'Netherlands',  away:'Tunisia',      hg:3, ag:1, group:'F', date:'Jun 25' },
+  // ── GROUP G: Belgium, Egypt, Iran, New Zealand ──
+  { home:'Belgium',      away:'Egypt',        hg:1, ag:1, group:'G', date:'Jun 15' },
+  { home:'Iran',         away:'New Zealand',  hg:2, ag:2, group:'G', date:'Jun 15' },
+  { home:'Belgium',      away:'Iran',         hg:0, ag:0, group:'G', date:'Jun 21' },
+  { home:'New Zealand',  away:'Egypt',        hg:1, ag:3, group:'G', date:'Jun 21' },
+  { home:'Egypt',        away:'Iran',         hg:1, ag:1, group:'G', date:'Jun 26' },
+  { home:'New Zealand',  away:'Belgium',      hg:1, ag:5, group:'G', date:'Jun 26' },
+  // ── GROUP H: Spain, Uruguay, Saudi Arabia, Cape Verde ──
+  { home:'Spain',        away:'Cape Verde',   hg:0, ag:0, group:'H', date:'Jun 15' },
+  { home:'Saudi Arabia', away:'Uruguay',      hg:1, ag:1, group:'H', date:'Jun 15' },
+  { home:'Spain',        away:'Saudi Arabia', hg:4, ag:0, group:'H', date:'Jun 21' },
+  { home:'Uruguay',      away:'Cape Verde',   hg:2, ag:2, group:'H', date:'Jun 21' },
+  { home:'Cape Verde',   away:'Saudi Arabia', hg:0, ag:0, group:'H', date:'Jun 26' },
+  { home:'Uruguay',      away:'Spain',        hg:0, ag:1, group:'H', date:'Jun 26' },
+  // ── GROUP I: France, Senegal, Norway, Iraq ──
+  { home:'France',       away:'Senegal',      hg:3, ag:1, group:'I', date:'Jun 16' },
+  { home:'Iraq',         away:'Norway',       hg:1, ag:4, group:'I', date:'Jun 16' },
+  { home:'France',       away:'Iraq',         hg:3, ag:0, group:'I', date:'Jun 22' },
+  { home:'Norway',       away:'Senegal',      hg:3, ag:2, group:'I', date:'Jun 22' },
+  { home:'Norway',       away:'France',       hg:1, ag:4, group:'I', date:'Jun 26' },
+  { home:'Senegal',      away:'Iraq',         hg:5, ag:0, group:'I', date:'Jun 26' },
+  // ── GROUP J: Argentina, Austria, Algeria, Jordan ──
+  { home:'Argentina',    away:'Algeria',      hg:3, ag:0, group:'J', date:'Jun 16' },
+  { home:'Austria',      away:'Jordan',       hg:3, ag:1, group:'J', date:'Jun 16' },
+  { home:'Argentina',    away:'Austria',      hg:2, ag:0, group:'J', date:'Jun 22' },
+  { home:'Jordan',       away:'Algeria',      hg:1, ag:2, group:'J', date:'Jun 22' },
+  { home:'Algeria',      away:'Austria',      hg:3, ag:3, group:'J', date:'Jun 27' },
+  { home:'Jordan',       away:'Argentina',    hg:1, ag:3, group:'J', date:'Jun 27' },
+  // ── GROUP K: Portugal, Colombia, Uzbekistan, DR Congo ──
+  { home:'Portugal',     away:'DR Congo',     hg:1, ag:1, group:'K', date:'Jun 17' },
+  { home:'Uzbekistan',   away:'Colombia',     hg:1, ag:3, group:'K', date:'Jun 17' },
+  { home:'Portugal',     away:'Uzbekistan',   hg:5, ag:0, group:'K', date:'Jun 23' },
+  { home:'Colombia',     away:'DR Congo',     hg:1, ag:0, group:'K', date:'Jun 23' },
+  { home:'Colombia',     away:'Portugal',     hg:0, ag:0, group:'K', date:'Jun 27' },
+  { home:'DR Congo',     away:'Uzbekistan',   hg:3, ag:1, group:'K', date:'Jun 27' },
+  // ── GROUP L: England, Croatia, Ghana, Panama ──
+  { home:'England',      away:'Croatia',      hg:4, ag:2, group:'L', date:'Jun 17' },
+  { home:'Ghana',        away:'Panama',       hg:1, ag:0, group:'L', date:'Jun 17' },
+  { home:'England',      away:'Ghana',        hg:0, ag:0, group:'L', date:'Jun 23' },
+  { home:'Panama',       away:'Croatia',      hg:0, ag:1, group:'L', date:'Jun 23' },
+  { home:'Panama',       away:'England',      hg:0, ag:2, group:'L', date:'Jun 27' },
+  { home:'Croatia',      away:'Ghana',        hg:2, ag:1, group:'L', date:'Jun 27' },
+  // ── ROUND OF 32 (Jun 28 – Jul 3) ──
+  { home:'Canada',       away:'South Africa', hg:1, ag:0, group:'R32', date:'Jun 28' },
+  { home:'Brazil',       away:'Japan',        hg:2, ag:1, group:'R32', date:'Jun 29' },
+  { home:'Germany',      away:'Paraguay',     hg:1, ag:1, group:'R32', date:'Jun 29' },  // Paraguay 4-3 pens
+  { home:'Netherlands',  away:'Morocco',      hg:1, ag:1, group:'R32', date:'Jun 29' },  // Morocco 3-2 pens
+  { home:'Norway',       away:'Ivory Coast',  hg:2, ag:1, group:'R32', date:'Jun 30' },
+  { home:'France',       away:'Sweden',       hg:3, ag:0, group:'R32', date:'Jun 30' },
+  { home:'Mexico',       away:'Ecuador',      hg:2, ag:0, group:'R32', date:'Jun 30' },
+  { home:'England',      away:'DR Congo',     hg:2, ag:1, group:'R32', date:'Jul 1'  },
+  { home:'Belgium',      away:'Senegal',      hg:3, ag:2, group:'R32', date:'Jul 1'  },  // AET
+  { home:'USA',          away:'Bosnia',       hg:2, ag:0, group:'R32', date:'Jul 1'  },
+  { home:'Spain',        away:'Austria',      hg:3, ag:0, group:'R32', date:'Jul 2'  },
+  { home:'Portugal',     away:'Croatia',      hg:2, ag:1, group:'R32', date:'Jul 2'  },
+  { home:'Switzerland',  away:'Algeria',      hg:2, ag:0, group:'R32', date:'Jul 2'  },
+  { home:'Egypt',        away:'Australia',    hg:1, ag:1, group:'R32', date:'Jul 3'  },  // Egypt 4-2 pens
+  { home:'Argentina',    away:'Cape Verde',   hg:3, ag:2, group:'R32', date:'Jul 3'  },  // AET
+  { home:'Colombia',     away:'Ghana',        hg:1, ag:0, group:'R32', date:'Jul 3'  },
+  // ── ROUND OF 16 (Jul 4 – Jul 7) ──
+  { home:'Morocco',      away:'Canada',       hg:3, ag:0, group:'R16', date:'Jul 4'  },
+  { home:'France',       away:'Paraguay',     hg:1, ag:0, group:'R16', date:'Jul 5'  },
+  { home:'Norway',       away:'Brazil',       hg:2, ag:1, group:'R16', date:'Jul 5'  },
+  { home:'England',      away:'Mexico',       hg:3, ag:2, group:'R16', date:'Jul 6'  },
+  { home:'Spain',        away:'Portugal',     hg:1, ag:0, group:'R16', date:'Jul 6'  },
+  { home:'Belgium',      away:'USA',          hg:4, ag:1, group:'R16', date:'Jul 7'  },
+  { home:'Argentina',    away:'Egypt',        hg:3, ag:2, group:'R16', date:'Jul 7'  },  // AET
+  { home:'Switzerland',  away:'Colombia',     hg:0, ag:0, group:'R16', date:'Jul 7'  },  // Switzerland 4-3 pens
+  // ── QUARTERFINALS (Jul 9 – Jul 12) ──
+  { home:'France',       away:'Morocco',      hg:2, ag:0, group:'QF', date:'Jul 9'  },
+  { home:'Spain',        away:'Belgium',      hg:2, ag:1, group:'QF', date:'Jul 10' },
+  { home:'England',      away:'Norway',       hg:2, ag:1, group:'QF', date:'Jul 11' },  // AET
+  { home:'Argentina',    away:'Switzerland',  hg:3, ag:1, group:'QF', date:'Jul 12' },  // AET
+  // ── SEMIFINALS (Jul 14 – Jul 15) ──
+  { home:'Spain',        away:'France',       hg:2, ag:0, group:'SF', date:'Jul 14' },
+  // England vs Argentina (Jul 15) — in progress
 ];
 
 // O(1) lookup set — key: 'Home|Away' (used by engine snapshot & score table fallback)
@@ -4845,28 +4952,28 @@ const matchLines = [
     homeML:-900, draw:+1200, awayML:+2200,
     ou:3.5, ouDir:'Over -140', btts:'No -200',
     modelHome:88, modelDraw:8, modelAway:4,
-    pick:'Germany -2.5 ✅', pickConf:'high', result:'4-0' },
-  // ── UPCOMING ──
-  { date:'Jun 15', home:'🇪🇸 Spain', away:'🇨🇻 Cape Verde', group:'H',
+    pick:'Germany -2.5 ✅', pickConf:'high', result:'7-1' },
+  // ── COMPLETED (MD2/MD3 matches — predicted as MD1) ──
+  { date:'Jun 15 FT', home:'🇪🇸 Spain', away:'🇨🇻 Cape Verde', group:'H',
     homeML:-1000, draw:+1400, awayML:+2500,
     ou:3.5, ouDir:'Over -145', btts:'No -210',
     modelHome:91, modelDraw:6, modelAway:3,
-    pick:'Spain ML + Over 2.5', pickConf:'high' },
-  { date:'Jun 15', home:'🇫🇷 France', away:'🇮🇶 Iraq', group:'I',
+    pick:'Spain ML + Over 2.5 ❌', pickConf:'high', result:'0-0' },
+  { date:'Jun 22 FT', home:'🇫🇷 France', away:'🇮🇶 Iraq', group:'I',
     homeML:-900, draw:+1200, awayML:+2400,
     ou:3.5, ouDir:'Over -150', btts:'No -180',
     modelHome:89, modelDraw:7, modelAway:4,
-    pick:'France ML + Clean Sheet', pickConf:'high' },
-  { date:'Jun 16', home:'🇦🇷 Argentina', away:'🇯🇴 Jordan', group:'J',
+    pick:'France ML + Clean Sheet ✅', pickConf:'high', result:'3-0' },
+  { date:'Jun 27 FT', home:'🇦🇷 Argentina', away:'🇯🇴 Jordan', group:'J',
     homeML:-850, draw:+1100, awayML:+2200,
     ou:3.5, ouDir:'Over -135', btts:'No -195',
     modelHome:87, modelDraw:9, modelAway:4,
-    pick:'Argentina -2.5 handicap', pickConf:'high' },
-  { date:'Jun 16', home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', away:'🇵🇦 Panama', group:'L',
+    pick:'Argentina -2.5 handicap ❌', pickConf:'high', result:'3-1' },
+  { date:'Jun 27 FT', home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', away:'🇵🇦 Panama', group:'L',
     homeML:-900, draw:+1200, awayML:+2500,
     ou:3.5, ouDir:'Over -155', btts:'No -210',
     modelHome:90, modelDraw:7, modelAway:3,
-    pick:'England ML + Over 3.5', pickConf:'high' },
+    pick:'England ML + Over 3.5 ❌', pickConf:'high', result:'2-0' },
 ];
 
 // PL GW38 bookmaker comparison — pre-match odds across 6 UK/EU books, with actual results
@@ -5123,7 +5230,7 @@ function renderMatchLines() {
   if (sourceNote) {
     sourceNote.textContent = currentCompetition === 'pl'
       ? '— All 10 matches finished. 4/8 confirmed predictions correct (50%). Model weights recalibrated for World Cup.'
-      : '— 9 of 12 MD1 matches complete. 4/9 picks correct (44%). Live odds active — press 🔄 Refresh to update.';
+      : '— Group stage + knockouts complete (Jul 15). 5/13 picks correct (38%). Spain in Final. England vs Argentina SF result pending.';
   }
   const disclaimer = document.getElementById('bettingDisclaimer');
   if (disclaimer) disclaimer.style.display = currentCompetition === 'pl' ? 'none' : '';
