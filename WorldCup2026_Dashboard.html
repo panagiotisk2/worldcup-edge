@@ -3490,26 +3490,26 @@ const matches = [
       { name:'Tournament Exp.', val: 68, label:'AR reigning champions' },
       { name:'Market Odds',     val: 54, label:'EN -120 slight fav' },
     ],
-    tip: '⚖️ Near 50/50 classic — Bellingham vs Messi. England -120 narrow fav. Expect extra time.', tipClass: 'conf-low'
+    tip: '✅ FT: Argentina 2-1 England — Gordon 55\' (EN), Fernández 85\', Martínez 90+2\' (AR). Argentina to Final!', tipClass: 'conf-low'
   },
 
   // ── WORLD CUP FINAL (Jul 19) ──
   {
     date: 'Jul 19, 2026 · 3:00 PM ET', venue: 'MetLife Stadium, East Rutherford NJ', group: 'Final',
     matchday: 11,
-    home: { flag:'🇪🇸', name:'Spain' }, away: { flag:'🏆', name:'SF2 Winner' },
-    homeProb: 52, drawProb: 26, awayProb: 22, scorePred: '1-0',
+    home: { flag:'🇪🇸', name:'Spain' }, away: { flag:'🇦🇷', name:'Argentina' },
+    homeProb: 50, drawProb: 26, awayProb: 24, scorePred: '1-0',
     confidence: 'med', tags: ['high'],
     factors: [
-      { name:'Elo Rating',      val: 78, label:'SP #1 in tournament' },
+      { name:'Elo Rating',      val: 75, label:'SP slight edge' },
       { name:'Recent Form',     val: 82, label:'SP 5W in knockouts' },
-      { name:'Squad Quality',   val: 84, label:'Yamal, Olmo, Pedri dominant' },
-      { name:'Injury Impact',   val: 85, label:'SP near full strength' },
-      { name:'Tactical Style',  val: 80, label:'SP possession + press' },
-      { name:'Tournament Exp.', val: 72, label:'SP 2010 champs' },
-      { name:'Market Odds',     val: 62, label:'SP -156 vs EN / -150 vs AR' },
+      { name:'Squad Quality',   val: 80, label:'Yamal, Olmo vs Messi magic' },
+      { name:'Injury Impact',   val: 85, label:'SP full / AR Martínez in form' },
+      { name:'Tactical Style',  val: 72, label:'SP possession vs AR counter' },
+      { name:'Tournament Exp.', val: 68, label:'AR reigning champs' },
+      { name:'Market Odds',     val: 60, label:'SP -150 / AR +370' },
     ],
-    tip: '✅ Spain ML — Best team in tournament, dominant all-round. vs EN: -156 / vs AR: -150.', tipClass: 'conf-med'
+    tip: '✅ Spain ML @ -150 — Best team in tournament. Argentina dangerous via Messi & Martínez.', tipClass: 'conf-med'
   },
 ];
 
@@ -3636,7 +3636,8 @@ const completedResults = [
   { home:'Argentina',    away:'Switzerland',  hg:3, ag:1, group:'QF', date:'Jul 12' },  // AET
   // ── SEMIFINALS (Jul 14 – Jul 15) ──
   { home:'Spain',        away:'France',       hg:2, ag:0, group:'SF', date:'Jul 14' },
-  // England vs Argentina (Jul 15) — in progress
+  { home:'England',      away:'Argentina',    hg:1, ag:2, group:'SF', date:'Jul 15' },  // Gordon 55' | Fernández 85', Martínez 90+2'
+  // ── FINAL: Spain vs Argentina (Jul 19) ──
 ];
 
 // O(1) lookup set — key: 'Home|Away' (used by engine snapshot & score table fallback)
@@ -5017,17 +5018,12 @@ const matchLines = [
     modelHome:90, modelDraw:7, modelAway:3,
     pick:'England ML + Over 3.5 ❌', pickConf:'high', result:'2-0' },
   // ── UPCOMING: KNOCKOUT STAGE ──
-  { date:'Jul 15', home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', away:'🇦🇷 Argentina', group:'SF',
+  { date:'Jul 15 FT', home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England', away:'🇦🇷 Argentina', group:'SF',
     homeML:-120, draw:+240, awayML:+100,
     ou:2.5, ouDir:'Under -115', btts:'Yes +120',
     modelHome:45, modelDraw:28, modelAway:27,
-    pick:'England ML (narrow fav)', pickConf:'low' },
-  { date:'Jul 19', home:'🇪🇸 Spain', away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (if)', group:'Final',
-    homeML:-156, draw:+280, awayML:+290,
-    ou:2.5, ouDir:'Under -125', btts:'No -130',
-    modelHome:52, modelDraw:26, modelAway:22,
-    pick:'Spain ML', pickConf:'med' },
-  { date:'Jul 19', home:'🇪🇸 Spain', away:'🇦🇷 Argentina (if)', group:'Final',
+    pick:'England ML ❌', pickConf:'low', result:'1-2' },
+  { date:'Jul 19', home:'🇪🇸 Spain', away:'🇦🇷 Argentina', group:'Final',
     homeML:-150, draw:+285, awayML:+370,
     ou:2.5, ouDir:'Under -120', btts:'No -130',
     modelHome:50, modelDraw:26, modelAway:24,
@@ -5288,7 +5284,7 @@ function renderMatchLines() {
   if (sourceNote) {
     sourceNote.textContent = currentCompetition === 'pl'
       ? '— All 10 matches finished. 4/8 confirmed predictions correct (50%). Model weights recalibrated for World Cup.'
-      : '— Group stage + knockouts complete (Jul 15). 5/13 resolved picks (38%). 3 upcoming: England-Argentina SF tonight + Final Jul 19.';
+      : '— SF complete. 5/14 resolved picks (36%). Argentina 2-1 England. Final: 🇪🇸 Spain vs 🇦🇷 Argentina, Jul 19 MetLife.';
   }
   const disclaimer = document.getElementById('bettingDisclaimer');
   if (disclaimer) disclaimer.style.display = currentCompetition === 'pl' ? 'none' : '';
