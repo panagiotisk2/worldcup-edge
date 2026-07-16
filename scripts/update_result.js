@@ -14,6 +14,65 @@
 const fs   = require('fs');
 const path = require('path');
 
+// ── CLI args ───────────────────────────────────────────────────────────────
+
+const args = process.argv.slice(2);
+
+/**
+ * --mock-result "<score> [AET] [pens <pen-score>]"
+ *
+ * Examples:
+ *   --mock-result "2-0"              → FT Spain 2-0 Argentina
+ *   --mock-result "1-1 AET"          → AET Spain 1-1 Argentina (Spain win e.g. 2-1 in ET)
+ *   --mock-result "0-0 pens 4-2"     → Pens: Spain win 4-2 (goals 0-0)
+ *   --mock-result "0-0 pens 2-4"     → Pens: Argentina win 4-2 (goals 0-0)
+ *
+ * When set, skips the API fetch entirely and injects a synthetic finished event
+ * for the first watched match in the config. Writes to the HTML file so you can
+ * inspect the diff with `git diff` and revert with `git checkout <file>`.
+ */
+function parseMockResult(str) {
+  // tokenise
+  const tokens = str.trim().split(/\s+/);
+  // first token: "HGOALS-AGOALS"
+  const scoreParts = tokens[0].split('-');
+  if (scoreParts.length !== 2) throw new Error(`--mock-result: invalid score "${tokens[0]}" — expected "H-A"`);
+  const homeGoals = parseInt(scoreParts[0], 10);
+  const awayGoals = parseInt(scoreParts[1], 10);
+  if (isNaN(homeGoals) || isNaN(awayGoals)) throw new Error(`--mock-result: non-numeric goals in "${tokens[0]}"`);
+
+  let statusType = 'finished';
+  let homePens = null;
+  let awayPens = null;
+
+  for (let i = 1; i < tokens.length; i++) {
+    const t = tokens[i].toUpperCase();
+    if (t === 'AET') {
+      statusType = 'afterExtraTime';
+    } else if (t === 'PENS') {
+      statusType = 'afterPenalties';
+      // next token is the pen score, e.g. "4-2"
+      const penToken = tokens[++i];
+      if (!penToken) throw new Error('--mock-result: "pens" must be followed by a penalty score, e.g. "pens 4-2"');
+      const penParts = penToken.split('-');
+      if (penParts.length !== 2) throw new Error(`--mock-result: invalid pen score "${penToken}"`);
+      homePens = parseInt(penParts[0], 10);
+      awayPens = parseInt(penParts[1], 10);
+      if (isNaN(homePens) || isNaN(awayPens)) throw new Error(`--mock-result: non-numeric penalties in "${penToken}"`);
+    }
+  }
+
+  return { homeGoals, awayGoals, statusType, homePens, awayPens };
+}
+
+const mockResultArg = (() => {
+  const idx = args.indexOf('--mock-result');
+  if (idx === -1) return null;
+  const val = args[idx + 1];
+  if (!val) { console.error('[error] --mock-result requires a value'); process.exit(1); }
+  return val;
+})();
+
 // ── helpers ────────────────────────────────────────────────────────────────
 
 function setOutput(name, value) {
@@ -251,19 +310,45 @@ async function main() {
 
   console.log(`[start] Checking ${championship.name}`);
 
-  // Fetch fixtures once — shared across all watched matches
-  const data = await fetchFixtures(championship.fixturesUrl);
-  const allEvents = data.all || data.events || [];
-  console.log(`[info] Got ${allEvents.length} events (datesChecked: ${data.datesChecked ?? 'n/a'})`);
+  // ── build event list: real API or mock ────────────────────────────────────
+  let allEvents;
 
-  // If the API returned 0 events the fixture proxy is broken (quota exhausted or API down).
-  // The API always returns historical matches from tournament start, so 0 is never a valid
-  // "no matches yet" response on or after the tournament start date.
-  // Fail loudly so GitHub sends a failure email and the cron doesn't silently skip.
-  if (allEvents.length === 0) {
-    console.error('[error] Fixtures API returned 0 events — likely quota exhausted or API error.');
-    console.error('[error] Check https://worldcup-edge.netlify.app/api/fixtures manually.');
-    process.exit(1);
+  if (mockResultArg) {
+    // Parse the mock string and build a synthetic SportAPI-shaped event for the
+    // first watched match in the config (the Final).
+    let parsed;
+    try { parsed = parseMockResult(mockResultArg); }
+    catch (e) { console.error(`[error] ${e.message}`); process.exit(1); }
+
+    const target = championship.watchedMatches[0];
+    const mockEvent = {
+      homeTeam: { name: target.homeTeams[0] },
+      awayTeam: { name: target.awayTeams[0] },
+      homeScore: { current: parsed.homeGoals, penalties: parsed.homePens },
+      awayScore: { current: parsed.awayGoals, penalties: parsed.awayPens },
+      status: { type: parsed.statusType },
+    };
+
+    const statusLabel = parsed.statusType === 'afterPenalties' ? 'PENS'
+      : parsed.statusType === 'afterExtraTime' ? 'AET' : 'FT';
+    console.log(`[mock] Injecting synthetic event: ${target.homeTeams[0]} ${parsed.homeGoals}-${parsed.awayGoals} ${target.awayTeams[0]} — ${statusLabel}${parsed.homePens != null ? ` (pens ${parsed.homePens}-${parsed.awayPens})` : ''}`);
+
+    allEvents = [mockEvent];
+  } else {
+    // Real API fetch
+    const data = await fetchFixtures(championship.fixturesUrl);
+    allEvents = data.all || data.events || [];
+    console.log(`[info] Got ${allEvents.length} events (datesChecked: ${data.datesChecked ?? 'n/a'})`);
+
+    // If the API returned 0 events the fixture proxy is broken (quota exhausted or API down).
+    // The API always returns historical matches from tournament start, so 0 is never a valid
+    // "no matches yet" response on or after the tournament start date.
+    // Fail loudly so GitHub sends a failure email and the cron doesn't silently skip.
+    if (allEvents.length === 0) {
+      console.error('[error] Fixtures API returned 0 events — likely quota exhausted or API error.');
+      console.error('[error] Check https://worldcup-edge.netlify.app/api/fixtures manually.');
+      process.exit(1);
+    }
   }
 
   let anyChanged = false;
