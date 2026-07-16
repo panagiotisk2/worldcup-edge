@@ -52,18 +52,30 @@ function isFinished(event) {
 }
 
 function getScore(event) {
-  // homeScore / awayScore (SportAPI v1)
+  // SportAPI v1 — homeScore.current is goals after 90 min (or AET for ET/pens matches)
+  // homeScore.penalties is the penalty shootout score (only present for afterPenalties)
   if (event.homeScore !== undefined) {
     return {
       home: event.homeScore?.current ?? event.homeScore,
       away: event.awayScore?.current ?? event.awayScore,
+      homePens: event.homeScore?.penalties ?? null,
+      awayPens: event.awayScore?.penalties ?? null,
     };
   }
   // goals (football-data / alternate)
   if (event.goals !== undefined) {
-    return { home: event.goals?.home, away: event.goals?.away };
+    return {
+      home: event.goals?.home,
+      away: event.goals?.away,
+      homePens: null,
+      awayPens: null,
+    };
   }
   return null;
+}
+
+function getStatusType(event) {
+  return event.status?.type || null;
 }
 
 function getTeams(event) {
@@ -85,15 +97,30 @@ async function fetchFixtures(url) {
 
 // ── patch HTML file ────────────────────────────────────────────────────────
 
-function patchDashboard(filePath, match, score) {
+function patchDashboard(filePath, match, score, statusType) {
   let html = fs.readFileSync(filePath, 'utf8');
   const original = html;
 
   const hg = score.home;
   const ag = score.away;
-  const scoreStr = `${hg}-${ag}`;
-  const homeWon = hg > ag;
-  const awayWon = ag > hg;
+  const isAET = statusType === 'afterExtraTime';
+  const isPens = statusType === 'afterPenalties';
+
+  // Determine actual winner — for pens, goals are tied so use penalty scores
+  let homeWon, awayWon;
+  if (isPens && score.homePens != null && score.awayPens != null) {
+    homeWon = score.homePens > score.awayPens;
+    awayWon = score.awayPens > score.homePens;
+    console.log(`[info] Penalty shootout: ${score.homePens}-${score.awayPens}`);
+  } else {
+    homeWon = hg > ag;
+    awayWon = ag > hg;
+  }
+
+  // Build display score string
+  let scoreStr = `${hg}-${ag}`;
+  if (isAET) scoreStr += ' AET';
+  if (isPens && score.homePens != null) scoreStr += ` (${score.homePens}-${score.awayPens} pens)`;
 
   // ── 1. completedResults: replace placeholder comment with result entry ──
   const placeholder = match.completedResultsPlaceholder;
@@ -170,8 +197,8 @@ function patchDashboard(filePath, match, score) {
     /('— All results up to[^']*')/,
     /('— Final complete\.[^']*')/,
   ];
-  const winnerName = homeWon ? match.homeTeams[0] : (awayWon ? match.awayTeams[0] : 'Draw');
-  const newNote = `'— Final complete. ${match.homeTeams[0]} ${hg}-${ag} ${match.awayTeams[0]}. ${winnerName === 'Draw' ? 'Match went to extra time/pens.' : winnerName + ' are World Champions 2026!'}'`;
+  const winnerName = homeWon ? match.homeTeams[0] : (awayWon ? match.awayTeams[0] : null);
+  const newNote = `'— Final complete. ${match.homeTeams[0]} ${scoreStr} ${match.awayTeams[0]}. ${winnerName ? winnerName + ' are World Champions 2026!' : 'No winner determined.'}'`;
 
   let notePatched = false;
   for (const pat of sourceNotePatterns) {
@@ -190,7 +217,10 @@ function patchDashboard(filePath, match, score) {
   // Find the Final match card tip and mark it as resolved
   const finalTipPattern = /(tip:\s*')(✅[^']*Spain ML[^']*|Spain ML[^']*)(', tipClass)/;
   if (finalTipPattern.test(html)) {
-    const winner = homeWon ? `Spain ${hg}-${ag} Argentina. Spain are World Champions! 🏆` : (awayWon ? `Argentina ${ag}-${hg} Spain. Argentina are World Champions! 🏆` : `${hg}-${hg} — went to extra time/penalties!`);
+    let winner;
+    if (homeWon) winner = `Spain ${scoreStr} Argentina. Spain are World Champions! 🏆`;
+    else if (awayWon) winner = `Argentina wins ${scoreStr} vs Spain. Argentina are World Champions! 🏆`;
+    else winner = `${scoreStr} — result unclear`;
     html = html.replace(finalTipPattern, `$1✅ FT: ${winner}$3`);
     console.log(`[patch] prediction card tip updated`);
   }
@@ -276,13 +306,15 @@ async function main() {
     const teams = getTeams(event);
     const isReversed = teamsMatch(teams.home, watchedMatch.awayTeams);
     const finalScore = isReversed
-      ? { home: score.away, away: score.home }
+      ? { home: score.away, away: score.home, homePens: score.awayPens, awayPens: score.homePens }
       : score;
 
-    console.log(`[found] ${watchedMatch.homeTeams[0]} ${finalScore.home}-${finalScore.away} ${watchedMatch.awayTeams[0]} — FINISHED`);
+    const statusType = getStatusType(event);
+    const statusLabel = statusType === 'afterPenalties' ? 'PENS' : statusType === 'afterExtraTime' ? 'AET' : 'FT';
+    console.log(`[found] ${watchedMatch.homeTeams[0]} ${finalScore.home}-${finalScore.away} ${watchedMatch.awayTeams[0]} — ${statusLabel}`);
 
     const dashboardPath = path.join(__dirname, '..', championship.dashboardFile);
-    const changed = patchDashboard(dashboardPath, watchedMatch, finalScore);
+    const changed = patchDashboard(dashboardPath, watchedMatch, finalScore, statusType);
     if (changed) anyChanged = true;
   }
 
