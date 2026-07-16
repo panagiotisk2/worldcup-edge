@@ -224,7 +224,17 @@ async function main() {
   // Fetch fixtures once — shared across all watched matches
   const data = await fetchFixtures(championship.fixturesUrl);
   const allEvents = data.all || data.events || [];
-  console.log(`[info] Got ${allEvents.length} events`);
+  console.log(`[info] Got ${allEvents.length} events (datesChecked: ${data.datesChecked ?? 'n/a'})`);
+
+  // If the API returned 0 events the fixture proxy is broken (quota exhausted or API down).
+  // The API always returns historical matches from tournament start, so 0 is never a valid
+  // "no matches yet" response on or after the tournament start date.
+  // Fail loudly so GitHub sends a failure email and the cron doesn't silently skip.
+  if (allEvents.length === 0) {
+    console.error('[error] Fixtures API returned 0 events — likely quota exhausted or API error.');
+    console.error('[error] Check https://worldcup-edge.netlify.app/api/fixtures manually.');
+    process.exit(1);
+  }
 
   let anyChanged = false;
 
