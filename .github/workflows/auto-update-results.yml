@@ -1,0 +1,69 @@
+name: Auto-Update Match Results
+
+# Runs every 15 minutes during the WC 2026 Final window (Jul 19, 3pm–midnight ET = 19:00–04:00 UTC)
+# Also available as a manual trigger for testing or future championships.
+#
+# To add a future championship: edit scripts/matches_config.json and update the cron lines below.
+
+on:
+  schedule:
+    # Jul 19 UTC 19:00–23:45 (3pm–7:45pm ET) — main match window
+    - cron: '0,15,30,45 19,20,21,22,23 19 7 *'
+    # Jul 20 UTC 00:00–04:00 (8pm–midnight ET) — extra time / post-match window
+    - cron: '0,15,30,45 0,1,2,3,4 20 7 *'
+
+  workflow_dispatch:
+    inputs:
+      championship_id:
+        description: 'Championship ID from matches_config.json (default: WC2026)'
+        required: false
+        default: 'WC2026'
+      dry_run:
+        description: 'Dry run — fetch and log, but do not commit'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+permissions:
+  contents: write
+
+jobs:
+  update-results:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Use the built-in GITHUB_TOKEN — no extra secrets needed
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run result updater
+        id: updater
+        env:
+          CHAMPIONSHIP_ID: ${{ github.event.inputs.championship_id || 'WC2026' }}
+        run: node scripts/update_result.js
+
+      - name: Commit & push if changed
+        if: steps.updater.outputs.changed == 'true' && github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add WorldCup2026_Dashboard.html
+          git commit -m "auto: update Final result $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
+
+      - name: Log dry-run note
+        if: steps.updater.outputs.changed == 'true' && github.event.inputs.dry_run == 'true'
+        run: echo "Dry run — changes detected but not committed."
+
+      - name: Log no-change
+        if: steps.updater.outputs.changed != 'true'
+        run: echo "No changes — match not finished yet or already up to date."

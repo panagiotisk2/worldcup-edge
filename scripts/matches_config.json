@@ -1,0 +1,40 @@
+{
+  "championships": [
+    {
+      "id": "WC2026",
+      "name": "FIFA World Cup 2026",
+      "fixturesUrl": "https://worldcup-edge.netlify.app/api/fixtures",
+      "dashboardFile": "WorldCup2026_Dashboard.html",
+      "watchedMatches": [
+        {
+          "id": "WC2026_FINAL",
+          "stage": "Final",
+          "homeTeams": ["Spain", "España"],
+          "awayTeams": ["Argentina"],
+          "scheduledDate": "2026-07-19",
+          "cronSchedule": "*/15 19-23 19 7 * | */15 0-4 20 7 *",
+          "completedResultsPlaceholder": "// ── FINAL: Spain vs Argentina (Jul 19) ──",
+          "matchLinesSelector": {
+            "date": "Jul 19",
+            "homeFlag": "🇪🇸",
+            "homeName": "Spain",
+            "awayFlag": "🇦🇷",
+            "awayName": "Argentina"
+          },
+          "group": "Final",
+          "pick": "Spain ML",
+          "pickConf": "med",
+          "homeML": -150,
+          "draw": 285,
+          "awayML": 370,
+          "ou": 2.5,
+          "ouDir": "Under -120",
+          "btts": "No -130",
+          "modelHome": 50,
+          "modelDraw": 26,
+          "modelAway": 24
+        }
+      ]
+    }
+  ]
+}
